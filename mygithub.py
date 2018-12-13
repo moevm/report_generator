@@ -7,7 +7,7 @@ class gengit():
     def __init__(self,login,password,url,branch='master'):
         self.url = url
         self.local_repo = "mytestproject"
-        self.test_branch = "test_branch"
+        self.test_branch = branch
         self.login = login
         self.branch = branch
         self.password = password
