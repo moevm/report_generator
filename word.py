@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import sys,os
+sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
 from docx import Document
 #import docx
 from docx.enum.text import WD_LINE_SPACING
@@ -25,11 +27,11 @@ class dword():
         self.document.save(name)
         pass
     def addcode(self,filename):
+        print(filename)
         path = next(Path(os.getcwd()).rglob(filename))
-        #print(path)
+        print(path)
         f = open(str(path))
-        if f is not None:
-            code = f.read()
+        code = f.read()
         f.close()
         #print(code)
         self.document.add_paragraph(code)
@@ -49,8 +51,7 @@ class dword():
                    'group': RichText(self.js['group']),
                    'student': RichText(self.js['student']),
                    'teacher': RichText(self.js['teacher']),
-                   'sense': RichText(self.js['sense of work']),
-                   'text': RichText(self.js['text'])
+                   'sense': RichText(self.js['sense of work'])
                    }
         doc.render(context)
         doc.save("generated_doc.docx")

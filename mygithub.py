@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 #import gitPython
+import sys,os
+sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
 import git
 import requests
 import sys
@@ -7,7 +9,7 @@ class gengit():
     def __init__(self,login,password,url,branch='master'):
         self.url = url
         self.local_repo = "mytestproject"
-        self.test_branch = branch
+        self.test_branch = "test_branch"
         self.login = login
         self.branch = branch
         self.password = password

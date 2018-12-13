@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 from mygithub import *
 from word import *
 import shutil
@@ -11,6 +12,7 @@ branch = input('branch: ')
 git = gengit(login, password, url, branch)
 wiki = git.checkwiki()
 if wiki is not None:
+    #git.downloadgit('https://github.com/light5551/test_gen.git')
     git.downloadgit(url)
 print(wiki)
 word = dword()
