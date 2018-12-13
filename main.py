@@ -20,11 +20,12 @@ word.addcode(word.js['download'])
 name = 'ready_project.docx'
 path_cr = './'+git.local_repo+'/'+name
 word.save(path_cr)
-if word.js["PDF"]:
-    word.convertpdf(path_cr)
-    git.add(name[:-5]+'.pdf')
-else:
-    git.add(name)
+#if word.js["PDF"]:
+#    word.convertpdf(path_cr)
+#    git.add(name[:-5]+'.pdf')
+#else:
+#    git.add(name)
+git.add(name)
 git.push()
 shutil.rmtree(git.local_repo)
 
