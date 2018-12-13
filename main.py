@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-#export PYTHONPATH="${PYTHONPATH}:."
 from mygithub import *
 from word import *
 import shutil
