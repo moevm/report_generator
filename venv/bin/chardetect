@@ -1,4 +1,4 @@
-#!/home/light5551/PycharmProjects/generation_reports/venv/bin/python
+#!/home/light5551/PycharmProjects/generator/venv/bin/python
 
 # -*- coding: utf-8 -*-
 import re

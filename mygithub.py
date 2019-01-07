@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 #import gitPython
+import sys,os
+sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
+
 import git
 import requests
 import sys
@@ -13,8 +16,8 @@ class gengit():
         self.password = password
         self.repo = None
 
-    def downloadgit(self, url):
-        git_url = url[0:8] + self.login + ':' + self.password + '@' + url[8:]
+    def downloadgit(self):
+        git_url = self.url[0:8] + self.login + ':' + self.password + '@' + self.url[8:]
         self.repo = git.Repo.clone_from(git_url, self.local_repo)
         if self.repo is None:
             print('repo is None')
