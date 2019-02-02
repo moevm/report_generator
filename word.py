@@ -28,34 +28,43 @@ class dword():
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
         self.name = 'generated_doc.docx'
+        self.downloadwiki()
+        self.choosepathoftemplate()
         self.maketitul()
         self.doc = Document(self.name)
         self.addmaintext()
         self.convert_format()
         self.addfinal()
-        #self.addmaintext()
         self.save(self.name)
         pass
 
     def addpagebreak(self):
         self.doc.add_page_break()
 
+    def downloadwiki(self):
+        self.js = json.load(open('mytestproject/settings.json'))
+
+    def choosepathoftemplate(self):
+        self.path = 'templates/'
+        if(self.js['type'] == "KR"):
+            self.path += "KR"
+        elif(self.js['type'] == "LR"):
+            self.path += "LR"
+        self.path += ".docx"
+        pass
+
     def w_h(self, width, height):
         h = w = 4
         if height > width:
-            h *= height / width
-            #print(h)
+            h *= height / width           
             if h/w > 1.5:
                 while h/w >1.3:
                     h *= 0.8
-            #print(h)
         else:
             w *= width / height
-            #print(w)
             if w/h > 1.5:
                 while w / h > 1.3:
                     w *= 0.8
-            #print(w)
         return (h,w)
 
     def convertpdf(self, docname):
@@ -74,16 +83,18 @@ class dword():
         if file is "":
             for filename in self.js['download']:
                 path = next(Path(os.getcwd()).rglob(filename))
-                #print(path)
                 code = 'not valid file'
-                f = open(str(path))
-                if f is not None:
-                    code = f.read()
-                f.close()
-                #print(code)
+                try:
+                    f = open(str(path))
+                    if f is not None:
+                        code = f.read()
+                    f.close()
+                except Exception:
+                    print("no such file"+str(path))
                 self.addLine(filename,set_bold=True, align='left')
                 self.addLine(code, line_spacing=1, align='left', font_name='Consolas', font_size=10)
         pass
+
 
     def addfinal(self):
         self.addpagebreak()
@@ -101,8 +112,6 @@ class dword():
         #font = paragraph.style.font
         font.name = font_name
         font.size = Pt(font_size)
-        #if set_bold is True:
-            #print('ok')
         font.bold = bool(set_bold)
         paragraph_format = paragraph.paragraph_format
         paragraph_format.alignment = alignment_dict.get(align.lower())
@@ -115,17 +124,14 @@ class dword():
 
     def convert_format(self):
         p = self.doc
-        i = 0
         for paragraph in p.paragraphs:
             for run in paragraph.runs:
-                #print(i)
-                i = i+1
                 font = run.font
                 font.name = 'Times New Roman'
                 font.size = Pt(14)
         pass
 
-    def addPicture(self,filename):
+    def addPicture(self, filename):
         path = next(Path(os.getcwd()).rglob(filename))
         p = self.doc.add_paragraph()
         ##
@@ -133,18 +139,22 @@ class dword():
         p_format.alignment = alignment_dict.get('centre')
         ##
         r = p.add_run()
-        #print(path)
         im = Image.open(str(path))
-        (h,w) = im.size
-        (h,w) = self.w_h(w,h)
+        (h, w) = im.size
+        (h, w) = self.w_h(w,h)
         r.add_picture(str(path), width=Inches(h), height=Inches(w))#тут произошла какая-то путаница-но так правильно(потом  разобраться)
-        self.addLine('Рисунок ' + str(self.num_of_pictures) + '.',align='centre',keep_together=True)
+        self.addLine('Рисунок ' + str(self.num_of_pictures) + '.', align='centre', keep_together=True)
         self.num_of_pictures += 1
 
     def maketitul(self):
-        doc = DocxTemplate("test_tml.docx")
-        self.js = json.load(open('mytestproject/settings.json'))
+        doc = DocxTemplate(self.path)
+        if self.js['M/W'] == "M":
+            mw = "Студент"
+        else:
+            mw = "Студентка"
         content = {
+                   'manorgirl': RichText(mw),
+                   'number': RichText(self.js['number']),
                    'cathedra': RichText(self.js['cathedra']),
                    'discipline': RichText(self.js['discipline']),
                    'theme': RichText(self.js['theme']),
@@ -170,20 +180,16 @@ class dword():
         for x in p:
             if (x['head'] is not ""):
                 self.addLine('\t'+x['head'], space_after=0, set_bold=True,keep_together=True, keep_with_next=True,style_name='Normal'+str(self.number_of_paragraph), align='left')
-                #self.number_of_paragraph += 1
             if (x['text'] is not ""):
                 self.addLine(self.form(x['text']),keep_together=True, style_name='Normal'+str(self.number_of_paragraph))
-                #self.addLine('\t'+x['text'],keep_together=True,style_name='Normal' + str(self.number_of_paragraph))
-                #self.number_of_paragraph += 1
             if (x['image'] is not ""):
                 self.addPicture(x['image'])
 
 
-    def form(self, text):
+    def form(self, text):#NEED TO FIX
         size = len(text)
         l = list(text)
         index = 0
-        #print(l)
         l.append(' ')
         if (l[0] is not '\t'):
             l.insert(index, '\t')
@@ -199,11 +205,9 @@ class dword():
                         l.pop(index)
                         l.insert(index,"\xa0")
                     index += 1
-                    #print(str(2)+l[index])
                 l.pop(index+1)
                 l.pop(index+1)
                 size -= 2
-            #print(str(1)+l[index])
             if l[index] is ',' or l[index] is '.':
                 if l[index+1] is not ' ':
                     l.insert(index+1, ' ')
