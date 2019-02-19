@@ -12,10 +12,10 @@ url = input('url of repo: ')
 branch = input('branch: ')
 #print('login='+login+' password='+password+'url='+url+'test_branch='+branch)
 git = gengit(login, password, url, branch)
+git_wiki = gengit(login, password, url, '')
 wiki = git.checkwiki()
-if wiki is not None:
-    #git.downloadgit('https://github.com/light5551/test_gen.git')
-    git.downloadgit()
+git.downloadgit()
+git_wiki.downloadgitwiki()
 #print(wiki)
 word = dword()
 #word.addcode(word.js['download'])
@@ -30,6 +30,7 @@ else:
     git.add(name)
 git.push()
 shutil.rmtree(git.local_repo)
+shutil.rmtree(git_wiki.local_wiki)
 
 
 
