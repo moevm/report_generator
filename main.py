@@ -6,19 +6,16 @@ from word import *
 import shutil
 
 d=Document()
-login = input('login: ')
-password = input('password: ')
-url = input('url of repo: ')
+url = input('url of repo(ssh): ')
+wiki_url = input('wiki repo(http):')
 branch = input('branch: ')
 #print('login='+login+' password='+password+'url='+url+'test_branch='+branch)
-git = gengit(login, password, url, branch)
-git_wiki = gengit(login, password, url, '')
-wiki = git.checkwiki()
+git = gengit(url, branch)
+git_wiki = gengit(wiki_url, '')
 git.downloadgit()
 git_wiki.downloadgitwiki()
 #print(wiki)
 word = dword()
-#word.addcode(word.js['download'])
 name = 'ready_project.docx'
 path_cr = './'+git.local_repo+'/'+name
 word.save(path_cr)

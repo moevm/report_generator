@@ -3,42 +3,31 @@
 import sys,os
 sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
 import git
-import requests
 import sys
 
 class gengit():
-    def __init__(self,login,password,url,branch='master'):
-        self.url = url
+
+    def __init__(self,ssh_url,branch='master'):
+        self.url = ssh_url
         self.local_repo = "mytestproject"
         self.local_wiki = "wiki_dir"
-        self.test_branch = branch
-        self.login = login
         self.branch = branch
-        self.password = password
         self.repo = None
 
     def downloadgit(self):
-        git_url = self.url[0:8] + self.login + ':' + self.password + '@' + self.url[8:]
-        self.repo = git.Repo.clone_from(git_url, self.local_repo)
+        self.repo = git.Repo.clone_from(self.url, self.local_repo)
         if self.repo is None:
             print('repo is None')
             sys.exit(1)
         self.repo.git.checkout(self.branch)
 
     def downloadgitwiki(self):
-        git_url = self.url[0:8] + self.login + ':' + self.password + '@' + self.url[8:-3]+'wiki.git'
+        git_url = 'git@github.com:' + self.url[19:]
+#self.url[0:-3] + 'wiki.git'
         self.repo = git.Repo.clone_from(git_url, self.local_wiki)
         if self.repo is None:
             print('wiki is None')
             sys.exit(1)
-
-    def checkwiki(self):
-        path = 'https://raw.githubusercontent.com'+self.url[18:-4]+'/'+self.branch+'/'+'settings.json'
-        wiki = requests.get(path)#https://raw.githubusercontent.com/light5551/test_gen/test_branch/test.c
-        if wiki.status_code is not 200:
-            print('There is no wiki in repository')
-            sys.exit(0)
-        return wiki.text
 
     def add(self, filename):
         self.repo.index.add([filename])
@@ -48,5 +37,5 @@ class gengit():
         #self.repo.git.pull('origin', self.branch)
         self.repo.git.push('origin', self.branch)
     pass
-pass
+
 
