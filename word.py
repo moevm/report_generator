@@ -128,9 +128,7 @@ class Dword():
             line = [str[:-1] for str in line]
 
             itr = iter(line)
-            global cur_line     # если это переменная не будет global, то она не будет видна в цикле на пару строчек ниже
             cur_line = next(itr)
-            global need_break
             need_break = False
             while (cur_line is not ""):
                 #nonlocal cur_line
