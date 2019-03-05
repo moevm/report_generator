@@ -3,6 +3,8 @@ from mygithub import Gengit
 from word import Dword
 import shutil
 
+TIME_REPORT = "ready_project.docx"
+
 def main():
     url = input('url of repo(ssh): ')
     wiki_url = input('wiki repo(http):')
@@ -13,12 +15,11 @@ def main():
 
     git.downloadgit()
     git_wiki.downloadgitwiki()
-    #print(wiki)
     word = Dword()
-    name = 'ready_project.docx'
-    path_cr = './'+git.local_repo+'/'+name
+    name = TIME_REPORT
+    path_cr = "/".join((git.local_repo, name))
     word.save(path_cr)
-    if word.js["PDF"]:
+    if word.js_content["PDF"]:
         word.convert_to_pdf(path_cr)
         git.add(name[:-5]+'.pdf')
     else:

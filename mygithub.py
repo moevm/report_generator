@@ -2,12 +2,14 @@
 import sys
 import os
 import git
-sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
+
+# так мы указываем где лежат сторонние библиотеки
+sys.path.append('{}/venv/lib64/python3.6/site-packages'.format(os.getcwd()))
 
 
 LOCAL_REPO = "mytestproject"
 LOCAL_WIKI = "wiki_dir"
-BEGIN_SSH = "git@github.com:"
+BEGIN_SSH = "git@github.com:{}"
 
 class Gengit():
 
@@ -25,11 +27,10 @@ class Gengit():
         self.repo.git.checkout(self.branch)
 
     def downloadgitwiki(self):
-        git_url = BEGIN_SSH + self.url[19:]
+        git_url = BEGIN_SSH.format(self.url[19:])
         self.repo = git.Repo.clone_from(git_url, self.local_wiki)
         if self.repo is None:
             print('wiki is None')
-            sys.exit(1)
 
     def add(self, filename):
         self.repo.index.add([filename])
