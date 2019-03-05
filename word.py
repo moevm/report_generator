@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
-import sys,os
-sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
-#!/usr/bin/env python3
-from docx import Document
-from docx.enum.text import WD_LINE_SPACING
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.enum.style import WD_STYLE_TYPE
-from docx.shared import Pt
-from docx.shared import Inches
-from pathlib import Path
-from PIL import Image
-import requests
+import sys
 import os
-from docxtpl import DocxTemplate, RichText
 import json
 import re
 import subprocess
+import requests
+from pathlib import Path
+from PIL import Image
+from docx import Document
+from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
+from docx.enum.style import WD_STYLE_TYPE
+from docx.shared import Pt, Inches
+from docxtpl import DocxTemplate, RichText
+
+sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
+
+LOCAL_REPO = "generated_doc.docx"
+SETTINGS_FILE = "settings.json"
+COURSE_WORK = "KR"
+LAB_WORK = "LR"
+PATH_TO_TEMPLATE = "templates/"
+FILE_EXTENSION = ".docx"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -29,40 +34,37 @@ line_space_dict = {1: WD_LINE_SPACING.SINGLE,
                    0: WD_LINE_SPACING.EXACTLY}
 
 
-class dword():
+class Dword():
     def __init__(self):
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
-        self.name = 'generated_doc.docx'
-        self.downloadsettings()
+        #self.name = 'generated_doc.docx'
+        self.name = LOCAL_REPO
+        self.download_settings()
         # self.downloadwiki()
-        self.choosepathoftemplate()
-        self.maketitul()
+        self.choose_path_template()
+        self.make_titul()
         self.doc = Document(self.name)
         # self.addmaintext()
-        self.AddMainTextFromWiki_v2()
+        self.add_main_text_from_wiki()
         self.convert_format()
         self.addfinal()
         self.save(self.name)
         pass
 
-    def addpagebreak(self):
+    def add_page_break(self):
         self.doc.add_page_break()
 
-    # def downloadwiki(self):
-    # self.content=json.load(open('mytestproject/wiki'))
+    def download_settings(self):
+        self.js = json.load(open(SETTINGS_FILE))
 
-    def downloadsettings(self):
-        self.js = json.load(open('./settings.json'))
-
-    def choosepathoftemplate(self):
-        self.path = 'templates/'
-        if (self.js['type'] == "KR"):
-            self.path += "KR"
-        elif (self.js['type'] == "LR"):
-            self.path += "LR"
-        self.path += ".docx"
-        pass
+    def choose_path_template(self):
+        self.path = PATH_TO_TEMPLATE
+        if (self.js['type'] == COURSE_WORK):
+            self.path += COURSE_WORK
+        elif (self.js['type'] == LAB_WORK):
+            self.path += LAB_WORK
+        self.path += FILE_EXTENSION
 
     def w_h(self, width, height):
         h = w = 4
@@ -78,19 +80,17 @@ class dword():
                     w *= 0.8
         return (h, w)
 
-    def convertpdf(self, docname):
+    def convert_to_pdf(self, docname):
         try:
             subprocess.check_call(
                 ['/usr/bin/python3', '/usr/bin/unoconv', '-f', 'pdf', docname])
         except subprocess.CalledProcessError as e:
             print('CalledProcessError', e)
-        pass
 
     def save(self, name='report.docx'):
         self.doc.save(name)
-        pass
 
-    def addcode(self, file=""):
+    def add_code(self, file=""):
         if file is "":
             for filename in self.js['download']:
                 path = next(Path(os.getcwd()).rglob(filename))
@@ -104,17 +104,14 @@ class dword():
                     print("no such file" + str(path))
                 self.addLine(filename, set_bold=True, align='left')
                 self.addLine(code, line_spacing=1, align='left', font_name='Consolas', font_size=10)
-        pass
 
-
-
-    def AddMainTextFromWiki_v2(self):
+    def add_main_text_from_wiki(self):
         pages = self.js['pages_of_wiki']
         firstpage = True
         for filename in self.js['pages_of_wiki']:
 
             if firstpage is False:
-                self.addpagebreak()
+                self.add_page_break()
             firstpage = False
             #self.addpagebreak()
             path = next(Path(os.getcwd()).rglob(filename + '.md'))
@@ -159,7 +156,7 @@ class dword():
                    self.addLine(cur_line[2:-2], set_bold=True, align='left',keep_with_next=True)
                 elif (re.match(r'`', cur_line) is not None):
 
-                    self.addcode(cur_line)
+                    self.add_code(cur_line)
                 elif (re.match(r'\**\*', cur_line) is not None):
 
                     self.addLine('•' + cur_line[1:], align='left', keep_with_next=True)
@@ -171,21 +168,17 @@ class dword():
                     #self.addpagebreak()
                     break
 
-        pass
-
     def addimagebyurl(self,url):
         r = requests.get(url)
         filepath = os.path.join(os.getcwd()+'/'+'picture')
         with open(filepath, 'wb') as f:
             f.write(r.content)
         self.addPicture(filepath)
-    pass
 
     def addfinal(self):
-        self.addpagebreak()
+        self.add_page_break()
         self.addLine('Приложение', set_bold=True, align='centre', style_name='Normal' + str(self.number_of_paragraph))
-        self.addcode()
-        pass
+        self.add_code()
 
     def addLine(self, line, space_after=0, set_bold=False, font_name='Times New Roman', keep_with_next=False,
                 font_size=14, space_before=0, line_spacing=1.5, align='justify', keep_together=True, style_name=""):
@@ -193,9 +186,7 @@ class dword():
         style_name = 'Normal' + str(self.number_of_paragraph)
         paragraph = self.doc.add_paragraph(line)
         paragraph.style = self.doc.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
-        # style = self.doc.styles['Normal']
         font = paragraph.style.font
-        # font = paragraph.style.font
         font.name = font_name
         font.size = Pt(font_size)
         font.bold = bool(set_bold)
@@ -206,7 +197,6 @@ class dword():
         paragraph_format.keep_with_next = keep_with_next
         paragraph_format.line_spacing_rule = line_space_dict.get(line_spacing)
         paragraph_format.keep_together = keep_together
-        pass
 
     def convert_format(self):
         p = self.doc
@@ -215,16 +205,12 @@ class dword():
                 font = run.font
                 font.name = 'Times New Roman'
                 font.size = Pt(14)
-        pass
 
     def addPicture(self, filename):
-        #path = next(Path(os.getcwd()).rglob(filename))
         path = filename
         p = self.doc.add_paragraph()
-        ##
         p_format = p.paragraph_format
         p_format.alignment = alignment_dict.get('centre')
-        ##
         r = p.add_run()
         im = Image.open(str(path))
         (h, w) = im.size
@@ -234,7 +220,7 @@ class dword():
         self.addLine('Рисунок ' + str(self.num_of_pictures) + '.', align='centre', keep_together=True)
         self.num_of_pictures += 1
 
-    def maketitul(self):
+    def make_titul(self):
         doc = DocxTemplate(self.path)
         if self.js['M/W'] == "M":
             mw = "Студент"
@@ -261,58 +247,3 @@ class dword():
         }
         doc.render(content)
         doc.save(self.name)
-        pass
-
-    def addmaintext(self):
-        p = self.content['content']
-        for x in p:
-            if (x['head'] is not ""):
-                self.addLine('\t' + x['head'], space_after=0, set_bold=True, keep_together=True, keep_with_next=True,
-                             style_name='Normal' + str(self.number_of_paragraph), align='left')
-            if (x['text'] is not ""):
-                self.addLine(self.form(x['text']), keep_together=True,
-                             style_name='Normal' + str(self.number_of_paragraph))
-            if (x['image'] is not ""):
-                self.addPicture(x['image'])
-
-    def form(self, text):  # NEED TO FIX
-        size = len(text)
-        l = list(text)
-        index = 0
-        l.append(' ')
-        if (l[0] is not '\t'):
-            l.insert(index, '\t')
-        index += 1
-        while index <= size:
-            # y = l[index]
-            if l[index] is '$' and l[index + 1] is '$':
-                l.pop(index)
-                l.pop(index)
-                size -= 2
-                while index < size and l[index] is not '$' and l[index + 1] is not '$':
-                    if l[index] is ' ':
-                        l.pop(index)
-                        l.insert(index, "\xa0")
-                    index += 1
-                l.pop(index + 1)
-                l.pop(index + 1)
-                size -= 2
-            if l[index] is ',' or l[index] is '.':
-                if l[index + 1] is not ' ':
-                    l.insert(index + 1, ' ')
-                    size += 1
-                    index += 1
-
-            if l[index] is ':' or l[index] is ';':
-                l.insert(index + 1, '\n')
-                index += 1
-                size += 1
-            index += 1
-        l.pop()
-        return ''.join(l)
-
-
-
-
-pass
-

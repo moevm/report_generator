@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-#import gitPython
-import sys,os
-sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
-import git
 import sys
+import os
+import git
+sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
 
-class gengit():
 
-    def __init__(self,ssh_url,branch='master'):
+LOCAL_REPO = "mytestproject"
+LOCAL_WIKI = "wiki_dir"
+BEGIN_SSH = "git@github.com:"
+
+class Gengit():
+
+    def __init__(self, ssh_url, branch='master'):
         self.url = ssh_url
-        self.local_repo = "mytestproject"
-        self.local_wiki = "wiki_dir"
+        self.local_repo = LOCAL_REPO
+        self.local_wiki = LOCAL_WIKI
         self.branch = branch
         self.repo = None
 
@@ -18,12 +22,10 @@ class gengit():
         self.repo = git.Repo.clone_from(self.url, self.local_repo)
         if self.repo is None:
             print('repo is None')
-            sys.exit(1)
         self.repo.git.checkout(self.branch)
 
     def downloadgitwiki(self):
-        git_url = 'git@github.com:' + self.url[19:]
-#self.url[0:-3] + 'wiki.git'
+        git_url = BEGIN_SSH + self.url[19:]
         self.repo = git.Repo.clone_from(git_url, self.local_wiki)
         if self.repo is None:
             print('wiki is None')
@@ -34,8 +36,4 @@ class gengit():
         self.repo.index.commit('add report')
 
     def push(self):
-        #self.repo.git.pull('origin', self.branch)
         self.repo.git.push('origin', self.branch)
-    pass
-
-
