@@ -7,6 +7,9 @@ from word import Dword
 
 TIME_REPORT = "ready_project.docx"
 FROM_CONSOLE = "cmd"
+PDF = "PDF"
+PDF_EXTENSION = "{}.pdf"
+LEN_WORD_EXTENSION = 5 # .docx - 5 symbols
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -23,8 +26,7 @@ def input_file(name):
     with open(name) as f:
         content = f.readlines()
     content = [x.strip() for x in content] 
-    return content[0], content[1], content[2]
-    
+    return content[:3] 
 
 def main(type_of_input):
     if type_of_input is FROM_CONSOLE:
@@ -34,15 +36,15 @@ def main(type_of_input):
     git = Gengit(url, branch)
     git_wiki = Gengit(wiki_url, '')
 
-    git.downloadgit()
-    git_wiki.downloadgitwiki()
+    git.download_git()
+    git_wiki.download_git_wiki()
     word = Dword()
     name = TIME_REPORT
     path_cr = "/".join((git.local_repo, name))
     word.save(path_cr)
-    if word.js_content["PDF"]:
-        word.convert_to_pdf(path_cr)
-        git.add(name[:-5]+'.pdf')
+    if word.js_content[PDF]:
+        word.convert_to_pdf(docname=path_cr)
+        git.add(PDF_EXTENSION.format(name[:-LEN_WORD_EXTENSION]))  
     else:
         git.add(name)
     git.push()
@@ -51,7 +53,7 @@ def main(type_of_input):
 
 if  __name__ ==  "__main__" :
     parser = create_parser()
-    namespace = parser.parse_args(sys.argv[1:])
+    namespace = parser.parse_args()
 
     if namespace.f is None:
         main(FROM_CONSOLE) 
