@@ -23,7 +23,17 @@ COURSE_WORK = "KR"
 LAB_WORK = "LR"
 PATH_TO_TEMPLATE = "templates/"
 FILE_EXTENSION = ".docx"
+TYPE_OF_WORK = "type"
 NOT_VALID = "not valid file"
+DICT_FILENAMES = 'download'
+NO_FILE_MESSAGE = "No such file {}"
+STYLE = "NORMAL {}"
+STANDART_FONT = "Timew New Roman"
+STANDART_FONT_SIZE = 14
+UNDER_PICTURE = "Рисунок {}{}"
+ATTACHMENT = "Приложение"
+PICTURE = "picture"
+PAGES = "pages_of_wiki"
 STANDART_SIZE_PICTURE = 4
 BORDER_OF_PICTURE = 1.5
 SPEED_OF_REDUCING_PICTURE = 0.8
@@ -63,13 +73,14 @@ class Dword:
 
     def choose_path_template(self):
         self.path = PATH_TO_TEMPLATE
-        if (self.js_content['type'] == COURSE_WORK):
-            self.path += COURSE_WORK
-        elif (self.js_content['type'] == LAB_WORK):
+        if (self.js_content[TYPE_OF_WORK] == COURSE_WORK):
+            self.path = "".join((self.path, COURSE_WORK))
+        elif (self.js_content[TYPE_OF_WORK] == LAB_WORK):
             self.path += LAB_WORK
         self.path += FILE_EXTENSION
-#width , height
-    def w_h(self, height, width):
+
+    def h_w(self, dimension):
+        height, width = dimension
         h = w = STANDART_SIZE_PICTURE
         if height > width:
             h *= height / width
@@ -88,24 +99,22 @@ class Dword:
         try:
             subprocess.check_call(
                 ['/usr/bin/python3', '/usr/bin/unoconv', '-f', 'pdf', docname])
-        except subprocess.CalledProcessError as exc:
-            print('CalledProcessError', exc)
+        except subprocess.CalledProcessError as e:
+            print('CalledProcessError', e)
 
     def save(self, name=NAME_REPORT):
         self.doc.save(name)
 
     def add_code(self):
-        for filename in self.js_content['download']:
+        for filename in self.js_content[DICT_FILENAMES]:
             path = next(Path(os.getcwd()).rglob(filename))
-            # path = next(Path('.').rglob(filename))  # равносильные строчки(с верхней)
             code = NOT_VALID
-            try:
-                with open(str(path)) as file_:
-                    if file_ is not None:
-                        code = file_.read()
-            except Exception:
-                print("no such file {}".format(path))
-            self.add_line(filename, set_bold=True, align='left')
+            with open(str(path)) as file:
+                if file is not None:
+                    code = file.read()
+                else:
+                    print(NO_FILE_MESSAGE.format(path))
+            self.add_line(filename, set_bold=True, align='left') # В будушем эти параметры будут браться из settings.json
             self.add_line(code, line_spacing=1, align='left', font_name='Consolas', font_size=10)
 
     # этот метод должен быть переделан - полностью!!!
@@ -113,14 +122,15 @@ class Dword:
 
     def add_main_text_from_wiki(self):
         firstpage = True
-        for filename in self.js_content['pages_of_wiki']:
+        for filename in self.js_content[PAGES]:
 
             if firstpage is False:
                 self.add_page_break()
             firstpage = False
             path = next(Path(os.getcwd()).rglob(filename + '.md'))
-            f = open(str(path))
-            line = f.readlines()
+            #f = open(str(path))
+            with open(str(path)) as f:
+                line = f.readlines()
             f.close()
             while '\n' in line:
                 line.remove('\n')
@@ -153,11 +163,9 @@ class Dword:
 
                 if re.match(r'\*\*', cur_line) is not None:
                    self.add_line(cur_line[2:-2], set_bold=True, align='left', keep_with_next=True)
-                #elif re.match(r'`', cur_line) is not None:
-                #    self.add_code(cur_line)
                 elif re.match(r'\**\*', cur_line) is not None:
                     self.add_line('•' + cur_line[1:], align='left', keep_with_next=True)
-                elif re.match(r'!\[\]',cur_line) is not None:
+                elif re.match(r'!\[\]', cur_line) is not None:
                     self.add_image_by_url(cur_line[4:-1])
                 try:
                     cur_line = next(itr)
@@ -166,20 +174,20 @@ class Dword:
 
     def add_image_by_url(self, url):
         req = requests.get(url)
-        filepath = os.path.join(os.getcwd(), 'picture')
-        with open(filepath, 'wb') as file_:
-            file_.write(req.content)
+        filepath = os.path.join(os.getcwd(), PICTURE)
+        with open(filepath, 'wb') as file:
+            file.write(req.content)
         self.add_picture(filepath)
 
     def add_final_part(self):
         self.add_page_break()
-        self.add_line('Приложение', set_bold=True, align='centre')
+        self.add_line(ATTACHMENT, set_bold=True, align='centre')
         self.add_code()
 
-    def add_line(self, line, space_after=0, set_bold=False, font_name='Times New Roman', keep_with_next=False,
-                 font_size=14, space_before=0, line_spacing=1.5, align='justify', keep_together=True):
+    def add_line(self, line, space_after=0, set_bold=False, font_name=STANDART_FONT, keep_with_next=False,
+                 font_size=STANDART_FONT_SIZE, space_before=0, line_spacing=1.5, align='justify', keep_together=True):
         self.number_of_paragraph += 1
-        style_name = 'Normal {}'.format(str(self.number_of_paragraph))
+        style_name = STYLE.format(str(self.number_of_paragraph))
         paragraph = self.doc.add_paragraph(line)
         paragraph.style = self.doc.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         font = paragraph.style.font
@@ -209,10 +217,9 @@ class Dword:
         time_word = paragraph.add_run()
 
         im = Image.open(str(path))
-        h, w = im.size
-        h, w = self.w_h(h, w)
+        h, w = self.h_w(im.size)
         time_word.add_picture(str(path), width=Inches(h), height=Inches(w))  # !!
-        self.add_line('Рисунок {}{}'.format(self.num_of_pictures, '.'), align='centre', keep_together=True)
+        self.add_line(UNDER_PICTURE.format(str(self.num_of_pictures), '.'), align='centre', keep_together=True)
         self.num_of_pictures += 1
 
     def make_title(self):
@@ -242,4 +249,3 @@ class Dword:
         }
         doc.render(content)
         doc.save(self.name)
-
