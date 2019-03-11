@@ -1,10 +1,7 @@
-#!/usr/bin/env python3
+#!./venv/bin/python3.6
 import sys
 import os
 import git
-
-# так мы указываем где лежат сторонние библиотеки
-sys.path.append('{}/venv/lib64/python3.6/site-packages'.format(os.getcwd()))
 
 
 LOCAL_REPO = "mytestproject"

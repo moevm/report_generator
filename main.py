@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
-import shutil
+#!./venv/bin/python3.6
 import argparse
 import sys
 import os
+import shutil
 from mygithub import Gengit
 from word import Dword
 
@@ -62,9 +62,9 @@ def main(type_of_input):
     if git.download_git() is False or git_wiki.download_git_wiki() is False:
         delete_directories_and_files(git, git_wiki)
         print(ERROR_MESSAGE)
-        sys.exit(0)
+
     word = Dword()
-    path_doc = "/".join((git.local_repo, TIME_REPORT))
+    path_doc = os.path.join(git.local_repo, TIME_REPORT)
     word.save(path_doc)
     if word.js_content[PDF]:
         word.convert_to_pdf(docname=path_doc)
@@ -79,7 +79,7 @@ if __name__ == "__main__" :
     parser = create_parser()
     namespace = parser.parse_args()
 
-    if namespace.f is None:
+    if not namespace.f:
         main(FROM_CONSOLE)
     else:
         main(namespace.f)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!./venv/bin/python3.6
 import sys
 import os
 import json
@@ -13,8 +13,6 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
 
-# так мы указываем где лежат сторонние библиотеки
-sys.path.append('{}/venv/lib64/python3.6/site-packages'.format(os.getcwd()))
 
 NAME_REPORT = "report.docx"
 LOCAL_REPO = "generated_doc.docx"
@@ -74,7 +72,7 @@ class Dword:
     def choose_path_template(self):
         self.path = PATH_TO_TEMPLATE
         if (self.js_content[TYPE_OF_WORK] == COURSE_WORK):
-            self.path = "".join((self.path, COURSE_WORK))
+            self.path = os.path.join(self.path, COURSE_WORK)
         elif (self.js_content[TYPE_OF_WORK] == LAB_WORK):
             self.path += LAB_WORK
         self.path += FILE_EXTENSION
@@ -107,15 +105,17 @@ class Dword:
 
     def add_code(self):
         for filename in self.js_content[DICT_FILENAMES]:
-            path = next(Path(os.getcwd()).rglob(filename))
-            code = NOT_VALID
-            with open(str(path)) as file:
-                if file is not None:
-                    code = file.read()
-                else:
-                    print(NO_FILE_MESSAGE.format(path))
-            self.add_line(filename, set_bold=True, align='left') # В будушем эти параметры будут браться из settings.json
-            self.add_line(code, line_spacing=1, align='left', font_name='Consolas', font_size=10)
+            p = Path(os.getcwd()).rglob(filename)
+            for path in p:
+                code = NOT_VALID
+                with open(str(path)) as file:
+                    if file is not None:
+                        code = file.read()
+                    else:
+                        print(NO_FILE_MESSAGE.format(path))
+
+                self.add_line(filename, set_bold=True, align='left') 
+                self.add_line(code, line_spacing=1, align='left', font_name='Consolas', font_size=10)
 
     # этот метод должен быть переделан - полностью!!!
     # эту функцию я не редактирую, потому что ее все равно надо будет удалить
@@ -187,7 +187,7 @@ class Dword:
     def add_line(self, line, space_after=0, set_bold=False, font_name=STANDART_FONT, keep_with_next=False,
                  font_size=STANDART_FONT_SIZE, space_before=0, line_spacing=1.5, align='justify', keep_together=True):
         self.number_of_paragraph += 1
-        style_name = STYLE.format(str(self.number_of_paragraph))
+        style_name = STYLE.format(self.number_of_paragraph)
         paragraph = self.doc.add_paragraph(line)
         paragraph.style = self.doc.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         font = paragraph.style.font
@@ -206,7 +206,7 @@ class Dword:
         for paragraph in self.doc.paragraphs:
             for run in paragraph.runs:
                 font = run.font
-                font.name = 'Times New Roman'       # в будущем этот параметр будет задоваться в settings.json
+                font.name = 'Times New Roman'
                 font.size = Pt(14)
 
     def add_picture(self, filename):
@@ -218,7 +218,7 @@ class Dword:
 
         im = Image.open(str(path))
         h, w = self.h_w(im.size)
-        time_word.add_picture(str(path), width=Inches(h), height=Inches(w))  # !!
+        time_word.add_picture(str(path), width=Inches(h), height=Inches(w)) 
         self.add_line(UNDER_PICTURE.format(str(self.num_of_pictures), '.'), align='centre', keep_together=True)
         self.num_of_pictures += 1
 
