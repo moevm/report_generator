@@ -26,8 +26,14 @@ NOT_VALID = "not valid file"
 DICT_FILENAMES = 'download'
 NO_FILE_MESSAGE = "No such file {}"
 STYLE = "NORMAL {}"
-STANDART_FONT = "Timew New Roman"
+STANDART_FONT = "Times New Roman"
 STANDART_FONT_SIZE = 14
+STANDART_PLACE_BEFORE = 0
+STANDART_PLACE_AFTER = 0
+STANDART_LINE_SPACING = 1.5
+ALIGN_CENTRE = "centre"
+ALIGN_JUSTIFY = "justify"
+ALIGN_LEFT = "left"
 UNDER_PICTURE = "Рисунок {}{}"
 ATTACHMENT = "Приложение"
 PICTURE = "picture"
@@ -35,6 +41,30 @@ PAGES = "pages_of_wiki"
 STANDART_SIZE_PICTURE = 4
 BORDER_OF_PICTURE = 1.5
 SPEED_OF_REDUCING_PICTURE = 0.8
+DOT = "."
+FONT_SIZE_CODE = 10
+FONT_CODE = 'Consolas'
+
+M_STUDENT = "Студент"
+W_STUDENT = "Студента"
+M_W = "M/W"
+MAN = "M"
+MAN_OR_WOMAN = "manogirl"
+NUMBER = "number"
+CATHEDRA = "cathedra"
+DISCIPLINE = "discipline"
+THEME = "theme"
+GROUP = "group"
+NAME_OF_STUDENT = "student"
+TEACHER = "teacher"
+INIT_DATA = "init_data"
+CONTEXT_OF_EXPLANATION = "context_of_explanation"
+MIN_PAGES = "min_pages"
+DATE_START = "date_start"
+DATE_FINISH = "date_finish"
+DATE_DEFEND = "date_defend"
+ANNOTATION = "annotation"
+INTRODUCTION = "introduction"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -108,17 +138,15 @@ class Dword:
             p = Path(os.getcwd()).rglob(filename)
             for path in p:
                 code = NOT_VALID
-                with open(str(path)) as file:
+                with open(path) as file:
                     if file is not None:
                         code = file.read()
                     else:
                         print(NO_FILE_MESSAGE.format(path))
 
-                self.add_line(filename, set_bold=True, align='left') 
-                self.add_line(code, line_spacing=1, align='left', font_name='Consolas', font_size=10)
+                self.add_line(filename, set_bold=True, align=ALIGN_LEFT) 
+                self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
-    # этот метод должен быть переделан - полностью!!!
-    # эту функцию я не редактирую, потому что ее все равно надо будет удалить
 
     def add_main_text_from_wiki(self):
         firstpage = True
@@ -129,7 +157,7 @@ class Dword:
             firstpage = False
             path = next(Path(os.getcwd()).rglob(filename + '.md'))
             #f = open(str(path))
-            with open(str(path)) as f:
+            with open(path) as f:
                 line = f.readlines()
             f.close()
             while '\n' in line:
@@ -162,9 +190,9 @@ class Dword:
                     break
 
                 if re.match(r'\*\*', cur_line) is not None:
-                   self.add_line(cur_line[2:-2], set_bold=True, align='left', keep_with_next=True)
+                   self.add_line(cur_line[2:-2], set_bold=True, align=ALIGN_LEFT, keep_with_next=True)
                 elif re.match(r'\**\*', cur_line) is not None:
-                    self.add_line('•' + cur_line[1:], align='left', keep_with_next=True)
+                    self.add_line('•' + cur_line[1:], align=ALIGN_LEFT, keep_with_next=True)
                 elif re.match(r'!\[\]', cur_line) is not None:
                     self.add_image_by_url(cur_line[4:-1])
                 try:
@@ -181,11 +209,11 @@ class Dword:
 
     def add_final_part(self):
         self.add_page_break()
-        self.add_line(ATTACHMENT, set_bold=True, align='centre')
+        self.add_line(ATTACHMENT, set_bold=True, align=ALIGN_CENTRE)
         self.add_code()
 
-    def add_line(self, line, space_after=0, set_bold=False, font_name=STANDART_FONT, keep_with_next=False,
-                 font_size=STANDART_FONT_SIZE, space_before=0, line_spacing=1.5, align='justify', keep_together=True):
+    def add_line(self, line, space_after=STANDART_PLACE_AFTER, set_bold=False, font_name=STANDART_FONT, keep_with_next=False,
+                 font_size=STANDART_FONT_SIZE, space_before=STANDART_PLACE_BEFORE, line_spacing=STANDART_LINE_SPACING, align=ALIGN_JUSTIFY, keep_together=True):
         self.number_of_paragraph += 1
         style_name = STYLE.format(self.number_of_paragraph)
         paragraph = self.doc.add_paragraph(line)
@@ -206,46 +234,46 @@ class Dword:
         for paragraph in self.doc.paragraphs:
             for run in paragraph.runs:
                 font = run.font
-                font.name = 'Times New Roman'
-                font.size = Pt(14)
+                font.name = STANDART_FONT
+                font.size = Pt(STANDART_FONT_SIZE)
 
-    def add_picture(self, filename):
-        path = filename
+    def add_picture(self, path):
         paragraph = self.doc.add_paragraph()
         p_format = paragraph.paragraph_format
-        p_format.alignment = alignment_dict.get('centre')
+        p_format.alignment = alignment_dict.get(ALIGN_CENTRE)
         time_word = paragraph.add_run()
 
-        im = Image.open(str(path))
+        im = Image.open(path)
         h, w = self.h_w(im.size)
-        time_word.add_picture(str(path), width=Inches(h), height=Inches(w)) 
-        self.add_line(UNDER_PICTURE.format(str(self.num_of_pictures), '.'), align='centre', keep_together=True)
+        time_word.add_picture(path, width=Inches(h), height=Inches(w)) 
+        self.add_line(UNDER_PICTURE.format(self.num_of_pictures, DOT), align=ALIGN_CENTRE, keep_together=True)
         self.num_of_pictures += 1
 
     def make_title(self):
         doc = DocxTemplate(self.path)
-        if self.js_content['M/W'] == "M":
-            mw = "Студент"
+        if self.js_content[M_W] == MAN:
+            mw = M_STUDENT
         else:
-            mw = "Студентка"
+            mw = W_STUDENT
         content = {
-            'manorgirl': RichText(mw),
-            'number': RichText(self.js_content['number']),
-            'cathedra': RichText(self.js_content['cathedra']),
-            'discipline': RichText(self.js_content['discipline']),
-            'theme': RichText(self.js_content['theme']),
-            'group': RichText(self.js_content['group']),
-            'student': RichText(self.js_content['student']),
-            'teacher': RichText(self.js_content['teacher']),
-            'init_data': RichText(self.js_content['init_data']),
-            'context_of_explanation': RichText(self.js_content['context_of_explanation']),
-            'min_pages': RichText(self.js_content['min_pages']),
-            'date_start': RichText(self.js_content['date_start']),
-            'date_finish': RichText(self.js_content['date_finish']),
-            'date_defend': RichText(self.js_content['date_defend']),
-            'annotation': RichText(self.js_content['annotation']),
-            'introduction': RichText(self.js_content['introduction'])
+            MAN_OR_WOMAN: RichText(mw),
+            NUMBER: RichText(self.js_content[NUMBER]),
+            CATHEDRA: RichText(self.js_content[CATHEDRA]),
+            DISCIPLINE: RichText(self.js_content[DISCIPLINE]),
+            THEME: RichText(self.js_content[THEME]),
+            GROUP: RichText(self.js_content[GROUP]),
+            NAME_OF_STUDENT: RichText(self.js_content[NAME_OF_STUDENT]),
+            TEACHER: RichText(self.js_content[TEACHER]),
+            INIT_DATA: RichText(self.js_content[INIT_DATA]),
+            CONTEXT_OF_EXPLANATION: RichText(self.js_content[CONTEXT_OF_EXPLANATION]),
+            MIN_PAGES: RichText(self.js_content[MIN_PAGES]),
+            DATE_START: RichText(self.js_content[DATE_START]),
+            DATE_FINISH: RichText(self.js_content[DATE_FINISH]),
+            DATE_DEFEND: RichText(self.js_content[DATE_DEFEND]),
+            ANNOTATION: RichText(self.js_content[ANNOTATION]),
+            INTRODUCTION: RichText(self.js_content[INTRODUCTION])
 
         }
         doc.render(content)
         doc.save(self.name)
+

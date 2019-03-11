@@ -17,7 +17,7 @@ INPUT_URL_MESSAGE = "url of repo(ssh): "
 INPUT_WIKI_URL_MESSAGE = "wiki repo(http): "
 INPUT_BRANCH_MESSAGE = "branch: "
 LEN_WORD_EXTENSION = 5  # .docx - 5 symbols
-DELETE_WORD = True
+DELETE_WORD = False
 DELETED_PICTURE = "picture"
 
 def create_parser():
