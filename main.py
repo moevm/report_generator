@@ -63,6 +63,13 @@ def main(type_of_input):
         delete_directories_and_files(git, git_wiki)
         print(ERROR_MESSAGE)
 
+    comments = git.get_comments()    
+    #for i in comments:
+    i = 0
+    print("комментарии:")
+    while i < len(comments):
+        print(comments[i][0], comments[i][2], comments[i][3])
+        i += 1
     word = Dword()
     path_doc = os.path.join(git.local_repo, TIME_REPORT)
     word.save(path_doc)

@@ -16,7 +16,7 @@ STANDART_BRANCH = 'master'
 
 PARAM = "updated"
 API_GITHUB_COMMENTS = "https://api.github.com/repos/OSLL/report_generator/pulls/comments"
-
+TIME_FILE = "file_for_api_git.txt"
 
 class Gengit:
 
@@ -51,13 +51,14 @@ class Gengit:
     @staticmethod
     def get_comments():
         response = requests.get(API_GITHUB_COMMENTS,params=PARAM)
-        with open("test1.txt", 'w') as file:
+        with open(TIME_FILE, 'w') as file:
             file.write(response.text)
-        with open("test1.txt", 'r') as file:            
+        with open(TIME_FILE, 'r') as file:            
             js = json.load(file)
         i = 0
-        list = []
+        list_comments = []
         while i < len(js):
-            list.append([js[i]["original_position"],js[i]["created_at"],js[i]["user"]["login"],js[i]["body"]])
+            list_comments.append([js[i]["original_position"],js[i]["created_at"],js[i]["user"]["login"],js[i]["body"]])
             i += 1
-        return list
+        list_comments.sort()
+        return list_comments
