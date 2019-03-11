@@ -1,33 +1,87 @@
-#!/usr/bin/env python3
-from mygithub import *
-from word import *
-#import docx
-#from docx import *
+#!./venv/bin/python3.6
+import argparse
+import sys
+import os
 import shutil
+from mygithub import Gengit
+from word import Dword
 
-d=Document()
-url = input('url of repo(ssh): ')
-wiki_url = input('wiki repo(http):')
-branch = input('branch: ')
-#print('login='+login+' password='+password+'url='+url+'test_branch='+branch)
-git = gengit(url, branch)
-git_wiki = gengit(wiki_url, '')
-git.downloadgit()
-git_wiki.downloadgitwiki()
-#print(wiki)
-word = dword()
-name = 'ready_project.docx'
-path_cr = './'+git.local_repo+'/'+name
-word.save(path_cr)
-print("PDF IS "+str(word.js["PDF"]))
-if word.js["PDF"]:
-    word.convertpdf(path_cr)
-    git.add(name[:-5]+'.pdf')
-else:
-    git.add(name)
-git.push()
-shutil.rmtree(git.local_repo)
-shutil.rmtree(git_wiki.local_wiki)
 
+TIME_REPORT = "ready_project.docx"
+READY_WORD = "generated_doc.docx"
+FROM_CONSOLE = "cmd"
+PDF = "PDF"
+PDF_EXTENSION = "{}.pdf"
+ERROR_MESSAGE = "Невернные входные даннык!"
+INPUT_URL_MESSAGE = "url of repo(ssh): "
+INPUT_WIKI_URL_MESSAGE = "wiki repo(http): "
+INPUT_BRANCH_MESSAGE = "branch: "
+LEN_WORD_EXTENSION = 5  # .docx - 5 symbols
+DELETE_WORD = False
+DELETED_PICTURE = "picture"
+
+def create_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f')
+    return parser
+
+
+def input_cmd():
+    url = input(INPUT_URL_MESSAGE)
+    wiki_url = input(INPUT_WIKI_URL_MESSAGE)
+    branch = input(INPUT_BRANCH_MESSAGE)
+    return url, wiki_url, branch
+
+
+def delete_directories_and_files(git, git_wiki):
+    if os.path.exists(git.local_repo):
+        shutil.rmtree(git.local_repo)
+    if os.path.exists(git.local_wiki):
+        shutil.rmtree(git_wiki.local_wiki)
+    if os.path.exists(READY_WORD) and DELETE_WORD:
+        os.remove(READY_WORD)
+    if os.path.exists(DELETED_PICTURE):
+        os.remove(DELETED_PICTURE)
+
+
+def input_file(name):
+    with open(name) as file:
+        content = file.readlines()
+    content = [element.strip() for element in content]
+    return content[:3]
+
+
+def main(type_of_input):
+    if type_of_input is FROM_CONSOLE:
+        url, wiki_url, branch = input_cmd()
+    else:
+        url, wiki_url, branch = input_file(type_of_input)
+    git = Gengit(url, branch)
+    git_wiki = Gengit(wiki_url)
+
+    if git.download_git() is False or git_wiki.download_git_wiki() is False:
+        delete_directories_and_files(git, git_wiki)
+        print(ERROR_MESSAGE)
+
+    word = Dword()
+    path_doc = os.path.join(git.local_repo, TIME_REPORT)
+    word.save(path_doc)
+    if word.js_content[PDF]:
+        word.convert_to_pdf(docname=path_doc)
+        git.add(PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION]))
+    else:
+        git.add(TIME_REPORT)
+    git.push()
+    delete_directories_and_files(git, git_wiki)
+
+
+if __name__ == "__main__" :
+    parser = create_parser()
+    namespace = parser.parse_args()
+
+    if not namespace.f:
+        main(FROM_CONSOLE)
+    else:
+        main(namespace.f)
 
 

@@ -1,21 +1,70 @@
-#!/usr/bin/env python3
-import sys,os
-sys.path.append(os.getcwd()+'/venv/lib64/python3.6/site-packages')
-#!/usr/bin/env python3
-from docx import Document
-from docx.enum.text import WD_LINE_SPACING
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.enum.style import WD_STYLE_TYPE
-from docx.shared import Pt
-from docx.shared import Inches
-from pathlib import Path
-from PIL import Image
-import requests
+#!./venv/bin/python3.6
+import sys
 import os
-from docxtpl import DocxTemplate, RichText
 import json
 import re
 import subprocess
+import requests
+from pathlib import Path
+from PIL import Image
+from docx import Document
+from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
+from docx.enum.style import WD_STYLE_TYPE
+from docx.shared import Pt, Inches
+from docxtpl import DocxTemplate, RichText
+
+
+NAME_REPORT = "report.docx"
+LOCAL_REPO = "generated_doc.docx"
+SETTINGS_FILE = "settings.json"
+COURSE_WORK = "KR"
+LAB_WORK = "LR"
+PATH_TO_TEMPLATE = "templates/"
+FILE_EXTENSION = ".docx"
+TYPE_OF_WORK = "type"
+NOT_VALID = "not valid file"
+DICT_FILENAMES = 'download'
+NO_FILE_MESSAGE = "No such file {}"
+STYLE = "NORMAL {}"
+STANDART_FONT = "Times New Roman"
+STANDART_FONT_SIZE = 14
+STANDART_PLACE_BEFORE = 0
+STANDART_PLACE_AFTER = 0
+STANDART_LINE_SPACING = 1.5
+ALIGN_CENTRE = "centre"
+ALIGN_JUSTIFY = "justify"
+ALIGN_LEFT = "left"
+UNDER_PICTURE = "Рисунок {}{}"
+ATTACHMENT = "Приложение"
+PICTURE = "picture"
+PAGES = "pages_of_wiki"
+STANDART_SIZE_PICTURE = 4
+BORDER_OF_PICTURE = 1.5
+SPEED_OF_REDUCING_PICTURE = 0.8
+DOT = "."
+FONT_SIZE_CODE = 10
+FONT_CODE = 'Consolas'
+
+M_STUDENT = "Студент"
+W_STUDENT = "Студента"
+M_W = "M/W"
+MAN = "M"
+MAN_OR_WOMAN = "manogirl"
+NUMBER = "number"
+CATHEDRA = "cathedra"
+DISCIPLINE = "discipline"
+THEME = "theme"
+GROUP = "group"
+NAME_OF_STUDENT = "student"
+TEACHER = "teacher"
+INIT_DATA = "init_data"
+CONTEXT_OF_EXPLANATION = "context_of_explanation"
+MIN_PAGES = "min_pages"
+DATE_START = "date_start"
+DATE_FINISH = "date_finish"
+DATE_DEFEND = "date_defend"
+ANNOTATION = "annotation"
+INTRODUCTION = "introduction"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -29,97 +78,87 @@ line_space_dict = {1: WD_LINE_SPACING.SINGLE,
                    0: WD_LINE_SPACING.EXACTLY}
 
 
-class dword():
+class Dword:
     def __init__(self):
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
-        self.name = 'generated_doc.docx'
-        self.downloadsettings()
-        # self.downloadwiki()
-        self.choosepathoftemplate()
-        self.maketitul()
+        self.name = LOCAL_REPO
+        self.download_settings()
+        self.choose_path_template()
+        self.make_title()
         self.doc = Document(self.name)
-        # self.addmaintext()
-        self.AddMainTextFromWiki_v2()
+        self.add_main_text_from_wiki()
         self.convert_format()
-        self.addfinal()
+        self.add_final_part()
         self.save(self.name)
-        pass
 
-    def addpagebreak(self):
+    def add_page_break(self):
         self.doc.add_page_break()
 
-    # def downloadwiki(self):
-    # self.content=json.load(open('mytestproject/wiki'))
+    def download_settings(self):
+        with open(SETTINGS_FILE) as file:
+            self.js_content = json.load(file)
 
-    def downloadsettings(self):
-        self.js = json.load(open('./settings.json'))
+    def choose_path_template(self):
+        self.path = PATH_TO_TEMPLATE
+        if (self.js_content[TYPE_OF_WORK] == COURSE_WORK):
+            self.path = os.path.join(self.path, COURSE_WORK)
+        elif (self.js_content[TYPE_OF_WORK] == LAB_WORK):
+            self.path += LAB_WORK
+        self.path += FILE_EXTENSION
 
-    def choosepathoftemplate(self):
-        self.path = 'templates/'
-        if (self.js['type'] == "KR"):
-            self.path += "KR"
-        elif (self.js['type'] == "LR"):
-            self.path += "LR"
-        self.path += ".docx"
-        pass
-
-    def w_h(self, width, height):
-        h = w = 4
+    def h_w(self, dimension):
+        height, width = dimension
+        h = w = STANDART_SIZE_PICTURE
         if height > width:
             h *= height / width
-            if h / w > 1.5:
-                while h / w > 1.3:
-                    h *= 0.8
+            if h / w > BORDER_OF_PICTURE:
+                while h / w > BORDER_OF_PICTURE:
+                    h *= SPEED_OF_REDUCING_PICTURE
         else:
             w *= width / height
-            if w / h > 1.5:
-                while w / h > 1.3:
-                    w *= 0.8
-        return (h, w)
+            if w / h > BORDER_OF_PICTURE:
+                while w / h > BORDER_OF_PICTURE:
+                    w *= SPEED_OF_REDUCING_PICTURE
+        return h, w
 
-    def convertpdf(self, docname):
+    @staticmethod
+    def convert_to_pdf(docname):
         try:
             subprocess.check_call(
                 ['/usr/bin/python3', '/usr/bin/unoconv', '-f', 'pdf', docname])
         except subprocess.CalledProcessError as e:
             print('CalledProcessError', e)
-        pass
 
-    def save(self, name='report.docx'):
+    def save(self, name=NAME_REPORT):
         self.doc.save(name)
-        pass
 
-    def addcode(self, file=""):
-        if file is "":
-            for filename in self.js['download']:
-                path = next(Path(os.getcwd()).rglob(filename))
-                code = 'not valid file'
-                try:
-                    f = open(str(path))
-                    if f is not None:
-                        code = f.read()
-                    f.close()
-                except Exception:
-                    print("no such file" + str(path))
-                self.addLine(filename, set_bold=True, align='left')
-                self.addLine(code, line_spacing=1, align='left', font_name='Consolas', font_size=10)
-        pass
+    def add_code(self):
+        for filename in self.js_content[DICT_FILENAMES]:
+            p = Path(os.getcwd()).rglob(filename)
+            for path in p:
+                code = NOT_VALID
+                with open(path) as file:
+                    if file is not None:
+                        code = file.read()
+                    else:
+                        print(NO_FILE_MESSAGE.format(path))
+
+                self.add_line(filename, set_bold=True, align=ALIGN_LEFT) 
+                self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
 
-
-    def AddMainTextFromWiki_v2(self):
-        pages = self.js['pages_of_wiki']
+    def add_main_text_from_wiki(self):
         firstpage = True
-        for filename in self.js['pages_of_wiki']:
+        for filename in self.js_content[PAGES]:
 
             if firstpage is False:
-                self.addpagebreak()
+                self.add_page_break()
             firstpage = False
-            #self.addpagebreak()
             path = next(Path(os.getcwd()).rglob(filename + '.md'))
-            f = open(str(path))
-            line = f.readlines()
+            #f = open(str(path))
+            with open(path) as f:
+                line = f.readlines()
             f.close()
             while '\n' in line:
                 line.remove('\n')
@@ -127,13 +166,9 @@ class dword():
             line = [str[:-1] for str in line]
 
             itr = iter(line)
-            ########################################
-            global cur_line
             cur_line = next(itr)
-            global need_break
             need_break = False
-            while (cur_line is not ""):
-                #nonlocal cur_line
+            while cur_line is not "":
                 if (re.match(r'\*\*', cur_line) is None and (re.match(r'`', cur_line) is None) and (
                         re.match(r'\*', cur_line) is None)):
                     mystr = ''
@@ -144,58 +179,46 @@ class dword():
                         try:
                             cur_line = next(itr)
                         except:
-                            self.addLine(mystr)
-                           # self.addpagebreak()
+                            self.add_line(mystr)
                             need_break = True
                             break
 
-                    self.addLine(mystr)
+                    self.add_line(mystr)
 
                 if need_break:
                     need_break = False
                     break
 
-                if (re.match(r'\*\*', cur_line) is not None):
-                   self.addLine(cur_line[2:-2], set_bold=True, align='left',keep_with_next=True)
-                elif (re.match(r'`', cur_line) is not None):
-
-                    self.addcode(cur_line)
-                elif (re.match(r'\**\*', cur_line) is not None):
-
-                    self.addLine('•' + cur_line[1:], align='left', keep_with_next=True)
-                elif (re.match(r'!\[\]',cur_line) is not None):
-                    self.addimagebyurl(cur_line[4:-1])
+                if re.match(r'\*\*', cur_line) is not None:
+                   self.add_line(cur_line[2:-2], set_bold=True, align=ALIGN_LEFT, keep_with_next=True)
+                elif re.match(r'\**\*', cur_line) is not None:
+                    self.add_line('•' + cur_line[1:], align=ALIGN_LEFT, keep_with_next=True)
+                elif re.match(r'!\[\]', cur_line) is not None:
+                    self.add_image_by_url(cur_line[4:-1])
                 try:
                     cur_line = next(itr)
                 except:
-                    #self.addpagebreak()
                     break
 
-        pass
+    def add_image_by_url(self, url):
+        req = requests.get(url)
+        filepath = os.path.join(os.getcwd(), PICTURE)
+        with open(filepath, 'wb') as file:
+            file.write(req.content)
+        self.add_picture(filepath)
 
-    def addimagebyurl(self,url):
-        r = requests.get(url)
-        filepath = os.path.join(os.getcwd()+'/'+'picture')
-        with open(filepath, 'wb') as f:
-            f.write(r.content)
-        self.addPicture(filepath)
-    pass
+    def add_final_part(self):
+        self.add_page_break()
+        self.add_line(ATTACHMENT, set_bold=True, align=ALIGN_CENTRE)
+        self.add_code()
 
-    def addfinal(self):
-        self.addpagebreak()
-        self.addLine('Приложение', set_bold=True, align='centre', style_name='Normal' + str(self.number_of_paragraph))
-        self.addcode()
-        pass
-
-    def addLine(self, line, space_after=0, set_bold=False, font_name='Times New Roman', keep_with_next=False,
-                font_size=14, space_before=0, line_spacing=1.5, align='justify', keep_together=True, style_name=""):
+    def add_line(self, line, space_after=STANDART_PLACE_AFTER, set_bold=False, font_name=STANDART_FONT, keep_with_next=False,
+                 font_size=STANDART_FONT_SIZE, space_before=STANDART_PLACE_BEFORE, line_spacing=STANDART_LINE_SPACING, align=ALIGN_JUSTIFY, keep_together=True):
         self.number_of_paragraph += 1
-        style_name = 'Normal' + str(self.number_of_paragraph)
+        style_name = STYLE.format(self.number_of_paragraph)
         paragraph = self.doc.add_paragraph(line)
         paragraph.style = self.doc.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
-        # style = self.doc.styles['Normal']
         font = paragraph.style.font
-        # font = paragraph.style.font
         font.name = font_name
         font.size = Pt(font_size)
         font.bold = bool(set_bold)
@@ -206,113 +229,51 @@ class dword():
         paragraph_format.keep_with_next = keep_with_next
         paragraph_format.line_spacing_rule = line_space_dict.get(line_spacing)
         paragraph_format.keep_together = keep_together
-        pass
 
     def convert_format(self):
-        p = self.doc
-        for paragraph in p.paragraphs:
+        for paragraph in self.doc.paragraphs:
             for run in paragraph.runs:
                 font = run.font
-                font.name = 'Times New Roman'
-                font.size = Pt(14)
-        pass
+                font.name = STANDART_FONT
+                font.size = Pt(STANDART_FONT_SIZE)
 
-    def addPicture(self, filename):
-        #path = next(Path(os.getcwd()).rglob(filename))
-        path = filename
-        p = self.doc.add_paragraph()
-        ##
-        p_format = p.paragraph_format
-        p_format.alignment = alignment_dict.get('centre')
-        ##
-        r = p.add_run()
-        im = Image.open(str(path))
-        (h, w) = im.size
-        (h, w) = self.w_h(w, h)
-        r.add_picture(str(path), width=Inches(h),
-                      height=Inches(w))  # тут произошла какая-то путаница-но так правильно(потом  разобраться)
-        self.addLine('Рисунок ' + str(self.num_of_pictures) + '.', align='centre', keep_together=True)
+    def add_picture(self, path):
+        paragraph = self.doc.add_paragraph()
+        p_format = paragraph.paragraph_format
+        p_format.alignment = alignment_dict.get(ALIGN_CENTRE)
+        time_word = paragraph.add_run()
+
+        im = Image.open(path)
+        h, w = self.h_w(im.size)
+        time_word.add_picture(path, width=Inches(h), height=Inches(w)) 
+        self.add_line(UNDER_PICTURE.format(self.num_of_pictures, DOT), align=ALIGN_CENTRE, keep_together=True)
         self.num_of_pictures += 1
 
-    def maketitul(self):
+    def make_title(self):
         doc = DocxTemplate(self.path)
-        if self.js['M/W'] == "M":
-            mw = "Студент"
+        if self.js_content[M_W] == MAN:
+            mw = M_STUDENT
         else:
-            mw = "Студентка"
+            mw = W_STUDENT
         content = {
-            'manorgirl': RichText(mw),
-            'number': RichText(self.js['number']),
-            'cathedra': RichText(self.js['cathedra']),
-            'discipline': RichText(self.js['discipline']),
-            'theme': RichText(self.js['theme']),
-            'group': RichText(self.js['group']),
-            'student': RichText(self.js['student']),
-            'teacher': RichText(self.js['teacher']),
-            'init_data': RichText(self.js['init_data']),
-            'context_of_explanation': RichText(self.js['context_of_explanation']),
-            'min_pages': RichText(self.js['min_pages']),
-            'date_start': RichText(self.js['date_start']),
-            'date_finish': RichText(self.js['date_finish']),
-            'date_defend': RichText(self.js['date_defend']),
-            'annotation': RichText(self.js['annotation']),
-            'introduction': RichText(self.js['introduction'])
+            MAN_OR_WOMAN: RichText(mw),
+            NUMBER: RichText(self.js_content[NUMBER]),
+            CATHEDRA: RichText(self.js_content[CATHEDRA]),
+            DISCIPLINE: RichText(self.js_content[DISCIPLINE]),
+            THEME: RichText(self.js_content[THEME]),
+            GROUP: RichText(self.js_content[GROUP]),
+            NAME_OF_STUDENT: RichText(self.js_content[NAME_OF_STUDENT]),
+            TEACHER: RichText(self.js_content[TEACHER]),
+            INIT_DATA: RichText(self.js_content[INIT_DATA]),
+            CONTEXT_OF_EXPLANATION: RichText(self.js_content[CONTEXT_OF_EXPLANATION]),
+            MIN_PAGES: RichText(self.js_content[MIN_PAGES]),
+            DATE_START: RichText(self.js_content[DATE_START]),
+            DATE_FINISH: RichText(self.js_content[DATE_FINISH]),
+            DATE_DEFEND: RichText(self.js_content[DATE_DEFEND]),
+            ANNOTATION: RichText(self.js_content[ANNOTATION]),
+            INTRODUCTION: RichText(self.js_content[INTRODUCTION])
 
         }
         doc.render(content)
         doc.save(self.name)
-        pass
-
-    def addmaintext(self):
-        p = self.content['content']
-        for x in p:
-            if (x['head'] is not ""):
-                self.addLine('\t' + x['head'], space_after=0, set_bold=True, keep_together=True, keep_with_next=True,
-                             style_name='Normal' + str(self.number_of_paragraph), align='left')
-            if (x['text'] is not ""):
-                self.addLine(self.form(x['text']), keep_together=True,
-                             style_name='Normal' + str(self.number_of_paragraph))
-            if (x['image'] is not ""):
-                self.addPicture(x['image'])
-
-    def form(self, text):  # NEED TO FIX
-        size = len(text)
-        l = list(text)
-        index = 0
-        l.append(' ')
-        if (l[0] is not '\t'):
-            l.insert(index, '\t')
-        index += 1
-        while index <= size:
-            # y = l[index]
-            if l[index] is '$' and l[index + 1] is '$':
-                l.pop(index)
-                l.pop(index)
-                size -= 2
-                while index < size and l[index] is not '$' and l[index + 1] is not '$':
-                    if l[index] is ' ':
-                        l.pop(index)
-                        l.insert(index, "\xa0")
-                    index += 1
-                l.pop(index + 1)
-                l.pop(index + 1)
-                size -= 2
-            if l[index] is ',' or l[index] is '.':
-                if l[index + 1] is not ' ':
-                    l.insert(index + 1, ' ')
-                    size += 1
-                    index += 1
-
-            if l[index] is ':' or l[index] is ';':
-                l.insert(index + 1, '\n')
-                index += 1
-                size += 1
-            index += 1
-        l.pop()
-        return ''.join(l)
-
-
-
-
-pass
 
