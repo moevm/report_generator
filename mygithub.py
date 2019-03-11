@@ -51,13 +51,13 @@ class Gengit:
     @staticmethod
     def get_comments():
         response = requests.get(API_GITHUB_COMMENTS,params=PARAM)
-        with open("test.txt", 'w') as file:
+        with open("test1.txt", 'w') as file:
             file.write(response.text)
-        with open("test.txt", 'r') as file:            
+        with open("test1.txt", 'r') as file:            
             js = json.load(file)
         i = 0
         list = []
         while i < len(js):
             list.append([js[i]["original_position"],js[i]["created_at"],js[i]["user"]["login"],js[i]["body"]])
-
+            i += 1
         return list
