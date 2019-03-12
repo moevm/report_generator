@@ -65,6 +65,7 @@ DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
 INTRODUCTION = "introduction"
+DISTANCE_NUMBER_CODE = " "
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -135,18 +136,21 @@ class Dword:
 
     def add_code(self):
         for filename in self.js_content[DICT_FILENAMES]:
-            p = Path(os.getcwd()).rglob(filename)
-            for path in p:
+            gen_path = Path(os.getcwd()).rglob(filename)
+            for path in gen_path:
                 code = NOT_VALID
+                j = 1
                 with open(path) as file:
                     if file is not None:
-                        code = file.read()
+                        code = file.readlines()
                     else:
                         print(NO_FILE_MESSAGE.format(path))
 
-                self.add_line(filename, set_bold=True, align=ALIGN_LEFT) 
-                self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
-
+                self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
+                for line in code:
+                    self.add_line(DISTANCE_NUMBER_CODE.join((str(j), line.strip('\n'))), line_spacing=1,
+                                  align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+                    j += 1
 
     def add_main_text_from_wiki(self):
         firstpage = True
@@ -156,7 +160,6 @@ class Dword:
                 self.add_page_break()
             firstpage = False
             path = next(Path(os.getcwd()).rglob(filename + '.md'))
-            #f = open(str(path))
             with open(path) as f:
                 line = f.readlines()
             f.close()
