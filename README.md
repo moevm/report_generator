@@ -9,11 +9,11 @@
 
 2. После необходимое сгенерировать папку:
 
-* `python3.6 -m venv <название папки>`
+* `python3.6 -m venv venv`
 
 3. И для активации виртуального окружения:
 
-* `source <название папки>/bin/activate` (для linux'a)
+* `source venv/bin/activate` (для linux'a)
 
 * `pip3 install -r requirements.txt`
 
