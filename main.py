@@ -16,13 +16,15 @@ ERROR_MESSAGE = "Невернные входные даннык!"
 INPUT_URL_MESSAGE = "url of repo(ssh): "
 INPUT_WIKI_URL_MESSAGE = "wiki repo(http): "
 INPUT_BRANCH_MESSAGE = "branch: "
-LEN_WORD_EXTENSION = 5  # .docx - 5 symbols
+LEN_WORD_EXTENSION = 5
 DELETE_WORD = False
 DELETED_PICTURE = "picture"
+FLAG_ARG = "-f"
+
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f')
+    parser.add_argument(FLAG_ARG)
     return parser
 
 
@@ -75,7 +77,7 @@ def main(type_of_input):
     delete_directories_and_files(git, git_wiki)
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     parser = create_parser()
     namespace = parser.parse_args()
 

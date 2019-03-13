@@ -19,10 +19,10 @@ LOCAL_REPO = "generated_doc.docx"
 SETTINGS_FILE = "settings.json"
 COURSE_WORK = "KR"
 LAB_WORK = "LR"
-PATH_TO_TEMPLATE = "templates/"
-FILE_EXTENSION = ".docx"
+PATH_TO_TEMPLATE = "templates/{}.docx"
 TYPE_OF_WORK = "type"
 NOT_VALID = "not valid file"
+MD_EXTENSION = ".md"
 DICT_FILENAMES = 'download'
 NO_FILE_MESSAGE = "No such file {}"
 STYLE = "NORMAL {}"
@@ -46,10 +46,10 @@ FONT_SIZE_CODE = 10
 FONT_CODE = 'Consolas'
 
 M_STUDENT = "Студент"
-W_STUDENT = "Студента"
+W_STUDENT = "Студентка"
 M_W = "M/W"
 MAN = "M"
-MAN_OR_WOMAN = "manogirl"
+MAN_OR_WOMAN = "manorgirl"
 NUMBER = "number"
 CATHEDRA = "cathedra"
 DISCIPLINE = "discipline"
@@ -65,6 +65,13 @@ DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
 INTRODUCTION = "introduction"
+
+ERROR_MESSAGE_UNOCONV = "Unoconv error: "
+UNOCONC_1ST = "/usr/bin/python3"
+UNOCONC_2ND = "/usr/bin/unoconv"
+UNOCONC_3RD = "-f"
+UNOCONC_4TH = "pdf"
+
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -100,12 +107,10 @@ class Dword:
             self.js_content = json.load(file)
 
     def choose_path_template(self):
-        self.path = PATH_TO_TEMPLATE
         if (self.js_content[TYPE_OF_WORK] == COURSE_WORK):
-            self.path = os.path.join(self.path, COURSE_WORK)
-        elif (self.js_content[TYPE_OF_WORK] == LAB_WORK):
-            self.path += LAB_WORK
-        self.path += FILE_EXTENSION
+            self.path = PATH_TO_TEMPLATE.format(COURSE_WORK)
+        if (self.js_content[TYPE_OF_WORK] == LAB_WORK):
+            self.path = PATH_TO_TEMPLATE.format(LAB_WORK)
 
     def h_w(self, dimension):
         height, width = dimension
@@ -126,9 +131,9 @@ class Dword:
     def convert_to_pdf(docname):
         try:
             subprocess.check_call(
-                ['/usr/bin/python3', '/usr/bin/unoconv', '-f', 'pdf', docname])
+                [UNOCONC_1ST, UNOCONC_2ND, UNOCONC_3RD, UNOCONC_4TH, docname])
         except subprocess.CalledProcessError as e:
-            print('CalledProcessError', e)
+            print(ERROR_MESSAGE_UNOCONV, e)
 
     def save(self, name=NAME_REPORT):
         self.doc.save(name)
@@ -212,8 +217,9 @@ class Dword:
         self.add_line(ATTACHMENT, set_bold=True, align=ALIGN_CENTRE)
         self.add_code()
 
-    def add_line(self, line, space_after=STANDART_PLACE_AFTER, set_bold=False, font_name=STANDART_FONT, keep_with_next=False,
-                 font_size=STANDART_FONT_SIZE, space_before=STANDART_PLACE_BEFORE, line_spacing=STANDART_LINE_SPACING, align=ALIGN_JUSTIFY, keep_together=True):
+    def add_line(self, line, space_after=STANDART_PLACE_AFTER, set_bold=False, font_name=STANDART_FONT,
+                 keep_with_next=False, font_size=STANDART_FONT_SIZE, space_before=STANDART_PLACE_BEFORE,
+                 line_spacing=STANDART_LINE_SPACING, align=ALIGN_JUSTIFY, keep_together=True):
         self.number_of_paragraph += 1
         style_name = STYLE.format(self.number_of_paragraph)
         paragraph = self.doc.add_paragraph(line)
