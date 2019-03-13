@@ -13,7 +13,10 @@
 
 3. И для активации виртуального окружения:
 
-* `source venv/bin/activate` (для linux'a)
+* Для явной активации: `source venv/bin/activate` (для linux'a)
+* Для неявной можно пропустить этот шаг.
+
+4. Установка зависимостей:
 
 * `pip3 install -r requirements.txt`
 
