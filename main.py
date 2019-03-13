@@ -52,6 +52,7 @@ def input_file(name):
 
 
 def main(type_of_input):
+    ALL_OK = True
     if type_of_input is FROM_CONSOLE:
         url, wiki_url, branch = input_cmd()
     else:
@@ -62,17 +63,20 @@ def main(type_of_input):
     if git.download_git() is False or git_wiki.download_git_wiki() is False:
         delete_directories_and_files(git, git_wiki)
         print(ERROR_MESSAGE)
+        ALL_OK = False
 
-    word = Dword()
-    path_doc = os.path.join(git.local_repo, TIME_REPORT)
-    word.save(path_doc)
-    if word.js_content[PDF]:
-        word.convert_to_pdf(docname=path_doc)
-        git.add(PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION]))
-    else:
-        git.add(TIME_REPORT)
-    git.push()
-    delete_directories_and_files(git, git_wiki)
+    if ALL_OK:
+        word = Dword()
+        path_doc = os.path.join(git.local_repo, TIME_REPORT)
+        word.save(path_doc)
+        if word.js_content[PDF]:
+            word.convert_to_pdf(docname=path_doc)
+            git.add(PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION]))
+        else:
+            git.add(TIME_REPORT)
+        git.push()
+        delete_directories_and_files(git, git_wiki)
+    
 
 
 if __name__ == "__main__" :
