@@ -66,7 +66,6 @@ DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
 INTRODUCTION = "introduction"
 DISTANCE_NUMBER_CODE = " "
-DISTANCE_BEFORE_NUMBER = "{}"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
