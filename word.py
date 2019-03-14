@@ -66,6 +66,7 @@ DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
 INTRODUCTION = "introduction"
 DISTANCE_NUMBER_CODE = " "
+DISTANCE_BEFORE_NUMBER = "{}"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -134,6 +135,12 @@ class Dword:
     def save(self, name=NAME_REPORT):
         self.doc.save(name)
 
+    def number_position(self, _number, code_size):
+        max_len = len(str(code_size))
+        number = str(_number)
+        len_number = len(number)
+        return "{0}{1}".format(DISTANCE_NUMBER_CODE * (max_len - len_number), number)
+
     def add_code(self):
         for filename in self.js_content[DICT_FILENAMES]:
             gen_path = Path(os.getcwd()).rglob(filename)
@@ -148,8 +155,8 @@ class Dword:
 
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
                 for line in code:
-                    self.add_line(DISTANCE_NUMBER_CODE.join((str(j), line.strip('\n'))), line_spacing=1,
-                                  align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+                    self.add_line(DISTANCE_NUMBER_CODE.join((self.number_position(j, len(code)), line.strip('\n'))),
+                    line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
                     j += 1
 
     def add_main_text_from_wiki(self):
