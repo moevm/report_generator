@@ -12,13 +12,14 @@ READY_WORD = "generated_doc.docx"
 FROM_CONSOLE = "cmd"
 PDF = "PDF"
 PDF_EXTENSION = "{}.pdf"
-ERROR_MESSAGE = "Невернные входные даннык!"
 INPUT_URL_MESSAGE = "url of repo(ssh): "
 INPUT_WIKI_URL_MESSAGE = "wiki repo(http): "
 INPUT_BRANCH_MESSAGE = "branch: "
-LEN_WORD_EXTENSION = 5  # .docx - 5 symbols
+VAR_CONTENT = 3
+LEN_WORD_EXTENSION = 5
 DELETE_WORD = False
 DELETED_PICTURE = "picture"
+
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -48,11 +49,11 @@ def input_file(name):
     with open(name) as file:
         content = file.readlines()
     content = [element.strip() for element in content]
-    return content[:3]
+    return content[:VAR_CONTENT]
 
 
 def main(type_of_input):
-    ALL_OK = True
+    all_ok = True
     if type_of_input is FROM_CONSOLE:
         url, wiki_url, branch = input_cmd()
     else:
@@ -62,10 +63,9 @@ def main(type_of_input):
 
     if git.download_git() is False or git_wiki.download_git_wiki() is False:
         delete_directories_and_files(git, git_wiki)
-        print(ERROR_MESSAGE)
-        ALL_OK = False
+        all_ok = False
 
-    if ALL_OK:
+    if all_ok:
         word = Dword()
         path_doc = os.path.join(git.local_repo, TIME_REPORT)
         word.save(path_doc)
@@ -76,10 +76,9 @@ def main(type_of_input):
             git.add(TIME_REPORT)
         git.push()
         delete_directories_and_files(git, git_wiki)
-    
 
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     parser = create_parser()
     namespace = parser.parse_args()
 

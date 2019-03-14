@@ -11,6 +11,8 @@ SIZE_OF_SSH_ADDRESS = 19
 COMMIT_MESSAGE = 'add report'
 ORIGIN = 'origin'
 STANDART_BRANCH = 'master'
+ERROR_WIKI = "Неверная ссылка на wiki-страничку!"
+ERROR_REPO = "Неверная ссылка на репозиторий или введенной ветки не существует!"
 
 
 class Gengit:
@@ -25,15 +27,18 @@ class Gengit:
     def download_git(self):
         try:
             self.repo = git.Repo.clone_from(self.url, self.local_repo)
+            self.repo.git.checkout(self.branch)
         except Exception:
+            print(ERROR_REPO)
             return False
-        self.repo.git.checkout(self.branch)
+
 
     def download_git_wiki(self):
         git_url = BEGIN_SSH.format(self.url[SIZE_OF_SSH_ADDRESS:])
         try:
             self.repo = git.Repo.clone_from(git_url, self.local_wiki)
         except Exception:
+            print(ERROR_WIKI)
             return False
 
     def add(self, filename):
