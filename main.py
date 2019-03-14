@@ -18,8 +18,8 @@ INPUT_BRANCH_MESSAGE = "branch: "
 LEN_WORD_EXTENSION = 5
 DELETE_WORD = False
 DELETED_PICTURE = "picture"
-VAR_CONTENT = 3
 
+VAR_CONTENT = 3
 
 def create_parser():
     parser = argparse.ArgumentParser()
