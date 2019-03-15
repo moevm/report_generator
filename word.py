@@ -72,6 +72,13 @@ UNOCONC_2ND = "/usr/bin/unoconv"
 UNOCONC_3RD = "-f"
 UNOCONC_4TH = "pdf"
 
+italic = False
+bold = False
+code = False
+propert = {0: italic, 1: bold, 2: code}
+ITALIC = 0
+BOLD = 1
+CODE = 2
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -152,59 +159,56 @@ class Dword:
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT) 
                 self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
+    def chane_bool(self, boolean):
+        if propert[boolean] is True:
+            propert[boolean] = False
+        else:
+            propert[boolean] = True
+
+    def add_symbol(self, paragraph, symbol):
+        tmp = paragraph.add_run(symbol)
+        tmp.font.italic = propert[ITALIC]
+        tmp.font.bold = propert[BOLD]
+        if propert[CODE]:
+            tmp.font.name = "Consolas"
+            tmp.font.size = Pt(10)
+            tmp.font.italic = True
+        else:
+            tmp.font.name = "Times New Roman"
+            tmp.font.size = Pt(14)
+
+    def parser(self, paragraph, text):
+        str_len = len(text)
+        i = 0
+        while i < str_len:
+            if text[i] == "*" and i + 1 < str_len and text[i + 1] == "*":  # проверка на жирный шрифт
+                self.chane_bool(BOLD)
+                i += 2
+                continue
+            elif text[i] == "*" and i + 1 < str_len and text[i + 1] == " " and not propert[ITALIC]:
+                self.add_symbol(paragraph, "•")  # проверка на список
+                i += 1
+                continue
+            elif text[i] == "_" or text[i] == "*":  # проверка на курсив
+                self.chane_bool(ITALIC)
+                i += 1
+                continue
+            elif text[i] == "`":
+                self.chane_bool(CODE)
+                i += 1
+                continue
+            if i < str_len:
+                self.add_symbol(paragraph, text[i])
+            i += 1
 
     def add_main_text_from_wiki(self):
-        firstpage = True
         for filename in self.js_content[PAGES]:
-
-            if firstpage is False:
-                self.add_page_break()
-            firstpage = False
-            path = next(Path(os.getcwd()).rglob(filename + '.md'))
-            #f = open(str(path))
-            with open(path) as f:
-                line = f.readlines()
-            f.close()
-            while '\n' in line:
-                line.remove('\n')
-
-            line = [str[:-1] for str in line]
-
-            itr = iter(line)
-            cur_line = next(itr)
-            need_break = False
-            while cur_line is not "":
-                if (re.match(r'\*\*', cur_line) is None and (re.match(r'`', cur_line) is None) and (
-                        re.match(r'\*', cur_line) is None)):
-                    mystr = ''
-                    while (re.match(r'\*\*', cur_line) is None and (re.match(r'`', cur_line) is None) and (
-                           re.match(r'\*', cur_line) is None) and cur_line is not "" and
-                           re.match(r'!\[\]', cur_line) is None):
-                        mystr +=' ' + cur_line
-                        try:
-                            cur_line = next(itr)
-                        except:
-                            self.add_line(mystr)
-                            need_break = True
-                            break
-
-                    self.add_line(mystr)
-
-                if need_break:
-                    need_break = False
-                    break
-
-                if re.match(r'\*\*', cur_line) is not None:
-                   self.add_line(cur_line[2:-2], set_bold=True, align=ALIGN_LEFT, keep_with_next=True)
-                elif re.match(r'\**\*', cur_line) is not None:
-                    self.add_line('•' + cur_line[1:], align=ALIGN_LEFT, keep_with_next=True)
-                elif re.match(r'!\[\]', cur_line) is not None:
-                    self.add_image_by_url(cur_line[4:-1])
-                try:
-                    cur_line = next(itr)
-                except:
-                    break
-
+            paragraph = self.doc.add_paragraph()
+            gen_path = Path(os.getcwd()).rglob("{0}{1}".format(filename, MD_EXTENSION))
+            for path in gen_path:
+                with open(path) as file:
+                    text = file.read()
+                    self.parser(paragraph, text)
     def add_image_by_url(self, url):
         req = requests.get(url)
         filepath = os.path.join(os.getcwd(), PICTURE)
