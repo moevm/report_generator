@@ -8,6 +8,9 @@ import requests
 from pathlib import Path
 from PIL import Image
 from docx import Document
+from docx.oxml.shared import OxmlElement
+from docx.opc.constants import RELATIONSHIP_TYPE
+from docx.oxml.shared import qn
 from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
@@ -31,6 +34,7 @@ STANDART_FONT_SIZE = 14
 STANDART_PLACE_BEFORE = 0
 STANDART_PLACE_AFTER = 0
 STANDART_LINE_SPACING = 1.5
+STANDART_FONT_QUOTE = "calibri"
 ALIGN_CENTRE = "centre"
 ALIGN_JUSTIFY = "justify"
 ALIGN_LEFT = "left"
@@ -72,13 +76,42 @@ UNOCONC_2ND = "/usr/bin/unoconv"
 UNOCONC_3RD = "-f"
 UNOCONC_4TH = "pdf"
 
+
+SET_HEAD = "h{}"
+LEFT_BRACKET = "["
+RIGHT_BRACKET = "]"
+RIGHT_BRACKET_V2 = ")"
+HASH = "#"
+CODE_SYMBOL = "`"
+QUOTE_SYMBOL = ">"
+LIST_SYMBOL = "•"
+BOLD_SYMBOL = "*"
+ITALIC_SYMBOL = ["*", "_"]
+EMPTY_PLACE = " "
+EMPTY_STRING = ""
+
+FORMAT = "format"
+SET_CODE = "code"
+FONT = "font"
+SIZE = "size"
+
 italic = False
 bold = False
 code = False
-propert = {0: italic, 1: bold, 2: code}
+header = False
+quote = False
+lvl_head = 0
+propert = {0: italic, 1: bold, 2: code, 3: header, 4: quote}
 ITALIC = 0
 BOLD = 1
 CODE = 2
+HEADER = 3
+QUOTE = 4
+
+W_HYPERLINK = "w:hyperlink"
+R_ID = "r:id"
+W_R = "w:r"
+W_RPR = "w:rPr"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -102,7 +135,7 @@ class Dword:
         self.make_title()
         self.doc = Document(self.name)
         self.add_main_text_from_wiki()
-        self.convert_format()
+        #self.convert_format()
         self.add_final_part()
         self.save(self.name)
 
@@ -159,46 +192,109 @@ class Dword:
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT) 
                 self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
-    def chane_bool(self, boolean):
+    def change_bool(self, boolean):
         if propert[boolean] is True:
             propert[boolean] = False
         else:
             propert[boolean] = True
 
-    def add_symbol(self, paragraph, symbol):
+    def add_symbol(self, paragraph, symbol, level_for_head=0):
         tmp = paragraph.add_run(symbol)
         tmp.font.italic = propert[ITALIC]
         tmp.font.bold = propert[BOLD]
         if propert[CODE]:
-            tmp.font.name = "Consolas"
-            tmp.font.size = Pt(10)
+            tmp.font.name = self.js_content[FORMAT][SET_CODE][FONT]
+            tmp.font.size = Pt(self.js_content[FORMAT][SET_CODE][SIZE])
             tmp.font.italic = True
+        elif propert[HEADER]:
+            level = SET_HEAD.format(level_for_head)
+            tmp.font.name = self.js_content[FORMAT][level][FONT]
+            tmp.font.size = Pt(self.js_content[FORMAT][level][SIZE])
+            tmp.font.bold = True
+            tmp.font.italic = False
         else:
-            tmp.font.name = "Times New Roman"
-            tmp.font.size = Pt(14)
+            tmp.font.name = STANDART_FONT
+            tmp.font.size = Pt(STANDART_FONT_SIZE)
+        if propert[QUOTE]:
+            tmp.font.name = STANDART_FONT_QUOTE
+            tmp.font.italic = True
 
-    def parser(self, paragraph, text):
+    def add_hyperlink(self, paragraph, url, text):
+        part = paragraph.part
+        r_id = part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+        hyperlink = OxmlElement(W_HYPERLINK)
+        hyperlink.set(qn(R_ID), r_id)
+        new_run = OxmlElement(W_R)
+        rPr = OxmlElement(W_RPR)
+        new_run.append(rPr)
+        new_run.text = text
+        hyperlink.append(new_run)
+        paragraph._p.append(hyperlink)
+
+    def create_hyper_link(self, paragraph, text, index):
+        start_size = index
+        alt_text = []
+        link = []
+        index += 1
+        need_text = True
+        while index < len(text) and text[index] != RIGHT_BRACKET_V2:
+            while index < len(text) and text[index] != RIGHT_BRACKET and need_text:
+                alt_text.append(text[index])
+                index += 1
+            if text[index] == RIGHT_BRACKET:
+                index += 2
+            need_text = False
+            if index < len(text):
+                link.append(text[index])
+            index += 1
+        self.add_hyperlink(paragraph, EMPTY_PLACE.join(link), EMPTY_STRING.join(alt_text))
+        return index - start_size
+
+    def level_head(self, text, index):
+        begin_index = index
+        while text[index] == HASH:
+            index += 1
+        return index - begin_index
+
+    def wiki_parser(self, paragraph, text):
         str_len = len(text)
         i = 0
+        lvl_head = 0
         while i < str_len:
-            if text[i] == "*" and i + 1 < str_len and text[i + 1] == "*":  # проверка на жирный шрифт
-                self.chane_bool(BOLD)
+            if text[i] == "\\":
                 i += 2
                 continue
-            elif text[i] == "*" and i + 1 < str_len and text[i + 1] == " " and not propert[ITALIC]:
-                self.add_symbol(paragraph, "•")  # проверка на список
+            elif text[i] == "\n":
+                lvl_head = 0
+                propert[HEADER] = False
+            elif text[i] == QUOTE_SYMBOL:
+                self.change_bool(QUOTE)
+                i += 1
+            elif text[i] == HASH:
+                lvl_head = self.level_head(text, i)
+                self.change_bool(HEADER)
+                i += lvl_head
+            elif text[i] == BOLD_SYMBOL and i + 1 < str_len and text[i + 1] == BOLD_SYMBOL:  # проверка на жирный шрифт
+                self.change_bool(BOLD)
+                i += 2
+                continue
+            elif text[i] == BOLD_SYMBOL and i + 1 < str_len and text[i + 1] == EMPTY_PLACE and not propert[ITALIC]:
+                self.add_symbol(paragraph, LIST_SYMBOL)  # проверка на список
                 i += 1
                 continue
-            elif text[i] == "_" or text[i] == "*":  # проверка на курсив
-                self.chane_bool(ITALIC)
+            elif text[i] in ITALIC_SYMBOL:
+                self.change_bool(ITALIC)
                 i += 1
                 continue
-            elif text[i] == "`":
-                self.chane_bool(CODE)
+            elif text[i] == CODE_SYMBOL:
+                self.change_bool(CODE)
                 i += 1
+                continue
+            elif text[i] == LEFT_BRACKET:
+                i += self.create_hyper_link(paragraph, text, i) + 1
                 continue
             if i < str_len:
-                self.add_symbol(paragraph, text[i])
+                self.add_symbol(paragraph, text[i], lvl_head)
             i += 1
 
     def add_main_text_from_wiki(self):
@@ -208,7 +304,8 @@ class Dword:
             for path in gen_path:
                 with open(path) as file:
                     text = file.read()
-                    self.parser(paragraph, text)
+                    self.wiki_parser(paragraph, text)
+
     def add_image_by_url(self, url):
         req = requests.get(url)
         filepath = os.path.join(os.getcwd(), PICTURE)
