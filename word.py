@@ -213,6 +213,7 @@ class Dword:
             level = SET_HEAD.format(level_for_head)
             tmp.font.name = self.js_content[FORMAT][level][FONT]
             tmp.font.size = Pt(self.js_content[FORMAT][level][SIZE])
+            tmp.font.bold = True
         elif property_font[QUOTE]:
             tmp.font.italic = True
             tmp.font.name = STANDART_FONT_QUOTE
