@@ -86,6 +86,7 @@ CODE_SYMBOL = "`"
 QUOTE_SYMBOL = ">"
 LIST_SYMBOL = "•"
 BOLD_SYMBOL = "*"
+EXCLAMATION_MARK = "!"
 ITALIC_SYMBOL = ["*", "_"]
 EMPTY_PLACE = " "
 EMPTY_STRING = ""
@@ -101,7 +102,7 @@ code = False
 header = False
 quote = False
 lvl_head = 0
-propert = {0: italic, 1: bold, 2: code, 3: header, 4: quote}
+property_font = {0: italic, 1: bold, 2: code, 3: header, 4: quote}
 ITALIC = 0
 BOLD = 1
 CODE = 2
@@ -135,7 +136,6 @@ class Dword:
         self.make_title()
         self.doc = Document(self.name)
         self.add_main_text_from_wiki()
-        #self.convert_format()
         self.add_final_part()
         self.save(self.name)
 
@@ -192,32 +192,30 @@ class Dword:
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT) 
                 self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
-    def change_bool(self, boolean):
-        if propert[boolean] is True:
-            propert[boolean] = False
+    def change_bool_property(self, boolean):
+        if property_font[boolean] is True:
+            property_font[boolean] = False
         else:
-            propert[boolean] = True
+            property_font[boolean] = True
 
     def add_symbol(self, paragraph, symbol, level_for_head=0):
         tmp = paragraph.add_run(symbol)
-        tmp.font.italic = propert[ITALIC]
-        tmp.font.bold = propert[BOLD]
-        if propert[CODE]:
+        tmp.font.italic = property_font[ITALIC]
+        tmp.font.bold = property_font[BOLD]
+        tmp.font.name = STANDART_FONT
+        tmp.font.size = Pt(STANDART_FONT_SIZE)
+        if property_font[CODE]:
             tmp.font.name = self.js_content[FORMAT][SET_CODE][FONT]
             tmp.font.size = Pt(self.js_content[FORMAT][SET_CODE][SIZE])
             tmp.font.italic = True
-        elif propert[HEADER]:
+            tmp.font.bold = False
+        elif property_font[HEADER]:
             level = SET_HEAD.format(level_for_head)
             tmp.font.name = self.js_content[FORMAT][level][FONT]
             tmp.font.size = Pt(self.js_content[FORMAT][level][SIZE])
-            tmp.font.bold = True
-            tmp.font.italic = False
-        else:
-            tmp.font.name = STANDART_FONT
-            tmp.font.size = Pt(STANDART_FONT_SIZE)
-        if propert[QUOTE]:
-            tmp.font.name = STANDART_FONT_QUOTE
+        elif property_font[QUOTE]:
             tmp.font.italic = True
+            tmp.font.name = STANDART_FONT_QUOTE
 
     def add_hyperlink(self, paragraph, url, text):
         part = paragraph.part
@@ -231,7 +229,7 @@ class Dword:
         hyperlink.append(new_run)
         paragraph._p.append(hyperlink)
 
-    def create_hyper_link(self, paragraph, text, index):
+    def select_text_and_link(self, text, index):
         start_size = index
         alt_text = []
         link = []
@@ -247,8 +245,7 @@ class Dword:
             if index < len(text):
                 link.append(text[index])
             index += 1
-        self.add_hyperlink(paragraph, EMPTY_PLACE.join(link), EMPTY_STRING.join(alt_text))
-        return index - start_size
+        return index - start_size, EMPTY_STRING.join(link), EMPTY_STRING.join(alt_text)
 
     def level_head(self, text, index):
         begin_index = index
@@ -259,47 +256,66 @@ class Dword:
     def wiki_parser(self, paragraph, text):
         str_len = len(text)
         i = 0
-        lvl_head = 0
+        level_for_head = 0
         while i < str_len:
             if text[i] == "\\":
+                self.add_symbol(paragraph, text[i + 1], level_for_head)
                 i += 2
                 continue
             elif text[i] == "\n":
-                lvl_head = 0
-                propert[HEADER] = False
+                level_for_head = 0
+                property_font[HEADER] = False
             elif text[i] == QUOTE_SYMBOL:
-                self.change_bool(QUOTE)
+                self.change_bool_property(QUOTE)
                 i += 1
             elif text[i] == HASH:
-                lvl_head = self.level_head(text, i)
-                self.change_bool(HEADER)
-                i += lvl_head
+                level_for_head = self.level_head(text, i)
+                paragraph = self.new_paragraph()
+                self.change_bool_property(HEADER)
+                i += level_for_head
             elif text[i] == BOLD_SYMBOL and i + 1 < str_len and text[i + 1] == BOLD_SYMBOL:  # проверка на жирный шрифт
-                self.change_bool(BOLD)
+                self.change_bool_property(BOLD)
                 i += 2
                 continue
-            elif text[i] == BOLD_SYMBOL and i + 1 < str_len and text[i + 1] == EMPTY_PLACE and not propert[ITALIC]:
+            elif text[i] == BOLD_SYMBOL and i + 1 < str_len and text[i + 1] == EMPTY_PLACE and not property_font[ITALIC]:
                 self.add_symbol(paragraph, LIST_SYMBOL)  # проверка на список
                 i += 1
                 continue
-            elif text[i] in ITALIC_SYMBOL:
-                self.change_bool(ITALIC)
+            elif text[i] in ITALIC_SYMBOL:  # проверка на курсив
+                self.change_bool_property(ITALIC)
                 i += 1
                 continue
-            elif text[i] == CODE_SYMBOL:
-                self.change_bool(CODE)
+            elif text[i] == CODE_SYMBOL:  # проверка на блок кода
+                self.change_bool_property(CODE)
                 i += 1
                 continue
-            elif text[i] == LEFT_BRACKET:
-                i += self.create_hyper_link(paragraph, text, i) + 1
+            elif text[i] == LEFT_BRACKET:  # проверка на гиперссылку
+                offset, link, alt_text = self.select_text_and_link(text, i)
+                self.add_hyperlink(paragraph, link, alt_text)
+                i += offset + 1
+                continue
+            elif text[i] == EXCLAMATION_MARK and i + 1 < str_len and text[i + 1] == LEFT_BRACKET:  # проверка на изображение
+                offset, link, alt_text = self.select_text_and_link(text, i)
+                i += offset + 2
+                self.add_image_by_url(link)
+                paragraph = self.new_paragraph()
                 continue
             if i < str_len:
-                self.add_symbol(paragraph, text[i], lvl_head)
+                self.add_symbol(paragraph, text[i], level_for_head)
             i += 1
+
+    def new_paragraph(self, align=ALIGN_LEFT, line_space=STANDART_LINE_SPACING):
+        paragraph = self.doc.add_paragraph()
+        paragraph_format = paragraph.paragraph_format
+        paragraph_format.alignment = alignment_dict.get(align)
+        paragraph_format.keep_with_next = True
+        paragraph_format.line_spacing_rule = line_space_dict.get(line_space)
+        paragraph_format.keep_together = True
+        return paragraph
 
     def add_main_text_from_wiki(self):
         for filename in self.js_content[PAGES]:
-            paragraph = self.doc.add_paragraph()
+            paragraph = self.new_paragraph()
             gen_path = Path(os.getcwd()).rglob("{0}{1}".format(filename, MD_EXTENSION))
             for path in gen_path:
                 with open(path) as file:
