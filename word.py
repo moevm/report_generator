@@ -90,6 +90,7 @@ EXCLAMATION_MARK = "!"
 ITALIC_SYMBOL = ["*", "_"]
 EMPTY_PLACE = " "
 EMPTY_STRING = ""
+DASH = "-"
 
 FORMAT = "format"
 SET_CODE = "code"
@@ -317,7 +318,7 @@ class Dword:
     def add_main_text_from_wiki(self):
         for filename in self.js_content[PAGES]:
             paragraph = self.new_paragraph()
-            gen_path = Path(os.getcwd()).rglob("{0}{1}".format(filename, MD_EXTENSION))
+            gen_path = Path(os.getcwd()).rglob("{0}{1}".format(filename.replace(EMPTY_PLACE, DASH), MD_EXTENSION))
             for path in gen_path:
                 with open(path) as file:
                     text = file.read()
