@@ -1,3 +1,4 @@
+#!./venv/bin/python3.6
 from tkinter import *
 from tkinter.messagebox import *
 import main
