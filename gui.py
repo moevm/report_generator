@@ -1,6 +1,4 @@
 #!./venv/bin/python3.6
-from multiprocessing import process
-#from threading import Thread
 import threading
 from tkinter import Tk
 from tkinter import Button, Label, Entry, Menu
@@ -25,7 +23,6 @@ MAIN_BUTTON = "Запуск"
 INFORMATION_TEXT = '''
 some information
 '''
-DELAY = 100
 
 
 class Model(threading.Thread):
