@@ -1,7 +1,9 @@
 #!./venv/bin/python3.6
-from tkinter import *
-from tkinter.messagebox import *
-import main
+from tkinter import Tk
+from tkinter import Button, Label, Entry, Menu
+from tkinter import EW, E
+from tkinter.messagebox import showinfo
+from main import main
 
 GIT_FILE = "git_file"
 TITLE = "REPORT GENERATOR"
@@ -46,16 +48,16 @@ class Application:
         self.branch_entry.grid(row=2, column=1)
 
         button = Button(self.root, text=MAIN_BUTTON, font=BIG_BUTTON, command=self.start_git)
-        button.grid(row=4, column=1, sticky="ew")
+        button.grid(row=4, column=1, sticky=EW)
 
     def start_git(self):
         with open(GIT_FILE, "w") as file:
-            file.write("{0}\n{1}\n{2}".format(
-                str(self.ssh_entry.get()),
-                str(self.wiki_entry.get()),
-                str(self.branch_entry.get())
-           ))
-        main.main(GIT_FILE)
+            file.write("{}\n{}\n{}".format(
+                self.ssh_entry.get(),
+                self.wiki_entry.get(),
+                self.branch_entry.get()
+             ))
+        main(GIT_FILE)
 
     def create_menu(self):
         main_menu = Menu(self.root)
