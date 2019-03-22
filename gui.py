@@ -1,4 +1,7 @@
 #!./venv/bin/python3.6
+from multiprocessing import process
+#from threading import Thread
+import threading
 from tkinter import Tk
 from tkinter import Button, Label, Entry, Menu
 from tkinter import EW, E
@@ -22,6 +25,12 @@ MAIN_BUTTON = "Запуск"
 INFORMATION_TEXT = '''
 some information
 '''
+DELAY = 100
+
+
+class Model(threading.Thread):
+    def run(self):
+        main(GIT_FILE)
 
 
 class Application:
@@ -57,7 +66,8 @@ class Application:
                 self.wiki_entry.get(),
                 self.branch_entry.get()
              ))
-        main(GIT_FILE)
+        model = Model()
+        model.start()
 
     def create_menu(self):
         main_menu = Menu(self.root)
