@@ -138,25 +138,24 @@ class Dword:
         max_len = len(str(code_size))
         number = str(_number)
         len_number = len(number)
-        return "{0}{1}".format(DISTANCE_NUMBER_CODE * (max_len - len_number), number)
+        return "{}{}".format(DISTANCE_NUMBER_CODE * (max_len - len_number), number)
 
     def add_code(self):
         for filename in self.js_content[DICT_FILENAMES]:
             gen_path = Path(os.getcwd()).rglob(filename)
             for path in gen_path:
                 code = NOT_VALID
-                j = 1
-                with open(path) as file:
-                    if file is not None:
+                try:
+                    with open(path) as file:
                         code = file.readlines()
-                    else:
-                        print(NO_FILE_MESSAGE.format(path))
+                except EnvironmentError:
+                    print(NO_FILE_MESSAGE.format(path))
 
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
-                for line in code:
-                    self.add_line(DISTANCE_NUMBER_CODE.join((self.number_position(j, len(code)), line.strip('\n'))),
-                    line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
-                    j += 1
+                for number, line in enumerate(code, 1):
+                    self.add_line(DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
+                        line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+
 
     def add_main_text_from_wiki(self):
         firstpage = True
