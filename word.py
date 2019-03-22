@@ -145,12 +145,8 @@ class Dword:
             gen_path = Path(os.getcwd()).rglob(filename)
             for path in gen_path:
                 code = NOT_VALID
-                try:
-                    with open(path) as file:
+                with open(path) as file:
                         code = file.readlines()
-                except EnvironmentError:
-                    print(NO_FILE_MESSAGE.format(path))
-
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
                 for number, line in enumerate(code, 1):
                     self.add_line(DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
