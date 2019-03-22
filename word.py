@@ -45,6 +45,7 @@ PAGES = "pages_of_wiki"
 STANDART_SIZE_PICTURE = 4
 BORDER_OF_PICTURE = 1.5
 SPEED_OF_REDUCING_PICTURE = 0.8
+MAX_HEAD = 6
 DOT = "."
 FONT_SIZE_CODE = 10
 FONT_CODE = 'Consolas'
@@ -193,26 +194,22 @@ class Dword:
                 self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
     def change_bool_property(self, boolean):
-        if property_font[boolean] is True:
+        if property_font[boolean]:
             property_font[boolean] = False
         else:
             property_font[boolean] = True
 
     def add_symbol(self, paragraph, symbol, level_for_head=0):
         tmp = paragraph.add_run(symbol)
-        tmp.font.italic = property_font[ITALIC]
-        tmp.font.bold = property_font[BOLD]
-        tmp.font.name = STANDART_FONT
-        tmp.font.size = Pt(STANDART_FONT_SIZE)
+        tmp.font.italic, tmp.font.bold = property_font[ITALIC], property_font[BOLD]
+        tmp.font.name, tmp.font.size = STANDART_FONT, Pt(STANDART_FONT_SIZE)
         if property_font[CODE]:
             tmp.font.name = self.js_content[FORMAT][SET_CODE][FONT]
             tmp.font.size = Pt(self.js_content[FORMAT][SET_CODE][SIZE])
-            tmp.font.italic = True
-            tmp.font.bold = False
+            tmp.font.italic, tmp.font.bold = True, False
         elif property_font[HEADER]:
             level = SET_HEAD.format(level_for_head)
-            tmp.font.name = self.js_content[FORMAT][level][FONT]
-            tmp.font.size = Pt(self.js_content[FORMAT][level][SIZE])
+            tmp.font.name, tmp.font.size = self.js_content[FORMAT][level][FONT], Pt(self.js_content[FORMAT][level][SIZE])
             tmp.font.bold = True
         elif property_font[QUOTE]:
             tmp.font.italic = True
@@ -249,10 +246,7 @@ class Dword:
         return index - start_size, EMPTY_STRING.join(link), EMPTY_STRING.join(alt_text)
 
     def level_head(self, text, index):
-        begin_index = index
-        while text[index] == HASH:
-            index += 1
-        return index - begin_index
+        return text.rindex(HASH, index, index + MAX_HEAD) - index + 1
 
     def wiki_parser(self, paragraph, text):
         str_len = len(text)
