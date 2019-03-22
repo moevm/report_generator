@@ -16,7 +16,7 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
 
-
+GIT_REPO = "wiki_dir"
 NAME_REPORT = "report.docx"
 LOCAL_REPO = "generated_doc.docx"
 SETTINGS_FILE = "settings.json"
@@ -91,6 +91,7 @@ EXCLAMATION_MARK = "!"
 ITALIC_SYMBOL = ["*", "_"]
 EMPTY_PLACE = " "
 EMPTY_STRING = ""
+DASH = "-"
 
 FORMAT = "format"
 SET_CODE = "code"
@@ -311,7 +312,7 @@ class Dword:
     def add_main_text_from_wiki(self):
         for filename in self.js_content[PAGES]:
             paragraph = self.new_paragraph()
-            gen_path = Path(os.getcwd()).rglob("{0}{1}".format(filename, MD_EXTENSION))
+            gen_path = Path(os.path.join(os.getcwd(), GIT_REPO)).rglob("{0}{1}".format(filename.replace(EMPTY_PLACE, DASH), MD_EXTENSION))
             for path in gen_path:
                 with open(path) as file:
                     text = file.read()
