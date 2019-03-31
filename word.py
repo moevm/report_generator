@@ -15,6 +15,7 @@ from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
+from markdown2 import Markdown
 
 GIT_REPO = "wiki_dir"
 NAME_REPORT = "report.docx"
@@ -126,6 +127,24 @@ line_space_dict = {1: WD_LINE_SPACING.SINGLE,
                    2: WD_LINE_SPACING.DOUBLE,
                    1.5: WD_LINE_SPACING.ONE_POINT_FIVE,
                    0: WD_LINE_SPACING.EXACTLY}
+
+global_len = 0
+index = 0
+html = ""
+TAG_CODE = "<code>"
+TAG_STRONG = "<strong>"
+TAG_EM = "<em>"
+TAG_LI = "<li>"
+TAG_P = "<p>"
+CLOSE_TAG_CODE = "</code>"
+
+CLOSE_TAGS = {"": "-",
+              TAG_CODE: "</code>",
+              TAG_STRONG: "</strong>",
+              TAG_EM: "</em>",
+              TAG_LI: "</li>",
+              TAG_P: "</p>"
+             }
 
 
 class Dword:
@@ -249,56 +268,65 @@ class Dword:
     def level_head(self, text, index):
         return text.rindex(HASH, index, index + MAX_HEAD) - index + 1
 
-    def wiki_parser(self, paragraph, text):
-        str_len = len(text)
-        i = 0
-        level_for_head = 0
-        while i < str_len:
-            if text[i] == "\\":
-                self.add_symbol(paragraph, text[i + 1], level_for_head)
-                i += 2
-                continue
-            elif text[i] == "\n":
-                level_for_head = 0
-                property_font[HEADER] = False
-            elif text[i] == QUOTE_SYMBOL:
-                self.change_bool_property(QUOTE)
-                i += 1
-            elif text[i] == HASH:
-                level_for_head = self.level_head(text, i)
-                paragraph = self.new_paragraph()
-                self.change_bool_property(HEADER)
-                i += level_for_head
-            elif text[i] == BOLD_SYMBOL and i + 1 < str_len and text[i + 1] == BOLD_SYMBOL:  # проверка на жирный шрифт
-                self.change_bool_property(BOLD)
-                i += 2
-                continue
-            elif text[i] == BOLD_SYMBOL and i + 1 < str_len and text[i + 1] == EMPTY_PLACE and not property_font[ITALIC]:
-                self.add_symbol(paragraph, LIST_SYMBOL)  # проверка на список
-                i += 1
-                continue
-            elif text[i] in ITALIC_SYMBOL:  # проверка на курсив
-                self.change_bool_property(ITALIC)
-                i += 1
-                continue
-            elif text[i] == CODE_SYMBOL:  # проверка на блок кода
-                self.change_bool_property(CODE)
-                i += 1
-                continue
-            elif text[i] == LEFT_BRACKET:  # проверка на гиперссылку
-                offset, link, alt_text = self.select_text_and_link(text, i)
-                self.add_hyperlink(paragraph, link, alt_text)
-                i += offset + 1
-                continue
-            elif text[i] == EXCLAMATION_MARK and i + 1 < str_len and text[i + 1] == LEFT_BRACKET:  # проверка на изображение
-                offset, link, alt_text = self.select_text_and_link(text, i)
-                i += offset + 2
-                self.add_image_by_url(link)
-                paragraph = self.new_paragraph()
-                continue
-            if i < str_len:
-                self.add_symbol(paragraph, text[i], level_for_head)
-            i += 1
+    def is_tag_code(self, text):
+        return TAG_CODE == self.return_tag(text)
+
+    def is_tag_strong(self, text):
+        return TAG_STRONG == self.return_tag(text)
+
+    def is_tag_em(self, text):
+        return TAG_EM == self.return_tag(text)
+
+    def is_close_tag(self, text, tag):
+        return self.return_tag(text) == CLOSE_TAGS[tag]
+
+    def is_tag_p(self, text):
+        return TAG_P == self.return_tag(text)
+
+    def return_len_tag(self, text):
+        return len(self.return_tag(text))
+
+    def return_tag(self, text):
+        try:
+            return text[:text.index(">") + 1]
+        except Exception:
+            return "!"
+
+    def html_to_docx(self, paragraph, tag):
+        global index   # , index):
+        print("\nНовый тег - " + tag)
+        index += len(tag)
+        if len(html) is 0:
+            return
+        while index < global_len:
+            if html[index] == "<":
+                # выход из рекурсии
+                if self.is_close_tag(html[index:], tag):  # выход из рекурсии когда мы встречаем закрывающий тег
+                    print("\nЗакрываю тег - " + self.return_tag(html[index:]) + " length: " + str(self.return_len_tag(html[index:])))
+
+                    index += self.return_len_tag(html[index:])
+                    return
+                # рекурсия для параграфа
+                if self.is_tag_p(html[index:]):
+                    self.html_to_docx(paragraph, self.return_tag(html[index:]))
+                # рекурсия для участка кода
+                if self.is_tag_code(html[index:]):
+                    self.html_to_docx(paragraph, self.return_tag(html[index:]))
+                # рекурсия для жирного шрифта
+                if self.is_tag_strong(html[index:]):
+                    self.html_to_docx(paragraph, self.return_tag(html[index:]))
+                    continue
+                # рекурсия для курсива
+                if self.is_tag_em(html[index:]):
+                    self.html_to_docx(paragraph, self.return_tag(html[index:]))
+                    continue
+
+            if index < global_len:
+                print(html[index], end="")
+                index += 1
+            else:
+                break
+        print("exit")
 
     def new_paragraph(self, align=ALIGN_LEFT, line_space=STANDART_LINE_SPACING):
         paragraph = self.doc.add_paragraph()
@@ -316,7 +344,14 @@ class Dword:
             for path in gen_path:
                 with open(path) as file:
                     text = file.read()
-                    self.wiki_parser(paragraph, text)
+                    # переход markdown->html
+                    markdowner = Markdown(extras=['cuddled-lists', "fenced-code-blocks"])
+                    global html
+                    global global_len
+                    #global index
+                    html = markdowner.convert(text)
+                    global_len = len(html)
+                    self.html_to_docx(paragraph, "")#, index)
 
     def add_image_by_url(self, url):
         req = requests.get(url)
