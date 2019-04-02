@@ -4,22 +4,22 @@ import os
 import json
 import re
 import subprocess
-import requests
+import itertools
+from docx import Document
+import mistune
 from pathlib import Path
 from PIL import Image
-from docx import Document
-from docx.oxml.shared import OxmlElement
-from docx.opc.constants import RELATIONSHIP_TYPE
-from docx.oxml.shared import qn
 from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
-from markdown2 import Markdown
 
+document = None
 GIT_REPO = "wiki_dir"
+PATH_TO_WIKI = "{}/{}.md"
 NAME_REPORT = "report.docx"
 LOCAL_REPO = "generated_doc.docx"
+TEMPLATE = "template"
 SETTINGS_FILE = "settings.json"
 COURSE_WORK = "KR"
 LAB_WORK = "LR"
@@ -78,44 +78,26 @@ UNOCONC_2ND = "/usr/bin/unoconv"
 UNOCONC_3RD = "-f"
 UNOCONC_4TH = "pdf"
 
+NAME_STYLE = "Mystyle"
+SPAN_TEXT = "p.add_run(\"{}\",style=\'{}\')\n"
+SPAN_EMPHASIS = "{}.italic = True\n"
+SPAN_DOUBLE_EMPHASIS = "{}.bold = True\n"
+SPAN_CODE = "p = document.add_paragraph()\np.add_run(\"{}\")\np.style = 'BasicUserQuote'\np.add_run().add_break()\n"
+SPAN_LINK = "{} ({})"
+SPAN_HRULE = "document.add_page_break()\n"
 
-SET_HEAD = "h{}"
-LEFT_BRACKET = "["
-RIGHT_BRACKET = "]"
-RIGHT_BRACKET_V2 = ")"
-HASH = "#"
-CODE_SYMBOL = "`"
-QUOTE_SYMBOL = ">"
-LIST_SYMBOL = "•"
-BOLD_SYMBOL = "*"
-EXCLAMATION_MARK = "!"
-ITALIC_SYMBOL = ["*", "_"]
-EMPTY_PLACE = " "
-EMPTY_STRING = ""
-DASH = "-"
+BLOCK = "block"
+BLOCK_MATH = 'block_math'
+TOKEN_TYPE = "type"
+TOKEN_TEXT = "text"
 
-FORMAT = "format"
-SET_CODE = "code"
-FONT = "font"
-SIZE = "size"
-
-italic = False
-bold = False
-code = False
-header = False
-quote = False
-lvl_head = 0
-property_font = {0: italic, 1: bold, 2: code, 3: header, 4: quote}
-ITALIC = 0
-BOLD = 1
-CODE = 2
-HEADER = 3
-QUOTE = 4
-
-W_HYPERLINK = "w:hyperlink"
-R_ID = "r:id"
-W_R = "w:r"
-W_RPR = "w:rPr"
+LIST_ITEM = "p = document.add_paragraph('', style = 'BasicUserList')"
+LIST = "{}\np.add_run().add_break()\n"
+HEADER = "p = document.add_heading('', {})\n{}"
+ADD_PICTURE = "add_picture"
+END_STR = ':")\n'
+RUN_AND_BREAK = 'p.add_run().add_break()'
+ADD_PARAGRAPH = "p = document.add_paragraph()"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -128,280 +110,135 @@ line_space_dict = {1: WD_LINE_SPACING.SINGLE,
                    1.5: WD_LINE_SPACING.ONE_POINT_FIVE,
                    0: WD_LINE_SPACING.EXACTLY}
 
-global_len = 0
-index = 0
-html = ""
-TAG_CODE = "<code>"
-TAG_STRONG = "<strong>"
-TAG_EM = "<em>"
-TAG_LI = "<li>"
-TAG_P = "<p>"
-CLOSE_TAG_CODE = "</code>"
 
-CLOSE_TAGS = {"": "-",
-              TAG_CODE: "</code>",
-              TAG_STRONG: "</strong>",
-              TAG_EM: "</em>",
-              TAG_LI: "</li>",
-              TAG_P: "</p>"
-             }
+class MathBlockGrammar(mistune.BlockGrammar):
+    block_math = re.compile(r"^\$\$(.*?)\$\$", re.DOTALL)
+
+
+class MathBlockLexer(mistune.BlockLexer):
+    default_rules = [BLOCK_MATH] + mistune.BlockLexer.default_rules
+
+    def __init__(self, rules=None, **kwargs):
+        if rules is None:
+            rules = MathBlockGrammar()
+        super(MathBlockLexer, self).__init__(rules, **kwargs)
+
+    def parse_block_math(self, m):
+        self.tokens.append({TOKEN_TYPE: BLOCK_MATH, TOKEN_TEXT: m.group(1)})
+
+
+class MarkdownWithMath(mistune.Markdown):
+    def __init__(self, renderer, **kwargs):
+        kwargs[BLOCK] = MathBlockLexer
+        super(MarkdownWithMath, self).__init__(renderer, **kwargs)
+
+    def output_block_math(self):
+        return self.renderer.block_math(self.token[TOKEN_TEXT])
+
+
+class PythonDocxRenderer(mistune.Renderer):
+    def __init__(self, **kwds):
+        super(PythonDocxRenderer, self).__init__(**kwds)
+        self.table_memory = []
+        self.img_counter = 0
+
+    def header(self, text, level, raw):
+        return HEADER.format(level - 1, text)
+
+    def paragraph(self, text):
+        if ADD_PICTURE in text:
+            return text
+        add_break = '' if text.endswith(END_STR) else RUN_AND_BREAK
+        return "{}{}".format('\n'.join((ADD_PARAGRAPH, text, add_break)), '\n')
+
+    def list(self, body, ordered):
+        return LIST.format(body)
+
+    def list_item(self, text):
+        return '\n'.join((LIST_ITEM, text))
+
+    def table(self, header, body):
+        number_cols = header.count('\n') - 2
+        number_rows = int(len(self.table_memory) / number_cols)
+        cells = ["table.rows[%d].cells[%d].paragraphs[0]%s\n" % (i, j, self.table_memory.pop(0)[1:])
+                 for i, j in itertools.product(range(number_rows), range(number_cols))]
+        return '\n'.join(["table = document.add_table(rows=%d, cols=%d, style = 'BasicUserTable')" % (number_rows,
+                                                                                                      number_cols)] +
+                         cells) + 'document.add_paragraph().add_run().add_break()\n'
+
+    def table_cell(self, content, **flags):
+        self.table_memory.append(content)
+        return content
+
+    # SPAN LEVEL
+    def text(self, text):
+        return SPAN_TEXT.format(text, NAME_STYLE)
+
+    def emphasis(self, text):
+        return SPAN_EMPHASIS.format(text[:-1])
+
+    def double_emphasis(self, text):
+        return SPAN_DOUBLE_EMPHASIS.format(text[:-1])
+
+    def block_code(self, code, language):
+        code = code.replace('\n', '\\n')
+        return SPAN_CODE.format(code)
+
+    def link(self, link, title, content):
+        return SPAN_LINK.format(content, link)
+
+    def image(self, src, title, alt_text):
+        return '\n'.join((
+            "p = document.add_paragraph()",
+            "p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER",
+            "p.space_after = Pt(18)",
+            "run = p.add_run()",
+            "run.add_picture(\'%s\')" % src if "tmp" in src else "run.add_picture(\'%s\', width=Cm(15))" % src,
+            "run.add_break()",
+            "run.add_text(\'%s\')" % alt_text,
+            "run.font.italic = True",
+            "run.add_break()"
+            )) + '\n'
+
+    def hrule(self):
+        return SPAN_HRULE
 
 
 class Dword:
+
     def __init__(self):
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
         self.name = LOCAL_REPO
         self.download_settings()
         self.choose_path_template()
-        self.make_title()
-        self.doc = Document(self.name)
-        self.add_main_text_from_wiki()
-        self.add_final_part()
-        self.save(self.name)
+        #self.make_title()
+        #self.doc = Document(self.name)
+        self.add_text_from_wiki()
+        #self.add_final_part()
+        #self.save(self.name)
 
-    def add_page_break(self):
-        self.doc.add_page_break()
+    def create_styles(self):
+        global document
+        styles = document.styles
+        style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
+        style.font.size = Pt(STANDART_FONT_SIZE)
+        style.font.name = STANDART_FONT
 
-    def download_settings(self):
-        with open(SETTINGS_FILE) as file:
-            self.js_content = json.load(file)
+    def add_text_from_wiki(self):
+        global document
+        document = Document(os.path.abspath(self.path))
+        self.create_styles()
+        tmp = []
 
-    def choose_path_template(self):
-        if (self.js_content[TYPE_OF_WORK] == COURSE_WORK):
-            self.path = PATH_TO_TEMPLATE.format(COURSE_WORK)
-        if (self.js_content[TYPE_OF_WORK] == LAB_WORK):
-            self.path = PATH_TO_TEMPLATE.format(LAB_WORK)
+        for path in self.js_content[PAGES]:
+            with open(PATH_TO_WIKI.format(GIT_REPO, path), 'r', encoding="utf-8") as file:
+                tmp.append(file.read())
 
-    def h_w(self, dimension):
-        height, width = dimension
-        h = w = STANDART_SIZE_PICTURE
-        if height > width:
-            h *= height / width
-            if h / w > BORDER_OF_PICTURE:
-                while h / w > BORDER_OF_PICTURE:
-                    h *= SPEED_OF_REDUCING_PICTURE
-        else:
-            w *= width / height
-            if w / h > BORDER_OF_PICTURE:
-                while w / h > BORDER_OF_PICTURE:
-                    w *= SPEED_OF_REDUCING_PICTURE
-        return h, w
+        renderer = PythonDocxRenderer()
 
-    @staticmethod
-    def convert_to_pdf(docname):
-        try:
-            subprocess.check_call(
-                [UNOCONC_1ST, UNOCONC_2ND, UNOCONC_3RD, UNOCONC_4TH, docname])
-        except subprocess.CalledProcessError as e:
-            print(ERROR_MESSAGE_UNOCONV, e)
-
-    def save(self, name=NAME_REPORT):
-        self.doc.save(name)
-
-    def add_code(self):
-        for filename in self.js_content[DICT_FILENAMES]:
-            p = Path(os.getcwd()).rglob(filename)
-            for path in p:
-                code = NOT_VALID
-                with open(path) as file:
-                    if file is not None:
-                        code = file.read()
-                    else:
-                        print(NO_FILE_MESSAGE.format(path))
-
-                self.add_line(filename, set_bold=True, align=ALIGN_LEFT) 
-                self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
-
-    def change_bool_property(self, boolean):
-        if property_font[boolean]:
-            property_font[boolean] = False
-        else:
-            property_font[boolean] = True
-
-    def add_symbol(self, paragraph, symbol, level_for_head=0):
-        tmp = paragraph.add_run(symbol)
-        tmp.font.italic, tmp.font.bold = property_font[ITALIC], property_font[BOLD]
-        tmp.font.name, tmp.font.size = STANDART_FONT, Pt(STANDART_FONT_SIZE)
-        if property_font[CODE]:
-            tmp.font.name = self.js_content[FORMAT][SET_CODE][FONT]
-            tmp.font.size = Pt(self.js_content[FORMAT][SET_CODE][SIZE])
-            tmp.font.italic, tmp.font.bold = True, False
-        elif property_font[HEADER]:
-            level = SET_HEAD.format(level_for_head)
-            tmp.font.name, tmp.font.size = self.js_content[FORMAT][level][FONT], Pt(self.js_content[FORMAT][level][SIZE])
-            tmp.font.bold = True
-        elif property_font[QUOTE]:
-            tmp.font.italic = True
-            tmp.font.name = STANDART_FONT_QUOTE
-
-    def add_hyperlink(self, paragraph, url, text):
-        part = paragraph.part
-        r_id = part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
-        hyperlink = OxmlElement(W_HYPERLINK)
-        hyperlink.set(qn(R_ID), r_id)
-        new_run = OxmlElement(W_R)
-        rPr = OxmlElement(W_RPR)
-        new_run.append(rPr)
-        new_run.text = text
-        hyperlink.append(new_run)
-        paragraph._p.append(hyperlink)
-
-    def select_text_and_link(self, text, index):
-        start_size = index
-        alt_text = []
-        link = []
-        index += 1
-        need_text = True
-        while index < len(text) and text[index] != RIGHT_BRACKET_V2:
-            while index < len(text) and text[index] != RIGHT_BRACKET and need_text:
-                alt_text.append(text[index])
-                index += 1
-            if text[index] == RIGHT_BRACKET:
-                index += 2
-            need_text = False
-            if index < len(text):
-                link.append(text[index])
-            index += 1
-        return index - start_size, EMPTY_STRING.join(link), EMPTY_STRING.join(alt_text)
-
-    def level_head(self, text, index):
-        return text.rindex(HASH, index, index + MAX_HEAD) - index + 1
-
-    def is_tag_code(self, text):
-        return TAG_CODE == self.return_tag(text)
-
-    def is_tag_strong(self, text):
-        return TAG_STRONG == self.return_tag(text)
-
-    def is_tag_em(self, text):
-        return TAG_EM == self.return_tag(text)
-
-    def is_close_tag(self, text, tag):
-        return self.return_tag(text) == CLOSE_TAGS[tag]
-
-    def is_tag_p(self, text):
-        return TAG_P == self.return_tag(text)
-
-    def return_len_tag(self, text):
-        return len(self.return_tag(text))
-
-    def return_tag(self, text):
-        try:
-            return text[:text.index(">") + 1]
-        except Exception:
-            return "!"
-
-    def html_to_docx(self, paragraph, tag):
-        global index   # , index):
-        print("\nНовый тег - " + tag)
-        index += len(tag)
-        if len(html) is 0:
-            return
-        while index < global_len:
-            if html[index] == "<":
-                # выход из рекурсии
-                if self.is_close_tag(html[index:], tag):  # выход из рекурсии когда мы встречаем закрывающий тег
-                    print("\nЗакрываю тег - " + self.return_tag(html[index:]) + " length: " + str(self.return_len_tag(html[index:])))
-
-                    index += self.return_len_tag(html[index:])
-                    return
-                # рекурсия для параграфа
-                if self.is_tag_p(html[index:]):
-                    self.html_to_docx(paragraph, self.return_tag(html[index:]))
-                # рекурсия для участка кода
-                if self.is_tag_code(html[index:]):
-                    self.html_to_docx(paragraph, self.return_tag(html[index:]))
-                # рекурсия для жирного шрифта
-                if self.is_tag_strong(html[index:]):
-                    self.html_to_docx(paragraph, self.return_tag(html[index:]))
-                    continue
-                # рекурсия для курсива
-                if self.is_tag_em(html[index:]):
-                    self.html_to_docx(paragraph, self.return_tag(html[index:]))
-                    continue
-
-            if index < global_len:
-                print(html[index], end="")
-                index += 1
-            else:
-                break
-        print("exit")
-
-    def new_paragraph(self, align=ALIGN_LEFT, line_space=STANDART_LINE_SPACING):
-        paragraph = self.doc.add_paragraph()
-        paragraph_format = paragraph.paragraph_format
-        paragraph_format.alignment = alignment_dict.get(align)
-        paragraph_format.keep_with_next = True
-        paragraph_format.line_spacing_rule = line_space_dict.get(line_space)
-        paragraph_format.keep_together = True
-        return paragraph
-
-    def add_main_text_from_wiki(self):
-        for filename in self.js_content[PAGES]:
-            paragraph = self.new_paragraph()
-            gen_path = Path(os.path.join(os.getcwd(), GIT_REPO)).rglob("{0}{1}".format(filename.replace(EMPTY_PLACE, DASH), MD_EXTENSION))
-            for path in gen_path:
-                with open(path) as file:
-                    text = file.read()
-                    # переход markdown->html
-                    markdowner = Markdown(extras=['cuddled-lists', "fenced-code-blocks"])
-                    global html
-                    global global_len
-                    #global index
-                    html = markdowner.convert(text)
-                    global_len = len(html)
-                    self.html_to_docx(paragraph, "")#, index)
-
-    def add_image_by_url(self, url):
-        req = requests.get(url)
-        filepath = os.path.join(os.getcwd(), PICTURE)
-        with open(filepath, 'wb') as file:
-            file.write(req.content)
-        self.add_picture(filepath)
-
-    def add_final_part(self):
-        self.add_page_break()
-        self.add_line(ATTACHMENT, set_bold=True, align=ALIGN_CENTRE)
-        self.add_code()
-
-    def add_line(self, line, space_after=STANDART_PLACE_AFTER, set_bold=False, font_name=STANDART_FONT,
-                 keep_with_next=False, font_size=STANDART_FONT_SIZE, space_before=STANDART_PLACE_BEFORE,
-                 line_spacing=STANDART_LINE_SPACING, align=ALIGN_JUSTIFY, keep_together=True):
-        self.number_of_paragraph += 1
-        style_name = STYLE.format(self.number_of_paragraph)
-        paragraph = self.doc.add_paragraph(line)
-        paragraph.style = self.doc.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
-        font = paragraph.style.font
-        font.name = font_name
-        font.size = Pt(font_size)
-        font.bold = bool(set_bold)
-        paragraph_format = paragraph.paragraph_format
-        paragraph_format.alignment = alignment_dict.get(align.lower())
-        paragraph_format.space_before = Pt(space_before)
-        paragraph_format.space_after = Pt(space_after)
-        paragraph_format.keep_with_next = keep_with_next
-        paragraph_format.line_spacing_rule = line_space_dict.get(line_spacing)
-        paragraph_format.keep_together = keep_together
-
-    def convert_format(self):
-        for paragraph in self.doc.paragraphs:
-            for run in paragraph.runs:
-                font = run.font
-                font.name = STANDART_FONT
-                font.size = Pt(STANDART_FONT_SIZE)
-
-    def add_picture(self, path):
-        paragraph = self.doc.add_paragraph()
-        p_format = paragraph.paragraph_format
-        p_format.alignment = alignment_dict.get(ALIGN_CENTRE)
-        time_word = paragraph.add_run()
-
-        im = Image.open(path)
-        h, w = self.h_w(im.size)
-        time_word.add_picture(path, width=Inches(h), height=Inches(w)) 
-        self.add_line(UNDER_PICTURE.format(self.num_of_pictures, DOT), align=ALIGN_CENTRE, keep_together=True)
-        self.num_of_pictures += 1
+        exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+        document.save(os.path.abspath(NAME_REPORT))
 
     def make_title(self):
         doc = DocxTemplate(self.path)
@@ -431,3 +268,66 @@ class Dword:
         doc.render(content)
         doc.save(self.name)
 
+    def add_line(self, line, space_after=STANDART_PLACE_AFTER, set_bold=False, font_name=STANDART_FONT,
+                 keep_with_next=False, font_size=STANDART_FONT_SIZE, space_before=STANDART_PLACE_BEFORE,
+                 line_spacing=STANDART_LINE_SPACING, align=ALIGN_JUSTIFY, keep_together=True):
+        self.number_of_paragraph += 1
+        style_name = STYLE.format(self.number_of_paragraph)
+        paragraph = document.add_paragraph(line)
+        paragraph.style = document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
+        font = paragraph.style.font
+        font.name = font_name
+        font.size = Pt(font_size)
+        font.bold = bool(set_bold)
+        paragraph_format = paragraph.paragraph_format
+        paragraph_format.alignment = alignment_dict.get(align.lower())
+        paragraph_format.space_before = Pt(space_before)
+        paragraph_format.space_after = Pt(space_after)
+        paragraph_format.keep_with_next = keep_with_next
+        paragraph_format.line_spacing_rule = line_space_dict.get(line_spacing)
+        paragraph_format.keep_together = keep_together
+
+    def add_final_part(self):
+        self.add_page_break()
+        self.add_line(ATTACHMENT, set_bold=True, align=ALIGN_CENTRE)
+        self.add_code()
+
+    @staticmethod
+    def convert_to_pdf(docname):
+        try:
+            subprocess.check_call(
+                [UNOCONC_1ST, UNOCONC_2ND, UNOCONC_3RD, UNOCONC_4TH, docname])
+        except subprocess.CalledProcessError as e:
+            print(ERROR_MESSAGE_UNOCONV, e)
+
+    def save(self, name=NAME_REPORT):
+        document.save(name)
+
+    def add_code(self):
+        for filename in self.js_content[DICT_FILENAMES]:
+            p = Path(os.getcwd()).rglob(filename)
+            for path in p:
+                code = NOT_VALID
+                with open(path) as file:
+                    if file is not None:
+                        code = file.read()
+                    else:
+                        print(NO_FILE_MESSAGE.format(path))
+
+                self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
+                self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+
+    def add_page_break(self):
+        document.add_page_break()
+
+    def download_settings(self):
+        with open(SETTINGS_FILE) as file:
+            self.js_content = json.load(file)
+
+    def choose_path_template(self):
+        if self.js_content[TYPE_OF_WORK] == COURSE_WORK:
+            self.path = PATH_TO_TEMPLATE.format(COURSE_WORK)
+        elif self.js_content[TYPE_OF_WORK] == LAB_WORK:
+            self.path = PATH_TO_TEMPLATE.format(LAB_WORK)
+        else:
+            self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
