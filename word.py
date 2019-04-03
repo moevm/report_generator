@@ -190,19 +190,6 @@ class PythonDocxRenderer(mistune.Renderer):
     def link(self, link, title, content):
         return SPAN_LINK.format(content, link)
 
-    def image(self, src, title, alt_text):
-        return '\n'.join((
-            "p = document.add_paragraph()",
-            "p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER",
-            "p.space_after = Pt(18)",
-            "run = p.add_run()",
-            "run.add_picture(\'%s\')" % src if "tmp" in src else "run.add_picture(\'%s\', width=Cm(15))" % src,
-            "run.add_break()",
-            "run.add_text(\'%s\')" % alt_text,
-            "run.font.italic = True",
-            "run.add_break()"
-            )) + '\n'
-
     def hrule(self):
         return SPAN_HRULE
 
