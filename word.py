@@ -90,6 +90,8 @@ BLOCK = "block"
 BLOCK_MATH = 'block_math'
 TOKEN_TYPE = "type"
 TOKEN_TEXT = "text"
+EMPTY = " "
+DASH = "-"
 
 LIST_ITEM = "p = document.add_paragraph('', style = 'BasicUserList')"
 LIST = "{}\np.add_run().add_break()\n"
@@ -153,7 +155,7 @@ class PythonDocxRenderer(mistune.Renderer):
         if ADD_PICTURE in text:
             return text
         add_break = '' if text.endswith(END_STR) else RUN_AND_BREAK
-        return "{}{}".format('\n'.join((ADD_PARAGRAPH, text, add_break)), '\n')
+        return PLUS_STR.format('\n'.join((ADD_PARAGRAPH, text, add_break)), '\n')
 
     def list(self, body, ordered):
         return LIST.format(body)
@@ -222,7 +224,7 @@ class Dword:
         tmp = []
 
         for path in self.js_content[PAGES]:
-            with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(' ', '-')), 'r', encoding="utf-8") as file:
+            with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
                 tmp.append(file.read())
 
         renderer = PythonDocxRenderer()
