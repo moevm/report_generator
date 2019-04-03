@@ -101,6 +101,7 @@ ADD_PARAGRAPH = "p = document.add_paragraph()"
 TABLE2 = "table = document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
 TABLE3 = 'document.add_paragraph().add_run().add_break()\n'
 TABLE1 = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
+PLUS_STR = "{}{}"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -165,7 +166,8 @@ class PythonDocxRenderer(mistune.Renderer):
         number_rows = int(len(self.table_memory) / number_cols)
         cells = [TABLE1.format(i, j, self.table_memory.pop(0)[1:])
                  for i, j in itertools.product(range(number_rows), range(number_cols))]
-        return '\n'.join([TABLE2.format(number_rows, number_cols)] + cells) + TABLE3
+        tmp = "\n".join([TABLE2.format(number_rows, number_cols)] + cells)
+        return PLUS_STR.format(tmp, TABLE3)
 
     def table_cell(self, content, **flags):
         self.table_memory.append(content)
