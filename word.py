@@ -235,7 +235,7 @@ class Dword:
         tmp = []
 
         for path in self.js_content[PAGES]:
-            with open(PATH_TO_WIKI.format(GIT_REPO, path), 'r', encoding="utf-8") as file:
+            with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(' ', '-')), 'r', encoding="utf-8") as file:
                 tmp.append(file.read())
 
         renderer = PythonDocxRenderer()
