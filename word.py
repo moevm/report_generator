@@ -198,7 +198,7 @@ class PythonDocxRenderer(mistune.Renderer):
 
 class Dword:
 
-    def __init__(self):
+    def  __init__(self):
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
         self.name = LOCAL_REPO
@@ -297,14 +297,11 @@ class Dword:
 
     def add_code(self):
         for filename in self.js_content[DICT_FILENAMES]:
-            p = Path(os.getcwd()).rglob(filename)
-            for path in p:
+            paths = Path(os.getcwd()).rglob(filename)
+            for path in paths:
                 code = NOT_VALID
                 with open(path) as file:
-                    if file is not None:
-                        code = file.read()
-                    else:
-                        print(NO_FILE_MESSAGE.format(path))
+                    code = file.read()
 
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
                 self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
