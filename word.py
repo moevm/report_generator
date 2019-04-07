@@ -109,6 +109,7 @@ FORMAT = "format"
 FONT = "font"
 SIZE = "size"
 TYPE_OF_HEADER = "h{}"
+ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -239,8 +240,10 @@ class Dword:
                 tmp.append(file.read())
 
         renderer = PythonDocxRenderer()
-
-        exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+        try:
+            exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+        except Exception:
+            print(ERROR_STYLE_IN_MD)
         document.save(os.path.abspath(NAME_REPORT))
 
     def make_title(self):
