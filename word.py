@@ -71,7 +71,6 @@ DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
 INTRODUCTION = "introduction"
-DISTANCE_NUMBER_CODE = " "
 
 ERROR_MESSAGE_UNOCONV = "Unoconv error: "
 UNOCONC_1ST = "/usr/bin/python3"
