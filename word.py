@@ -296,24 +296,17 @@ class Dword:
     def save(self, name=NAME_REPORT):
         document.save(name)
 
-    def number_position(self, _number, code_size):
-        max_len = len(str(code_size))
-        number = str(_number)
-        len_number = len(number)
-        return PLUS_STR.format(DISTANCE_NUMBER_CODE * (max_len - len_number), number)
-
     def add_code(self):
         for filename in self.js_content[DICT_FILENAMES]:
-            gen_path = Path(os.getcwd()).rglob(filename)
-            for path in gen_path:
+            paths = Path(os.getcwd()).rglob(filename)
+            for path in paths:
                 code = NOT_VALID
                 with open(path) as file:
-                        code = file.readlines()
+                    code = file.read()
+
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
-                for number, line in enumerate(code, 1):
-                    self.add_line(DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
-                        line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
-                    
+                self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+
     def add_page_break(self):
         document.add_page_break()
 
