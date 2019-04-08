@@ -106,6 +106,7 @@ TABLE1 = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
 PLUS_STR = "{}{}"
 DISTANCE_NUMBER_CODE = " "
 
+
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
                   'centre': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -189,6 +190,7 @@ class PythonDocxRenderer(mistune.Renderer):
     def block_code(self, code, language):
         code = code.replace('\n', '\\n')
         return SPAN_CODE.format(code)
+
 
     def link(self, link, title, content):
         return SPAN_LINK.format(content, link)
