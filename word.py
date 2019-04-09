@@ -100,9 +100,9 @@ ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
 RUN_AND_BREAK = 'p.add_run().add_break()'
 ADD_PARAGRAPH = "p = document.add_paragraph()"
-TABLE2 = "table = document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
-TABLE3 = 'document.add_paragraph().add_run().add_break()\n'
-TABLE1 = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
+CREATE_TABLE = "table = document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
+END_TABLE = 'document.add_paragraph().add_run().add_break()\n'
+ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
 PLUS_STR = "{}{}"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
@@ -166,10 +166,10 @@ class PythonDocxRenderer(mistune.Renderer):
     def table(self, header, body):
         number_cols = header.count('\n') - 2
         number_rows = int(len(self.table_memory) / number_cols)
-        cells = [TABLE1.format(i, j, self.table_memory.pop(0)[1:])
+        cells = [ONE_PART_OF_TABLE.format(i, j, self.table_memory.pop(0)[1:])
                  for i, j in itertools.product(range(number_rows), range(number_cols))]
-        tmp = "\n".join([TABLE2.format(number_rows, number_cols)] + cells)
-        return PLUS_STR.format(tmp, TABLE3)
+        tmp = "\n".join([CREATE_TABLE.format(number_rows, number_cols)] + cells)
+        return PLUS_STR.format(tmp, END_TABLE)
 
     def table_cell(self, content, **flags):
         self.table_memory.append(content)
