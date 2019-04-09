@@ -242,7 +242,7 @@ class Dword:
         renderer = PythonDocxRenderer()
         try:
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
-        except Exception:
+        except SyntaxError:
             print(ERROR_STYLE_IN_MD)
         document.save(os.path.abspath(NAME_REPORT))
 
