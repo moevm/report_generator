@@ -240,22 +240,12 @@ class Dword:
             mw = W_STUDENT
         content = {
             MAN_OR_WOMAN: RichText(mw),
-            NUMBER: RichText(self.js_content[NUMBER]),
             CATHEDRA: RichText(self.js_content[CATHEDRA]),
             DISCIPLINE: RichText(self.js_content[DISCIPLINE]),
             THEME: RichText(self.js_content[THEME]),
             GROUP: RichText(self.js_content[GROUP]),
             NAME_OF_STUDENT: RichText(self.js_content[NAME_OF_STUDENT]),
-            TEACHER: RichText(self.js_content[TEACHER]),
-            INIT_DATA: RichText(self.js_content[INIT_DATA]),
-            CONTEXT_OF_EXPLANATION: RichText(self.js_content[CONTEXT_OF_EXPLANATION]),
-            MIN_PAGES: RichText(self.js_content[MIN_PAGES]),
-            DATE_START: RichText(self.js_content[DATE_START]),
-            DATE_FINISH: RichText(self.js_content[DATE_FINISH]),
-            DATE_DEFEND: RichText(self.js_content[DATE_DEFEND]),
-            ANNOTATION: RichText(self.js_content[ANNOTATION]),
-            INTRODUCTION: RichText(self.js_content[INTRODUCTION])
-
+            TEACHER: RichText(self.js_content[TEACHER])
         }
         doc.render(content)
         doc.save(self.name)
