@@ -104,6 +104,8 @@ TABLE2 = "table = document.add_table(rows={}, cols={}, style = 'BasicUserTable')
 TABLE3 = 'document.add_paragraph().add_run().add_break()\n'
 TABLE1 = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
 PLUS_STR = "{}{}"
+DISTANCE_NUMBER_CODE = " "
+
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -188,6 +190,7 @@ class PythonDocxRenderer(mistune.Renderer):
     def block_code(self, code, language):
         code = code.replace('\n', '\\n')
         return SPAN_CODE.format(code)
+
 
     def link(self, link, title, content):
         return SPAN_LINK.format(content, link)
@@ -295,16 +298,24 @@ class Dword:
     def save(self, name=NAME_REPORT):
         document.save(name)
 
+    def number_position(self, _number, code_size):
+        max_len = len(str(code_size))
+        number = str(_number)
+        len_number = len(number)
+        return PLUS_STR.format(DISTANCE_NUMBER_CODE * (max_len - len_number), number)
+
     def add_code(self):
         for filename in self.js_content[DICT_FILENAMES]:
-            paths = Path(os.getcwd()).rglob(filename)
-            for path in paths:
+            gen_path = Path(os.getcwd()).rglob(filename)
+            for path in gen_path:
                 code = NOT_VALID
                 with open(path) as file:
-                    code = file.read()
-
+                    code = file.readlines()
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
-                self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+                for number, line in enumerate(code, 1):
+                    self.add_line(
+                        DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
+                        line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
     def add_page_break(self):
         document.add_page_break()
