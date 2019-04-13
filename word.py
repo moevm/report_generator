@@ -14,7 +14,6 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
 
-document = None
 GIT_REPO = "wiki_dir"
 PATH_TO_WIKI = "{}/{}.md"
 NAME_REPORT = "report.docx"
@@ -82,9 +81,9 @@ NAME_STYLE = "Mystyle"
 SPAN_TEXT = "p.add_run(\"{}\",style=\'{}\')\n"
 SPAN_EMPHASIS = "{}.italic = True\n"
 SPAN_DOUBLE_EMPHASIS = "{}.bold = True\n"
-SPAN_CODE = "p = document.add_paragraph()\np.add_run(\"{}\")\np.style = 'BasicUserQuote'\np.add_run().add_break()\n"
+SPAN_CODE = "p = self.document.add_paragraph()\np.add_run(\"{}\")\np.style = 'BasicUserQuote'\np.add_run().add_break()\n"
 SPAN_LINK = "{} ({})"
-SPAN_HRULE = "document.add_page_break()\n"
+SPAN_HRULE = "self.document.add_page_break()\n"
 
 BLOCK = "block"
 BLOCK_MATH = 'block_math'
@@ -93,15 +92,15 @@ TOKEN_TEXT = "text"
 EMPTY = " "
 DASH = "-"
 
-LIST_ITEM = "p = document.add_paragraph('', style = 'BasicUserList')"
+LIST_ITEM = "p = self.document.add_paragraph('', style = 'BasicUserList')"
 LIST = "{}\np.add_run().add_break()\n"
-HEADER = "p = document.add_heading('', {})\n{}"
+HEADER = "p = self.document.add_heading('', {})\n{}"
 ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
 RUN_AND_BREAK = 'p.add_run().add_break()'
-ADD_PARAGRAPH = "p = document.add_paragraph()"
-CREATE_TABLE = "table = document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
-END_TABLE = 'document.add_paragraph().add_run().add_break()\n'
+ADD_PARAGRAPH = "p = self.document.add_paragraph()"
+CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
+END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
 ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
 PLUS_STR = "{}{}"
 
@@ -147,6 +146,9 @@ class PythonDocxRenderer(mistune.Renderer):
         super(PythonDocxRenderer, self).__init__(**kwds)
         self.table_memory = []
         self.img_counter = 0
+
+    def get_document(self, doc):
+        self.document = doc
 
     def header(self, text, level, raw):
         return HEADER.format(level - 1, text)
@@ -211,15 +213,13 @@ class Dword:
         #self.save(self.name)
 
     def create_styles(self):
-        global document
-        styles = document.styles
+        styles = self.document.styles
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
         style.font.size = Pt(STANDART_FONT_SIZE)
         style.font.name = STANDART_FONT
 
     def add_text_from_wiki(self):
-        global document
-        document = Document(os.path.abspath(self.path))
+        self.document = Document(os.path.abspath(self.path))
         self.create_styles()
         tmp = []
 
@@ -228,9 +228,10 @@ class Dword:
                 tmp.append(file.read())
 
         renderer = PythonDocxRenderer()
+        renderer.get_document(self.document)
 
         exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
-        document.save(os.path.abspath(NAME_REPORT))
+        self.document.save(os.path.abspath(NAME_REPORT))
 
     def make_title(self):
         doc = DocxTemplate(self.path)
@@ -265,8 +266,8 @@ class Dword:
                  line_spacing=STANDART_LINE_SPACING, align=ALIGN_JUSTIFY, keep_together=True):
         self.number_of_paragraph += 1
         style_name = STYLE.format(self.number_of_paragraph)
-        paragraph = document.add_paragraph(line)
-        paragraph.style = document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
+        paragraph = self.document.add_paragraph(line)
+        paragraph.style = self.document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         font = paragraph.style.font
         font.name = font_name
         font.size = Pt(font_size)
@@ -293,7 +294,7 @@ class Dword:
             print(ERROR_MESSAGE_UNOCONV, e)
 
     def save(self, name=NAME_REPORT):
-        document.save(name)
+        self.document.save(name)
 
     def add_code(self):
         for filename in self.js_content[DICT_FILENAMES]:
@@ -307,7 +308,7 @@ class Dword:
                 self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
     def add_page_break(self):
-        document.add_page_break()
+        self.document.add_page_break()
 
     def download_settings(self):
         with open(SETTINGS_FILE) as file:
