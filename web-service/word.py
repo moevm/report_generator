@@ -46,7 +46,6 @@ PAGES = "pages_of_wiki"
 STANDART_SIZE_PICTURE = 4
 BORDER_OF_PICTURE = 1.5
 SPEED_OF_REDUCING_PICTURE = 0.8
-MAX_HEAD = 6
 DOT = "."
 FONT_SIZE_CODE = 10
 FONT_CODE = 'Consolas'
@@ -79,6 +78,7 @@ UNOCONC_3RD = "-f"
 UNOCONC_4TH = "pdf"
 
 NAME_STYLE = "Mystyle"
+HEAD_STYLE = "Myheadstyle"
 SPAN_TEXT = "p.add_run(\"{}\",style=\'{}\')\n"
 SPAN_EMPHASIS = "{}.italic = True\n"
 SPAN_DOUBLE_EMPHASIS = "{}.bold = True\n"
@@ -95,7 +95,7 @@ DASH = "-"
 
 LIST_ITEM = "p = document.add_paragraph('', style = 'BasicUserList')"
 LIST = "{}\np.add_run().add_break()\n"
-HEADER = "p = document.add_heading('', {})\n{}"
+HEADER = "p = document.add_paragraph(text=\"{}\",style=\"{}\")\n"
 ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
 RUN_AND_BREAK = 'p.add_run().add_break()'
@@ -104,6 +104,13 @@ TABLE2 = "table = document.add_table(rows={}, cols={}, style = 'BasicUserTable')
 TABLE3 = 'document.add_paragraph().add_run().add_break()\n'
 TABLE1 = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
 PLUS_STR = "{}{}"
+H_STYLE = "my_header_{}"
+FORMAT = "format"
+FONT = "font"
+SIZE = "size"
+TYPE_OF_HEADER = "h{}"
+ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
+DISTANCE_NUMBER_CODE = " "
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -149,7 +156,7 @@ class PythonDocxRenderer(mistune.Renderer):
         self.img_counter = 0
 
     def header(self, text, level, raw):
-        return HEADER.format(level - 1, text)
+        return HEADER.format(text[text.find("\"") + 1:text.rfind("\"")], H_STYLE.format(level))
 
     def paragraph(self, text):
         if ADD_PICTURE in text:
@@ -189,6 +196,7 @@ class PythonDocxRenderer(mistune.Renderer):
         code = code.replace('\n', '\\n')
         return SPAN_CODE.format(code)
 
+
     def link(self, link, title, content):
         return SPAN_LINK.format(content, link)
 
@@ -198,7 +206,7 @@ class PythonDocxRenderer(mistune.Renderer):
 
 class Dword:
 
-    def  __init__(self):
+    def __init__(self):
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
         self.name = LOCAL_REPO
@@ -213,9 +221,15 @@ class Dword:
     def create_styles(self):
         global document
         styles = document.styles
+        # стиль для обычного текста
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
         style.font.size = Pt(STANDART_FONT_SIZE)
         style.font.name = STANDART_FONT
+        # стили для загаловков
+        for i in enumerate(self.js_content[FORMAT]):
+            style = styles.add_style(H_STYLE.format(i[0] + 1), WD_STYLE_TYPE.PARAGRAPH)
+            style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i[0] + 1)][SIZE])
+            style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i[0] + 1)][FONT]
 
     def add_text_from_wiki(self):
         global document
@@ -228,8 +242,10 @@ class Dword:
                 tmp.append(file.read())
 
         renderer = PythonDocxRenderer()
-
-        exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+        try:
+            exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+        except SyntaxError:
+            print(ERROR_STYLE_IN_MD)
         document.save(os.path.abspath(NAME_REPORT))
 
     def make_title(self):
@@ -295,16 +311,24 @@ class Dword:
     def save(self, name=NAME_REPORT):
         document.save(name)
 
+    def number_position(self, _number, code_size):
+        max_len = len(str(code_size))
+        number = str(_number)
+        len_number = len(number)
+        return PLUS_STR.format(DISTANCE_NUMBER_CODE * (max_len - len_number), number)
+
     def add_code(self):
         for filename in self.js_content[DICT_FILENAMES]:
-            paths = Path(os.getcwd()).rglob(filename)
-            for path in paths:
+            gen_path = Path(os.getcwd()).rglob(filename)
+            for path in gen_path:
                 code = NOT_VALID
                 with open(path) as file:
-                    code = file.read()
-
+                    code = file.readlines()
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
-                self.add_line(code, line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+                for number, line in enumerate(code, 1):
+                    self.add_line(
+                        DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
+                        line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
     def add_page_break(self):
         document.add_page_break()
