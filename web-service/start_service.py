@@ -1,3 +1,4 @@
+#!../venv/bin/python3.6
 from app import app
 import view
 
