@@ -1,9 +1,9 @@
-#!./venv/bin/python3.6
+#!../venv/bin/python3.6
 import argparse
 import sys
 import os
 import shutil
-from mygithub import Gengit
+from github_api import Gengit
 from word import Dword
 
 
@@ -19,9 +19,9 @@ LEN_WORD_EXTENSION = 5
 DELETE_WORD = False
 DELETED_PICTURE = "picture"
 FLAG_ARG = "-f"
-
-
+LINK = "https://github.com/{}/blob/{}/{}"
 VAR_CONTENT = 3
+
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -56,16 +56,14 @@ def input_file(name):
 
 def main(type_of_input):
     all_ok = True
-    if type_of_input is FROM_CONSOLE:
-        url, wiki_url, branch = input_cmd()
-    else:
-        url, wiki_url, branch = input_file(type_of_input)
+    url, wiki_url, branch = type_of_input[0], type_of_input[1], type_of_input[2]
     git = Gengit(url, branch)
     git_wiki = Gengit(wiki_url)
 
     if git.download_git() is False or git_wiki.download_git_wiki() is False:
         delete_directories_and_files(git, git_wiki)
         all_ok = False
+    report = TIME_REPORT
 
     if all_ok:
         word = Dword()
@@ -73,11 +71,11 @@ def main(type_of_input):
         word.save(path_doc)
         if word.js_content[PDF]:
             word.convert_to_pdf(docname=path_doc)
-            git.add(PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION]))
-        else:
-            git.add(TIME_REPORT)
+            report = PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION])
+        git.add(report)
         git.push()
         delete_directories_and_files(git, git_wiki)
+    return LINK.format(url[15:-4], branch, report)
 
 
 if __name__ == "__main__":
@@ -85,8 +83,7 @@ if __name__ == "__main__":
     namespace = parser.parse_args()
 
     if not namespace.f:
-        main(FROM_CONSOLE)
+        main(input_cmd())
     else:
-        main(namespace.f)
-
+        main(input_file(namespace.f))
 

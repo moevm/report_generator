@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+
+    Home Page
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+      <div class="py-5 text-center">
+          <h2>Генерация отчетов</h2>
+      </div>
+
+
+      <div class="col-md-10">
+          <form action="home" class="needs-validation" method="POST">
+              <div class="mb-3">
+                  <label for="wiki_name">Ссылка на вики:</label>
+                  <input type="text" class="form-control" id="wiki_name" name="wiki" value="{{ request.args.get('wiki','') }}" required>
+              </div>
+
+
+              <div class="mb-3">
+                  <label for="repo_name">Ссылка на репозиторий, куда будет отправлен отчет:</label>
+                  <input type="text" class="form-control" id="repo_name" name="repo" value="{{ request.args.get('repo','') }}" required>
+              </div>
+
+
+              <div class="mb-3">
+                  <label for="branch_name">Название ветки</label>
+                  <div class="input-group">
+                      <input type="text" class="form-control" id="branch_name" name="branch" value="{{ request.args.get('branch','') }}" placeholder="По-умолчанию ветка master">
+                  </div>
+              </div>
+              <div>
+                  <button class="btn btn-primary" type="submit">Отправить</button>
+                  {% block link %}
+                  {% endblock %}
+              </div>
+          </form>
+      </div>
+</div>
+
+{% endblock %}
