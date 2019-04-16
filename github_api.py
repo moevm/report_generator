@@ -4,7 +4,7 @@ import os
 import git
 
 
-LOCAL_REPO = "mytestproject"
+LOCAL_REPO = "repo_for_report"
 LOCAL_WIKI = "wiki_dir"
 BEGIN_SSH = "git@github.com:{}"
 SIZE_OF_SSH_ADDRESS = 19

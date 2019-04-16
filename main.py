@@ -3,7 +3,7 @@ import argparse
 import sys
 import os
 import shutil
-from mygithub import Gengit
+from github_api import Gengit
 from word import Dword
 
 
