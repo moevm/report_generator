@@ -14,7 +14,6 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
 
-document = None
 GIT_REPO = "wiki_dir"
 PATH_TO_WIKI = "{}/{}.md"
 NAME_REPORT = "report.docx"
@@ -82,9 +81,9 @@ HEAD_STYLE = "Myheadstyle"
 SPAN_TEXT = "p.add_run(\"{}\",style=\'{}\')\n"
 SPAN_EMPHASIS = "{}.italic = True\n"
 SPAN_DOUBLE_EMPHASIS = "{}.bold = True\n"
-SPAN_CODE = "p = document.add_paragraph()\np.add_run(\"{}\")\np.style = 'BasicUserQuote'\np.add_run().add_break()\n"
+SPAN_CODE = "p = self.document.add_paragraph()\np.add_run(\"{}\")\np.style = 'BasicUserQuote'\np.add_run().add_break()\n"
 SPAN_LINK = "{} ({})"
-SPAN_HRULE = "document.add_page_break()\n"
+SPAN_HRULE = "self.document.add_page_break()\n"
 
 BLOCK = "block"
 BLOCK_MATH = 'block_math'
@@ -93,16 +92,16 @@ TOKEN_TEXT = "text"
 EMPTY = " "
 DASH = "-"
 
-LIST_ITEM = "p = document.add_paragraph('', style = 'BasicUserList')"
+LIST_ITEM = "p = self.document.add_paragraph('', style = 'BasicUserList')"
 LIST = "{}\np.add_run().add_break()\n"
 HEADER = "p = document.add_paragraph(text=\"{}\",style=\"{}\")\n"
 ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
 RUN_AND_BREAK = 'p.add_run().add_break()'
-ADD_PARAGRAPH = "p = document.add_paragraph()"
-TABLE2 = "table = document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
-TABLE3 = 'document.add_paragraph().add_run().add_break()\n'
-TABLE1 = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
+ADD_PARAGRAPH = "p = self.document.add_paragraph()"
+CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
+END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
+ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
 PLUS_STR = "{}{}"
 H_STYLE = "my_header_{}"
 FORMAT = "format"
@@ -155,6 +154,9 @@ class PythonDocxRenderer(mistune.Renderer):
         self.table_memory = []
         self.img_counter = 0
 
+    def get_document(self, doc):
+        self.document = doc
+
     def header(self, text, level, raw):
         return HEADER.format(text[text.find("\"") + 1:text.rfind("\"")], H_STYLE.format(level))
 
@@ -173,10 +175,10 @@ class PythonDocxRenderer(mistune.Renderer):
     def table(self, header, body):
         number_cols = header.count('\n') - 2
         number_rows = int(len(self.table_memory) / number_cols)
-        cells = [TABLE1.format(i, j, self.table_memory.pop(0)[1:])
+        cells = [ONE_PART_OF_TABLE.format(i, j, self.table_memory.pop(0)[1:])
                  for i, j in itertools.product(range(number_rows), range(number_cols))]
-        tmp = "\n".join([TABLE2.format(number_rows, number_cols)] + cells)
-        return PLUS_STR.format(tmp, TABLE3)
+        tmp = "\n".join([CREATE_TABLE.format(number_rows, number_cols)] + cells)
+        return PLUS_STR.format(tmp, END_TABLE)
 
     def table_cell(self, content, **flags):
         self.table_memory.append(content)
@@ -219,8 +221,7 @@ class Dword:
         #self.save(self.name)
 
     def create_styles(self):
-        global document
-        styles = document.styles
+        styles = self.document.styles
         # стиль для обычного текста
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
         style.font.size = Pt(STANDART_FONT_SIZE)
@@ -232,8 +233,7 @@ class Dword:
             style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i[0] + 1)][FONT]
 
     def add_text_from_wiki(self):
-        global document
-        document = Document(os.path.abspath(self.path))
+        self.document = Document(os.path.abspath(self.path))
         self.create_styles()
         tmp = []
 
@@ -242,11 +242,12 @@ class Dword:
                 tmp.append(file.read())
 
         renderer = PythonDocxRenderer()
+        renderer.get_document(self.document)
         try:
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
-        document.save(os.path.abspath(NAME_REPORT))
+        self.document.save(os.path.abspath(NAME_REPORT))
 
     def make_title(self):
         doc = DocxTemplate(self.path)
@@ -281,8 +282,8 @@ class Dword:
                  line_spacing=STANDART_LINE_SPACING, align=ALIGN_JUSTIFY, keep_together=True):
         self.number_of_paragraph += 1
         style_name = STYLE.format(self.number_of_paragraph)
-        paragraph = document.add_paragraph(line)
-        paragraph.style = document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
+        paragraph = self.document.add_paragraph(line)
+        paragraph.style = self.document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         font = paragraph.style.font
         font.name = font_name
         font.size = Pt(font_size)
@@ -309,7 +310,7 @@ class Dword:
             print(ERROR_MESSAGE_UNOCONV, e)
 
     def save(self, name=NAME_REPORT):
-        document.save(name)
+        self.document.save(name)
 
     def number_position(self, _number, code_size):
         max_len = len(str(code_size))
@@ -331,7 +332,7 @@ class Dword:
                         line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
     def add_page_break(self):
-        document.add_page_break()
+        self.document.add_page_break()
 
     def download_settings(self):
         with open(SETTINGS_FILE) as file:
