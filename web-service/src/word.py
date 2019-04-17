@@ -94,7 +94,7 @@ DASH = "-"
 
 LIST_ITEM = "p = self.document.add_paragraph('', style = 'BasicUserList')"
 LIST = "{}\np.add_run().add_break()\n"
-HEADER = "p = document.add_paragraph(text=\"{}\",style=\"{}\")\n"
+HEADER = "p = self.document.add_paragraph(text=\"{}\",style=\"{}\")\n"
 ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
 RUN_AND_BREAK = 'p.add_run().add_break()'
