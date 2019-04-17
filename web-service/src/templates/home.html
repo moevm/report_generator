@@ -36,8 +36,9 @@
               </div>
               <div>
                   <button class="btn btn-primary" type="submit">Отправить</button>
-                  {% block link %}
-                  {% endblock %}
+                  {%  if link %}
+                  <a href={{link}} class="badge badge-primary">Ссылка на отчет</a>
+                  {% endif %}
               </div>
           </form>
       </div>

@@ -21,6 +21,7 @@ DELETED_PICTURE = "picture"
 FLAG_ARG = "-f"
 LINK = "https://github.com/{}/blob/{}/{}"
 VAR_CONTENT = 3
+EMPTY_PLACE = ""
 
 
 def create_parser():
@@ -75,7 +76,8 @@ def main(type_of_input):
         git.add(report)
         git.push()
         delete_directories_and_files(git, git_wiki)
-    return LINK.format(url[15:-4], branch, report)
+        return LINK.format(url[15:-4], branch, report)
+    return EMPTY_PLACE
 
 
 if __name__ == "__main__":

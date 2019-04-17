@@ -11,6 +11,6 @@ def index():
         wiki = request.form['wiki']
         branch = request.form['branch']
         repo = request.form['repo']
-        return render_template("home_with_link.html", link=create_word([repo, wiki, branch]))
+        return render_template("home.html", link=create_word([repo, wiki, branch]))
 
     return render_template("home.html")
