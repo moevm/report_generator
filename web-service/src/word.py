@@ -198,7 +198,6 @@ class PythonDocxRenderer(mistune.Renderer):
         code = code.replace('\n', '\\n')
         return SPAN_CODE.format(code)
 
-
     def link(self, link, title, content):
         return SPAN_LINK.format(content, link)
 
