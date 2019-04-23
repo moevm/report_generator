@@ -112,6 +112,7 @@ H_STYLE = "my_header_{}"
 FORMAT = "format"
 FONT = "font"
 SIZE = "size"
+MAIN_TEXT = "main_text"
 TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
@@ -221,11 +222,19 @@ class Dword:
         self.name = LOCAL_REPO
         self.download_settings()
         self.choose_path_template()
-        #self.make_title()
-        #self.doc = Document(self.name)
+        self.make_title()
+        self.document = Document(os.path.abspath(self.path))
+        self.convert_format()
         self.add_text_from_wiki()
         #self.add_final_part()
         #self.save(self.name)
+
+    def convert_format(self):
+        for paragraph in self.document.paragraphs:
+            for run in paragraph.runs:
+                font = run.font
+                font.name = self.js_content[MAIN_TEXT][FONT]
+                font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
 
     def create_styles(self):
         styles = self.document.styles
@@ -273,7 +282,6 @@ class Dword:
         self.add_picture(filepath)
 
     def add_text_from_wiki(self):
-        self.document = Document(os.path.abspath(self.path))
         self.create_styles()
         tmp = []
 
@@ -315,6 +323,7 @@ class Dword:
 
         }
         doc.render(content)
+        self.path = self.name
         doc.save(self.name)
 
     def add_line(self, line, space_after=STANDART_PLACE_AFTER, set_bold=False, font_name=STANDART_FONT,
