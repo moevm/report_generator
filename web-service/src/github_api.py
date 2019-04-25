@@ -4,16 +4,16 @@ import os
 import git
 
 
-LOCAL_REPO = "mytestproject"
+LOCAL_REPO = "repo_for_report"
 LOCAL_WIKI = "wiki_dir"
 BEGIN_SSH = "git@github.com:{}"
 SIZE_OF_SSH_ADDRESS = 19
 COMMIT_MESSAGE = 'add report'
 ORIGIN = 'origin'
 STANDART_BRANCH = 'master'
-ERROR_WIKI = "Неверная ссылка на wiki-страничку!"
-ERROR_REPO = "Неверная ссылка на репозиторий!"
-ERROR_BRANCH = "Такой ветки не существует!"
+ERROR_WIKI = "Wrong link to wiki!"
+ERROR_REPO = "Wrong link to repository!"
+ERROR_BRANCH = "Branch doesnt exist!"
 
 
 class Gengit:
