@@ -22,6 +22,6 @@ cp -r ./src/templates /var/www/"$CATALOG"/templates/
 cp -r ./src/word_templates /var/www/"$CATALOG"/word_templates
 cp ./src/config/"${CONFIG}" /etc/apache2/sites-available/
 
-#chown -R www-data:www-data /var/www/"$CATALOG"
+chown -R www-data:www-data /var/www/"$CATALOG"
 a2ensite "${CONFIG}"
 service apache2 restart
