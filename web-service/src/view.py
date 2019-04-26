@@ -14,7 +14,5 @@ def index():
         repo = request.form['repo']
         link = create_word([repo, wiki, branch])
         return redirect(url_for("index"))
-    if link:
-        return render_template("home.html", link=link)
-    else:
-        return render_template("home.html")
+
+    return render_template("home.html", link=link)
