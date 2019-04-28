@@ -1,12 +1,26 @@
-{% extends 'base.html' %}
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-{% block title %}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
-    Home Page
+    <title>Hello, world!</title>
+</head>
 
-{% endblock %}
+<body class="bg-light">
+<h1>Hello, world!</h1>
 
-{% block content %}
+<button id="btn_start">open</button>
+<button id="btn_reset">close</button>
+
+<div>
+    <div id="message"></div>
+</div>
 
 <div class="container">
     <div class="py-5 text-center">
@@ -40,49 +54,53 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="generalFont">Основной шрифт</label>
-                    <input type="text" class="form-control" id="generalFont" placeholder="Times New Roman" value="">
+                    <input type="text" class="form-control" id="generalFont" placeholder="Times New Roman" value=""
+                           required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="generalSize">Кегель</label>
-                    <input type="text" class="form-control" id="generalSize" placeholder="14" value="">
+                    <input type="text" class="form-control" id="generalSize" placeholder="14" value="" required>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="codeFont">Шрифт кода</label>
-                    <input type="text" class="form-control" id="codeFont" placeholder="Consolas" value="">
+                    <input type="text" class="form-control" id="codeFont" placeholder="Consolas" value="" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="codeSize">Кегель кода</label>
-                    <input type="text" class="form-control" id="codeSize" placeholder="10" value="">
+                    <input type="text" class="form-control" id="codeSize" placeholder="10" value="" required>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
+
                     <label for="forH1">H1</label>
                     <input type="text" class="form-control" id="forH1" placeholder="" value="">
                 </div>
                 <div class="col-md-6 mb-3">
+
                     <label for="forH2">H2</label>
                     <input type="text" class="form-control" id="forH2" placeholder="" value="">
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="forH3">H3</label>
+                    <input type="text" class="form-control" id="forH3" placeholder="" value="">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="forH3">H3</label>
                     <input type="text" class="form-control" id="forH3" placeholder="" value="">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="forH4">H4</label>
-                    <input type="text" class="form-control" id="forH4" placeholder="" value="">
+                    <label for="forH3">H3</label>
+                    <input type="text" class="form-control" id="forH3" placeholder="" value="">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="forH5">H5</label>
-                    <input type="text" class="form-control" id="forH5" placeholder="" value="">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="forH6">H6</label>
-                    <input type="text" class="form-control" id="forH6" placeholder="" value="">
+                    <label for="forH3">H3</label>
+                    <input type="text" class="form-control" id="forH3" placeholder="" value="">
                 </div>
             </div>
 
@@ -94,20 +112,18 @@
                     Вид работы
                 </button>
                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                    <a class="dropdown-item" id="empty_doc">-</a>
-                    <a class="dropdown-item" id="course_doc">Курсовая работа</a>
-                    <a class="dropdown-item" id="lab_doc">Лабораторная работа</a>
+                    <a class="dropdown-item" id="empty_doc" href="#">-</a>
+                    <a class="dropdown-item" id="course_doc" href="#">Курсовая работа</a>
+                    <a class="dropdown-item" id="lab_doc" href="#">Лабораторная работа</a>
                 </div>
             </div>
             <div id="requirements"></div>
-<!--
--->
-            <hr></hr>
+
 
             <div>
                 <button class="btn btn-primary" id="create_report" type="submit">Отправить</button>
                 {% if link %}
-                <a href={{link}} class="btn btn-success">Ссылка на отчет</a>
+                <a href={{link}} class="badge badge-primary">Ссылка на отчет</a>
                 {% endif %}
                 <div id="test"></div>
             </div>
@@ -120,6 +136,19 @@
 </div>
 
 
-
-
-{% endblock %}
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="js/jquery-ui.min.js"></script>
+<script src="js/jquery-latest.min.js"></script>
+<script src="js/index.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
+</body>
+</html>
