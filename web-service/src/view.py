@@ -8,6 +8,8 @@ from flask import request
 @app.route('/home', methods=["GET", 'POST'])
 def index():
     if request.method == 'POST':
+        for i in request.form:
+            print(i)
         wiki = request.form['wiki']
         branch = request.form['branch']
         repo = request.form['repo']

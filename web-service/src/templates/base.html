@@ -17,23 +17,17 @@
     </title>
 </head>
 <body class="bg-light">
-<h1>hello world!</h1>
 
         {% block content %}
 
         {% endblock %}
 
-<button id="btn_start">open</button>
-<button id="btn_reset">close</button>
-
-<div>
-    <div id="message"></div>
-</div>
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js')}}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-latest.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/index.js')}}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js')}}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js')}}" crossorigin="anonymous"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}" crossorigin="anonymous"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}" crossorigin="anonymous"></script>
 
 
 </body>
