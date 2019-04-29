@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}
+
+    Home Page
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="py-5 text-center">
+        <h2>Генерация отчетов</h2>
+    </div>
+    <div class="col-md-10">
+        <form action="home" class="needs-validation" method="POST">
+            <div class="mb-3">
+                <label for="wiki_name">Ссылка на вики:</label>
+                <input type="text" class="form-control" id="wiki_name" name="wiki"
+                       value="{{ request.args.get('wiki','') }}" required>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="repo_name">Ссылка на репозиторий, куда будет отправлен отчет:</label>
+                <input type="text" class="form-control" id="repo_name" name="repo"
+                       value="{{ request.args.get('repo','') }}" required>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="branch_name">Название ветки</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="branch_name" name="branch"
+                           value="{{ request.args.get('branch','') }}" placeholder="master">
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="generalFont">Основной шрифт</label>
+                    <input type="text" class="form-control" id="generalFont" name="gen_font" placeholder="Times New Roman" value="{{ request.args.get('gen_font','') }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="generalSize">Кегель</label>
+                    <input type="text" class="form-control" id="generalSize" placeholder="14" name="gen_size" value="{{ request.args.get('gen_size','') }}">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="codeFont">Шрифт кода</label>
+                    <input type="text" class="form-control" id="codeFont" placeholder="Consolas" name="code_font" value="{{ request.args.get('code_font','') }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="codeSize">Кегель кода</label>
+                    <input type="text" class="form-control" id="codeSize" placeholder="10" name="code_size" value="{{ request.args.get('code_size','') }}">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="forH1">H1</label>
+                    <input type="text" class="form-control" id="forH1" placeholder="" name="h_1" value="{{ request.args.get('h_1','') }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="forH2">H2</label>
+                    <input type="text" class="form-control" id="forH2" placeholder="" name="h_2" value="{{ request.args.get('h_2','') }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="forH3">H3</label>
+                    <input type="text" class="form-control" id="forH3" placeholder="" name="h_3" value="{{ request.args.get('h_3','') }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="forH4">H4</label>
+                    <input type="text" class="form-control" id="forH4" placeholder="" name="h_4" value="{{ request.args.get('h_4','') }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="forH5">H5</label>
+                    <input type="text" class="form-control" id="forH5" placeholder="" name="h_5" value="{{ request.args.get('h_5','') }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="forH6">H6</label>
+                    <input type="text" class="form-control" id="forH6" placeholder="" name="h_6" value="{{ request.args.get('h_6','') }}">
+                </div>
+            </div>
+
+            <div class="btn-group" role="group">
+                <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
+                        data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                    Вид работы
+                </button>
+                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                    <a class="dropdown-item" id="empty_doc">-</a>
+                    <a class="dropdown-item" id="course_doc">Курсовая работа</a>
+                    <a class="dropdown-item" id="lab_doc">Лабораторная работа</a>
+                </div>
+            </div>
+            <div class="row" id="requirements"></div>
+<!--
+
+
+-->
+
+            <div class="col-md-6 mb-3"><label for="teacher">Преподаватель</label><input type="text" class="form-control" id="teacher" placeholder="" name="teacher" value="{{ request.args.get('teacher','') }}"></div>
+
+            <hr></hr>
+
+            <div>
+                <button class="btn btn-primary" id="create_report" type="submit">Отправить</button>
+                {% if link %}
+                <a href={{link}} class="btn btn-success">Ссылка на отчет</a>
+                {% endif %}
+                <div id="test"></div>
+            </div>
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+
+
+{% endblock %}
