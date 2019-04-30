@@ -16,7 +16,7 @@ RUN apt-get clean
 
 ADD ./ /report_generator
 WORKDIR /report_generator
-CMD /scripts/local_deploy.sh
+RUN ./scripts/local_deploy.sh
 
 CMD /etc/init.d/apache2 restart && /usr/sbin/sshd -D \
     -o UseDNS=no\
