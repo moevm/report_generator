@@ -2,7 +2,7 @@
 
 {% block title %}
 
-    Home Page
+Home Page
 
 {% endblock %}
 
@@ -13,78 +13,76 @@
         <h2>Генерация отчетов</h2>
     </div>
     <div class="col-md-10">
-        <form action="home" class="needs-validation" method="POST">
+        <form method="POST" class="needs-validation" action="javascript:void(null);" onsubmit="submitForm()">
             <div class="mb-3">
                 <label for="wiki_name">Ссылка на вики:</label>
-                <input type="text" class="form-control" id="wiki_name" name="wiki"
-                       value="{{ request.args.get('wiki','') }}" required>
+                <input type="text" class="form-control" id="wiki_name" required>
             </div>
 
 
             <div class="mb-3">
                 <label for="repo_name">Ссылка на репозиторий, куда будет отправлен отчет:</label>
-                <input type="text" class="form-control" id="repo_name" name="repo"
-                       value="{{ request.args.get('repo','') }}" required>
+                <input type="text" class="form-control" id="repo_name" required>
             </div>
 
 
             <div class="mb-3">
                 <label for="branch_name">Название ветки</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" id="branch_name" name="branch"
-                           value="{{ request.args.get('branch','') }}" placeholder="master">
+                    <input type="text" class="form-control" id="branch_name" placeholder="master">
                 </div>
             </div>
 
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="generalFont">Основной шрифт</label>
-                    <input type="text" class="form-control" id="generalFont" name="gen_font" placeholder="Times New Roman" value="{{ request.args.get('gen_font','') }}">
+                    <label for="general_font">Основной шрифт</label>
+                    <input type="text" class="form-control" id="general_font" placeholder="Times New Roman" value="">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="generalSize">Кегель</label>
-                    <input type="text" class="form-control" id="generalSize" placeholder="14" name="gen_size" value="{{ request.args.get('gen_size','') }}">
+                    <label for="general_size">Кегль</label>
+                    <input type="text" class="form-control" id="general_size" placeholder="14">
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="codeFont">Шрифт кода</label>
-                    <input type="text" class="form-control" id="codeFont" placeholder="Consolas" name="code_font" value="{{ request.args.get('code_font','') }}">
+                    <label for="code_font">Шрифт кода</label>
+                    <input type="text" class="form-control" id="code_font" placeholder="Consolas">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="codeSize">Кегель кода</label>
-                    <input type="text" class="form-control" id="codeSize" placeholder="10" name="code_size" value="{{ request.args.get('code_size','') }}">
+                    <label for="code_size">Кегль кода</label>
+                    <input type="text" class="form-control" id="code_size" placeholder="10">
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="forH1">H1</label>
-                    <input type="text" class="form-control" id="forH1" placeholder="" name="h_1" value="{{ request.args.get('h_1','') }}">
+                    <label for="for_h1">H1</label>
+                    <input type="text" class="form-control" id="for_h1" placeholder="">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="forH2">H2</label>
-                    <input type="text" class="form-control" id="forH2" placeholder="" name="h_2" value="{{ request.args.get('h_2','') }}">
+                    <label for="for_h2">H2</label>
+                    <input type="text" class="form-control" id="for_h2" placeholder="">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="forH3">H3</label>
-                    <input type="text" class="form-control" id="forH3" placeholder="" name="h_3" value="{{ request.args.get('h_3','') }}">
+                    <label for="for_h3">H3</label>
+                    <input type="text" class="form-control" id="for_h3" placeholder="">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="forH4">H4</label>
-                    <input type="text" class="form-control" id="forH4" placeholder="" name="h_4" value="{{ request.args.get('h_4','') }}">
+                    <label for="for_h4">H4</label>
+                    <input type="text" class="form-control" id="for_h4" placeholder="">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="forH5">H5</label>
-                    <input type="text" class="form-control" id="forH5" placeholder="" name="h_5" value="{{ request.args.get('h_5','') }}">
+                    <label for="for_h5">H5</label>
+                    <input type="text" class="form-control" id="for_h5" placeholder="">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="forH6">H6</label>
-                    <input type="text" class="form-control" id="forH6" placeholder="" name="h_6" value="{{ request.args.get('h_6','') }}">
+                    <label for="for_h6">H6</label>
+                    <input type="text" class="form-control" id="for_h6" placeholder="">
                 </div>
             </div>
+
 
             <div class="btn-group" role="group">
                 <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
@@ -98,22 +96,19 @@
                     <a class="dropdown-item" id="lab_doc">Лабораторная работа</a>
                 </div>
             </div>
-            <div class="row" id="requirements"></div>
-<!--
+            <p></p>
 
-
--->
-
-            <div class="col-md-6 mb-3"><label for="teacher">Преподаватель</label><input type="text" class="form-control" id="teacher" placeholder="" name="teacher" value="{{ request.args.get('teacher','') }}"></div>
-
-            <hr></hr>
-
-            <div>
-                <button class="btn btn-primary" id="create_report" type="submit">Отправить</button>
+            <div id="requirements"></div>
+            <hr>
+            <div class="row col-md-6 mb-3" id="buttons_field">
+                <input type="submit" class="btn btn-primary" value="Сформировать отчет" id="btn_submit">
+                 &nbsp;&nbsp;&nbsp;&nbsp;
+                <!--<div class="spinner-border text-success" role="status"><span class="sr-only">Loading...</span></div>
+                -->
                 {% if link %}
                 <a href={{link}} class="btn btn-success">Ссылка на отчет</a>
                 {% endif %}
-                <div id="test"></div>
+
             </div>
         </form>
 
@@ -122,8 +117,6 @@
 
 
 </div>
-
-
 
 
 {% endblock %}
