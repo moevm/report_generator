@@ -4,31 +4,44 @@ LEN_COURSE_DOC = 24
 LEN_LAB_DOC = 19
 '''
 принцип определения вида отчета - кол-во полей определяет вид отчета, так как
-пустой док < лабораторная < курсовая 
+пустой док < лабораторной < курсовой 
 '''
-'''
-NUMBER = "number"
+
+TYPE = "type"
+LR = "LR"
+KR = "KR"
+EMPTY_DOC = "-"
+MAIN_TEXT = "main_text"
+CODE_TEXT = "code_text"
+FONT = "font"
+SIZE = "size"
+NEW_MAIN_FONT = "general_font"
+NEW_MAIN_SIZE = "general_size"
+NEW_CODE_FONT = "code_font"
+NEW_CODE_SIZE = "code_size"
+HEADER = "h{}"
+FORMAT = "format"
+TEACHER = "teacher"
+STUDENT = "student"
+OLD_GROUP = "group"
+NEW_GROUP = "number_group"
+THEME = "theme"
 CATHEDRA = "cathedra"
 DISCIPLINE = "discipline"
-THEME = "theme"
-GROUP = "group"
-NAME_OF_STUDENT = "student"
-TEACHER = "teacher"
-INIT_DATA = "init_data"
-CONTEXT_OF_EXPLANATION = "context_of_explanation"
+OLD_CONTENT = "context_of_explanation"
+NEW_CONTENT = "content"
 MIN_PAGES = "min_pages"
 DATE_START = "date_start"
 DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
-ANNOTATION = "annotation"
-INTRODUCTION = "introduction"
-'''
+
 
 class json_api:
 
     def __init__(self, new_dict):
         self.read_json_file()
-        self.change_content(new_dict)
+        self.new_settings = new_dict
+        self.change_content()
         self.write_json_file()
         pass
 
@@ -40,24 +53,47 @@ class json_api:
         with open(JSON_FILE, 'w') as file:
             file.write(json.dumps(self.json_data))
 
-    def change_content(self, settings):
-        length_set = len(settings)
+    def change_content(self):
+        length_set = len(self.new_settings)
         if length_set == LEN_COURSE_DOC:
-            print("course")
+            self.json_data[TYPE] = KR
+            self.course_content()
         elif length_set == LEN_LAB_DOC:
-            print("lab")
+            self.json_data[TYPE] = LR
+            self.lab_content()
         else:
-            print("empty")
-        print(len(settings))
+            self.json_data[TYPE] = EMPTY_DOC
+            self.general_content()
+            return
+        self.general_content()
 
     def general_content(self):
-        pass
+        self.json_data[MAIN_TEXT][FONT] = self.new_settings[NEW_MAIN_FONT]
+        self.json_data[MAIN_TEXT][SIZE] = int(self.new_settings[NEW_MAIN_SIZE])
+        self.json_data[CODE_TEXT][FONT] = self.new_settings[NEW_CODE_FONT]
+        self.json_data[CODE_TEXT][SIZE] = int(self.new_settings[NEW_CODE_SIZE])
+        for i in range(1, 7):
+            if self.new_settings[HEADER.format(i)]:
+                self.json_data[FORMAT][HEADER.format(i)][SIZE] = int(self.new_settings[HEADER.format(i)])
+
+        print(self.json_data)
 
     def lab_content(self):
-        pass
+        self.json_data[TEACHER] = self.new_settings[TEACHER]
+        self.json_data[STUDENT] = self.new_settings[STUDENT]
+        self.json_data[OLD_GROUP] = self.new_settings[NEW_GROUP]
+        self.json_data[THEME] = self.new_settings[THEME]
+        self.json_data[CATHEDRA] = self.new_settings[CATHEDRA]
+        self.json_data[DISCIPLINE] = self.new_settings[DISCIPLINE]
 
     def course_content(self):
-        pass
+        self.lab_content()
+        self.json_data[OLD_CONTENT] = self.new_settings[NEW_CONTENT]
+        self.json_data[MIN_PAGES] = self.new_settings[MIN_PAGES]
+        self.json_data[DATE_START] = self.new_settings[DATE_START]
+        self.json_data[DATE_FINISH] = self.new_settings[DATE_FINISH]
+        self.json_data[DATE_DEFEND] = self.new_settings[DATE_DEFEND]
+
 
 if __name__ == '__main__':
     app = json_api()
