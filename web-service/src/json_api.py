@@ -68,10 +68,10 @@ class json_api:
         self.general_content()
 
     def general_content(self):
-        self.json_data[MAIN_TEXT][FONT] = self.new_settings[NEW_MAIN_FONT]
-        self.json_data[MAIN_TEXT][SIZE] = int(self.new_settings[NEW_MAIN_SIZE])
-        self.json_data[CODE_TEXT][FONT] = self.new_settings[NEW_CODE_FONT]
-        self.json_data[CODE_TEXT][SIZE] = int(self.new_settings[NEW_CODE_SIZE])
+        if self.new_settings[NEW_MAIN_FONT]: self.json_data[MAIN_TEXT][FONT] = self.new_settings[NEW_MAIN_FONT]
+        if self.new_settings[NEW_MAIN_SIZE]: self.json_data[MAIN_TEXT][SIZE] = int(self.new_settings[NEW_MAIN_SIZE])
+        if self.new_settings[NEW_CODE_FONT]: self.json_data[CODE_TEXT][FONT] = self.new_settings[NEW_CODE_FONT]
+        if self.new_settings[NEW_CODE_SIZE]: self.json_data[CODE_TEXT][SIZE] = int(self.new_settings[NEW_CODE_SIZE])
         for i in range(1, 7):
             if self.new_settings[HEADER.format(i)]:
                 self.json_data[FORMAT][HEADER.format(i)][SIZE] = int(self.new_settings[HEADER.format(i)])
@@ -79,20 +79,20 @@ class json_api:
         print(self.json_data)
 
     def lab_content(self):
-        self.json_data[TEACHER] = self.new_settings[TEACHER]
-        self.json_data[STUDENT] = self.new_settings[STUDENT]
-        self.json_data[OLD_GROUP] = self.new_settings[NEW_GROUP]
-        self.json_data[THEME] = self.new_settings[THEME]
-        self.json_data[CATHEDRA] = self.new_settings[CATHEDRA]
-        self.json_data[DISCIPLINE] = self.new_settings[DISCIPLINE]
+        if self.new_settings[TEACHER]: self.json_data[TEACHER] = self.new_settings[TEACHER]
+        if self.new_settings[STUDENT]: self.json_data[STUDENT] = self.new_settings[STUDENT]
+        if self.new_settings[NEW_GROUP]: self.json_data[OLD_GROUP] = self.new_settings[NEW_GROUP]
+        if self.new_settings[THEME]: self.json_data[THEME] = self.new_settings[THEME]
+        if self.new_settings[CATHEDRA]: self.json_data[CATHEDRA] = self.new_settings[CATHEDRA]
+        if self.new_settings[DISCIPLINE]: self.json_data[DISCIPLINE] = self.new_settings[DISCIPLINE]
 
     def course_content(self):
         self.lab_content()
-        self.json_data[OLD_CONTENT] = self.new_settings[NEW_CONTENT]
-        self.json_data[MIN_PAGES] = self.new_settings[MIN_PAGES]
-        self.json_data[DATE_START] = self.new_settings[DATE_START]
-        self.json_data[DATE_FINISH] = self.new_settings[DATE_FINISH]
-        self.json_data[DATE_DEFEND] = self.new_settings[DATE_DEFEND]
+        if self.new_settings[NEW_CONTENT]: self.json_data[OLD_CONTENT] = self.new_settings[NEW_CONTENT]
+        if self.new_settings[MIN_PAGES]: self.json_data[MIN_PAGES] = self.new_settings[MIN_PAGES]
+        if self.new_settings[DATE_START]: self.json_data[DATE_START] = self.new_settings[DATE_START]
+        if self.new_settings[DATE_FINISH]: self.json_data[DATE_FINISH] = self.new_settings[DATE_FINISH]
+        if self.new_settings[DATE_DEFEND]: self.json_data[DATE_DEFEND] = self.new_settings[DATE_DEFEND]
 
 
 if __name__ == '__main__':
