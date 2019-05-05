@@ -1,0 +1,7 @@
+1. Cделать /var/www папкой www-data:www-data `chown www-data:www-data /var/www`
+
+2. Cкопировать в /var/www/.ssh свой закрытый ключ в id_rsa 
+
+3. id_rsa должен быть с разрешением 600 `chmod 600 id_rsa`
+
+4. Зайти в www-data( `sudo su -s /bin/bash www-data` ) и прописать `ssh -T git@github.com` для того, чтобы сгенерировался файл known_hosts в `/var/www/.ssh/` (https://help.github.com/en/articles/testing-your-ssh-connection)

@@ -384,8 +384,10 @@ class Dword:
         self.document.add_page_break()
 
     def download_settings(self):
-        with open(SETTINGS_FILE) as file:
-            self.js_content = json.load(file)
+        paths = Path(os.getcwd()).rglob(SETTINGS_FILE)
+        for path in paths:
+            with open(path) as file:
+                self.js_content = json.load(file)
 
     def choose_path_template(self):
         if self.js_content[TYPE_OF_WORK] == COURSE_WORK:
