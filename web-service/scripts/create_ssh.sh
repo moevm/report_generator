@@ -11,3 +11,5 @@ chmod 666 /var/www/.ssh/config
   echo '     IdentityFile $HOME/www-data.ssh/id_rsa'
 } > /var/www/.ssh/config
 chown -R www-data:www-data /var/www/.ssh
+chown -R www-data:www-data /var/www
+
