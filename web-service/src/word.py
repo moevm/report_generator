@@ -13,6 +13,7 @@ from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
+from github_api import Gengit
 
 GIT_REPO = "wiki_dir"
 PATH_TO_WIKI = "{}/{}.md"
@@ -218,7 +219,8 @@ class Dword:
         #self.doc = Document(self.name)
         self.add_text_from_wiki()
         #self.add_final_part()
-        #self.save(self.name)
+        self.add_comments()
+        self.save(self.name)
 
     def create_styles(self):
         styles = self.document.styles
@@ -247,7 +249,10 @@ class Dword:
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
-        self.document.save(os.path.abspath(NAME_REPORT))
+        #self.document.save(os.path.abspath(NAME_REPORT))
+
+    def create_comments_from_git(self):
+        pass
 
     def make_title(self):
         doc = DocxTemplate(self.path)
@@ -310,7 +315,7 @@ class Dword:
             print(ERROR_MESSAGE_UNOCONV, e)
 
     def save(self, name=NAME_REPORT):
-        self.document.save(name)
+        self.document.save(os.path.abspath(name))
 
     def number_position(self, _number, code_size):
         max_len = len(str(code_size))
@@ -345,3 +350,15 @@ class Dword:
             self.path = PATH_TO_TEMPLATE.format(LAB_WORK)
         else:
             self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
+
+    def add_comments(self):
+        git = Gengit()
+        self.add_page_break()
+        self.add_line("Комменатрии из пулл-реквестов", align=ALIGN_CENTRE, set_bold=True)
+        comments = git.get_comments(self.js_content["pull_request"]["owner"], self.js_content["pull_request"]["repo"],
+                         self.js_content["pull_request"]["number_of_pr"])
+
+        for element in comments:
+            for body_element in element.body_comments:
+                self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1)
+            self.add_line(element.body_code, align=ALIGN_LEFT, font_size=12)
