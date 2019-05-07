@@ -112,6 +112,12 @@ TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
 
+COMMENTS_PR = "Комменатрии из пулл-реквестов"
+PR = "pull_request"
+OWNER_OF_PR = "owner"
+REPO_OF_PR = "repo"
+NUMBER_OF_PR = "number_of_pr"
+
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
                   'centre': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -354,9 +360,9 @@ class Dword:
     def add_comments(self):
         git = Gengit()
         self.add_page_break()
-        self.add_line("Комменатрии из пулл-реквестов", align=ALIGN_CENTRE, set_bold=True)
-        comments = git.get_comments(self.js_content["pull_request"]["owner"], self.js_content["pull_request"]["repo"],
-                         self.js_content["pull_request"]["number_of_pr"])
+        self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
+        comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
+                         self.js_content[PR][NUMBER_OF_PR])
 
         for element in comments:
             for body_element in element.body_comments:
