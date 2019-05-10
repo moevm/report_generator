@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-pip3 install -r scripts/requirements.txt
+python3.6 -m pip install -r scripts/requirements.txt
+
 
 CATALOG='report_generator'
 HOSTS_STRING="127.0.1.1       report_generator"
@@ -13,6 +14,12 @@ fi
 
 rm -rf /var/www/"$CATALOG"
 mkdir /var/www/"$CATALOG"
+
+
+python3.6 -m pip install -v mod_wsgi-httpd
+python3.6 -m pip install mod_wsgi
+#RUN mod_wsgi-express module-config
+
 
 cp ./src/*.py  /var/www/"$CATALOG"
 cp ./src/*.json  /var/www/"$CATALOG"

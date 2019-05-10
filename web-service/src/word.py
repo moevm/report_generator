@@ -224,7 +224,7 @@ class Dword:
         self.choose_path_template()
         self.make_title()
         self.document = Document(os.path.abspath(self.path))
-        self.convert_format()
+        #self.convert_format()
         self.add_text_from_wiki()
         #self.add_final_part()
         #self.save(self.name)
@@ -387,7 +387,9 @@ class Dword:
         paths = Path(os.getcwd()).rglob(SETTINGS_FILE)
         for path in paths:
             with open(path) as file:
+                print("was loaded")
                 self.js_content = json.load(file)
+                return
 
     def choose_path_template(self):
         if self.js_content[TYPE_OF_WORK] == COURSE_WORK:

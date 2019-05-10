@@ -10,12 +10,16 @@ RUN apt-get update
 
 RUN apt-get install -y build-essential python3.6 python3.6-dev python3-pip
 
-
-RUN apt-get -y install apache2 libapache2-mod-wsgi-py3
+RUN apt-get clean && apt-get update
+RUN apt-get -y install apache2 apache2-dev
+RUN python3.6 -m pip install -v mod_wsgi-httpd
+RUN python3.6 -m pip install mod_wsgi
 RUN apt-get clean
 
 ADD ./ /report_generator
 WORKDIR /report_generator
+RUN  mod_wsgi-express module-config
+#RUN a2enmod wsgi
 RUN ./scripts/local_deploy.sh
 
 CMD /etc/init.d/apache2 restart && /usr/sbin/sshd -D \
@@ -24,4 +28,3 @@ CMD /etc/init.d/apache2 restart && /usr/sbin/sshd -D \
     -o PasswordAuthentication=yes\
     -o UsePrivilegeSeparation=no\
     -o PidFile=/tmp/sshd.pid
-
