@@ -112,11 +112,15 @@ TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
 
-COMMENTS_PR = "Комменатрии из пулл-реквестов"
+COMMENTS_PR = "Комментарии из пулл-реквестов"
 PR = "pull_request"
 OWNER_OF_PR = "owner"
 REPO_OF_PR = "repo"
 NUMBER_OF_PR = "number_of_pr"
+
+PR_SOURCE_CODE = "Исходный код:"
+PR_COMMENTS = "Комментарии:"
+PR_DIFFS = "Изменения:"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -215,7 +219,8 @@ class PythonDocxRenderer(mistune.Renderer):
 
 class Dword:
 
-    def __init__(self):
+    def __init__(self, branch):
+        self.branch = branch
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
         self.name = LOCAL_REPO
@@ -255,7 +260,6 @@ class Dword:
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
-        #self.document.save(os.path.abspath(NAME_REPORT))
 
     def create_comments_from_git(self):
         pass
@@ -358,13 +362,24 @@ class Dword:
             self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
 
     def add_comments(self):
-        git = Gengit()
+        '''
+
+        Функция добавляет комментарии в word-документ, взятые с github'a. Вид комментария:
+        1. исходный фрагмент кода
+        2. комментарии
+        3. исправление в виде diff
+        '''
+        git = Gengit(branch=self.branch)
         self.add_page_break()
         self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
         comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
                          self.js_content[PR][NUMBER_OF_PR])
 
         for element in comments:
+            self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            self.add_line(element.body_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
             for body_element in element.body_comments:
-                self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1)
-            self.add_line(element.body_code, align=ALIGN_LEFT, font_size=12)
+                self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True)
+            self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)

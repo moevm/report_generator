@@ -48,9 +48,9 @@
     }
   },
   "pull_request" : {
-    "owner" : "OSLL",
-    "repo": "report_generator",
-    "number_of_pr": [20, 40]
+    "owner" : "light5551",
+    "repo": "test_gen",
+    "number_of_pr": [9]
   }
 }
 

@@ -1,6 +1,5 @@
 #!./venv/bin/python3.6
-import sys
-import os
+import subprocess
 import git
 import requests
 
@@ -17,13 +16,18 @@ ERROR_REPO = "Wrong link to repository!"
 ERROR_BRANCH = "Branch doesnt exist!"
 
 API_GITHUB = "https://api.github.com/repos/{}/{}/pulls/{}/comments"
-# GET /repos/:owner/:repo/pulls/:pull_number/comments
 POSITION = "original_position"
 USER = "user"
 LOGIN = "login"
 BODY = "body"
+COMMIT = "original_commit_id"
 DIFF_HUNK = "diff_hunk"
-
+FILENAME_DIFF = "diff_file.txt"
+FILENAME_LOG = "log_file.txt"
+LOG_SH = "./do_git_log.sh {}"
+DIFF_SH = "./do_git_diff.sh {} {} {}"
+PLUS = "+"
+MINUS = "-"
 
 
 class Gengit:
@@ -62,7 +66,12 @@ class Gengit:
     def push(self):
         self.repo.git.push(ORIGIN, self.branch)
 
+
     def get_response(self, url):
+        '''
+
+        url - ссылка, по котоой будет произведен запрос на github. Функция возвращает ответ на запрос
+        '''
         params = {"sort": "updated"}
         response = requests.get(url, params=params)
         return response
@@ -70,31 +79,61 @@ class Gengit:
     def comporator(self, object):
         return object[POSITION]
 
-    def new_hunk(self, string):
-        s = string.split('\n')
-        length = len(s) - 1
+    def new_hunk(self, diff_string):
+        '''
+
+        diff_string - строка, в которой находится весь diff для участа кода комментария. Функция возвращает часть
+        diff'a, которая является обновленной.
+        '''
+        lines_of_diff = diff_string.split('\n')
+        length = len(lines_of_diff) - 1
         new_str = []
-        while s[length][0] == "+":
-            new_str.append(s[length][1:] + "\n")
+        while lines_of_diff[length][0] == PLUS:
+            new_str.append("{}{}".format(lines_of_diff[length][1:], '\n'))
             length -= 1
         return ''.join(new_str)
 
     def create_comments_for_word(self, my_json):
+        '''
+
+        my_json - ответ на запрос от github api для комментариев по пул-реквесту. Функция возвращает список нужных
+        данных, взятых с my_json. Данные:
+        * позиция
+        * логин человека, который отправил комментарий
+        * тело комментария
+        * исходный код
+        * номер коммита (для удобства берется первые 7 символов sha коммита)
+        '''
         mylist = []
         my_json = sorted(my_json, key=self.comporator)
         for comment in my_json:
             mylist.append([comment[POSITION], comment[USER][LOGIN], comment[BODY],
-                           self.new_hunk(comment[DIFF_HUNK])])
+                           self.new_hunk(comment[DIFF_HUNK]), comment[COMMIT][0:7]])
         return mylist
 
     class comment:
         def __init__(self, id):
+            '''
+
+            id - это идентификатор для каждого комментария. Берется из json, который выдает github api. Класс служит
+            для хранения информации вида:
+            * исходный код
+            * комментарии
+            * diff после исправлений
+            '''
             self.body_comments = []
             self.id = id
             self.body_code = ""
+            self.commit = ""
+            self.diff = ""
 
-    # 0 - id | 1 - login | 2 - comment | 3 - body
     def optimization_comments(self, comments):
+        '''
+
+        comments - список, который содержит каждое сообщение по отдельности.
+        Функция возвращает список, в котором объединены комментарии к одному блоку кода,
+        к которому они относились. 0 - id | 1 - login | 2 - comment | 3 - body | 4 - commit
+        '''
         total_comments = []
         for element in comments:
             if len(total_comments) > 0 and element[0] == total_comments[len(total_comments) - 1].id:
@@ -103,13 +142,96 @@ class Gengit:
             my_comment = self.comment(element[0])
             my_comment.body_comments.append([element[1], element[2]])
             my_comment.body_code = element[3]
+            my_comment.commit = element[4]
             total_comments.append(my_comment)
         return total_comments
 
     def get_comments(self, company, name_of_repo, pull_requests):
+        '''
+
+        company - название организация, к которой относится репозиторий, name_of_repo - название репозитория,
+        pull_request - номер пул-реквеста. Функция возвращает список, который хранит информацию о изначальном
+        блоке кода, комментариям к нему и diff'е следующего коммита. Предполагается, что в следующем коммите хранится
+        только исправления проблем, выявленных преподавателем.
+        '''
         comments = []
         for number_of_pr in pull_requests:
             url = API_GITHUB.format(company, name_of_repo, number_of_pr)
             response = self.get_response(url)
             comments += self.create_comments_for_word(response.json())
-        return self.optimization_comments(comments)
+        main_comments = self.optimization_comments(comments)
+        return self.add_diff(main_comments, main_comments[0].commit)
+
+    def add_diff(self, comments, original_commit):
+        '''
+
+        comments - список, который хранит информацию об изначальном коде, sha коммита и комментариях,
+        original_commit - коммит, в котором преподаватель оставил свои комментарии. Функция возвращает список с diff,ом
+        '''
+        self.create_log(self.local_repo)
+        end_commit = self.find_next_commit(original_commit)
+        self.create_dif(self.local_repo, self.branch, original_commit, end_commit)
+        diffs = self.get_diffs()
+        for index in range(len(comments)):
+            comments[index].diff = diffs[index]
+        return comments
+
+    def create_log(self, repo):
+        '''
+
+        repo - название репозитория, в котором мы ходим вызвать команду git log. Функция записывает результат работы в
+        файл для лога через bash
+        '''
+        subprocess.Popen(LOG_SH.format(repo), shell=True, stdout=subprocess.PIPE)
+
+    def create_dif(self, repo, branch, begin_commit, end_commit):
+        '''
+
+        repo - название репозитория. begin_commit - коммит, на котором были комментарии преподавателя,
+        end_commit - коммит, на котором должны быть исправления, т.е. следующий по счету. Функция записывает результат
+        работы комманды [ git diff begin_commit end_commit ] в файл для diff'a
+        '''
+        subprocess.Popen(DIFF_SH.format(repo, begin_commit, end_commit), shell=True,
+                         stdout=subprocess.PIPE)
+
+    def get_diffs(self):
+        '''
+        Функция парсит дифы из диф-файла и возвращает список дифов. Каждый диф
+        представлен как одна строка
+
+        '''
+        diffs = []
+        string = ''
+        with open(FILENAME_DIFF, 'r') as file:
+            lines = file.readlines()
+            for i in lines:
+
+                if i[0] in [PLUS, MINUS] and not i.startswith(PLUS * 3) and not i.startswith(MINUS * 3):
+                    string = '%s%s' % (string, i)
+                    continue
+                if string:
+                    diffs.append(string)
+                string = ''
+            return diffs
+
+    def get_list_of_commit(self):
+        '''
+
+        Функция берет вывод git log'a из файла, и возвращает список всех коммитов
+        на заданной ветке
+        '''
+        with open(FILENAME_LOG, 'r') as file:
+            commits = [i.split()[0] for i in file.readlines()]
+            return commits
+
+    def find_next_commit(self, prev_commit):
+        '''
+
+        prev_commit - коммит, у которого надо найти следующий коммит. Если тот отсутсвует, возвращается None.
+        Функция возвращает следующий по счету коммит.
+        '''
+        next_commit = ''
+        for commit in self.get_list_of_commit():
+            if commit == prev_commit:
+                return next_commit
+            next_commit = commit

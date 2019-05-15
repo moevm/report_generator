@@ -67,7 +67,7 @@ def main(type_of_input):
     report = TIME_REPORT
 
     if all_ok:
-        word = Dword()
+        word = Dword(branch=branch)
         path_doc = os.path.join(git.local_repo, TIME_REPORT)
         word.save(path_doc)
         if word.js_content[PDF]:
