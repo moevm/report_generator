@@ -19,6 +19,8 @@ NEW_MAIN_FONT = "general_font"
 NEW_MAIN_SIZE = "general_size"
 NEW_CODE_FONT = "code_font"
 NEW_CODE_SIZE = "code_size"
+NUMBER_FOR_H1 = 1
+NUMBER_FOR_H6 = 7
 HEADER = "h{}"
 FORMAT = "format"
 TEACHER = "teacher"
@@ -34,16 +36,17 @@ MIN_PAGES = "min_pages"
 DATE_START = "date_start"
 DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
+COMMA = ","
+COLON = ": "
 
 
-class json_api:
+class JsonApi:
 
     def __init__(self, new_dict):
         self.read_json_file()
         self.new_settings = new_dict
         self.change_content()
         self.write_json_file()
-        pass
 
     def read_json_file(self):
         with open(JSON_FILE, 'r') as file:
@@ -51,7 +54,8 @@ class json_api:
 
     def write_json_file(self):
         with open(JSON_FILE, 'w') as file:
-            file.write(json.dumps(self.json_data))
+            file.write(json.dumps(self.json_data, sort_keys=False, indent=4, ensure_ascii=False,
+                                  separators=(COMMA, COLON)))
 
     def change_content(self):
         length_set = len(self.new_settings)
@@ -63,8 +67,6 @@ class json_api:
             self.lab_content()
         else:
             self.json_data[TYPE] = EMPTY_DOC
-            self.general_content()
-            return
         self.general_content()
 
     def general_content(self):
@@ -72,11 +74,9 @@ class json_api:
         if self.new_settings[NEW_MAIN_SIZE]: self.json_data[MAIN_TEXT][SIZE] = int(self.new_settings[NEW_MAIN_SIZE])
         if self.new_settings[NEW_CODE_FONT]: self.json_data[CODE_TEXT][FONT] = self.new_settings[NEW_CODE_FONT]
         if self.new_settings[NEW_CODE_SIZE]: self.json_data[CODE_TEXT][SIZE] = int(self.new_settings[NEW_CODE_SIZE])
-        for i in range(1, 7):
+        for i in range(NUMBER_FOR_H1, NUMBER_FOR_H6):
             if self.new_settings[HEADER.format(i)]:
                 self.json_data[FORMAT][HEADER.format(i)][SIZE] = int(self.new_settings[HEADER.format(i)])
-
-        print(self.json_data)
 
     def lab_content(self):
         if self.new_settings[TEACHER]: self.json_data[TEACHER] = self.new_settings[TEACHER]
@@ -96,5 +96,5 @@ class json_api:
 
 
 if __name__ == '__main__':
-    app = json_api()
+    app = JsonApi()
 

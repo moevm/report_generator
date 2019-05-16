@@ -1,8 +1,13 @@
 $('#empty_doc').click(function () {
+    $('#btnGroupDrop1').text("Пустой документ");
+    $('#requirements').hide('slow');
     $('#requirements').empty();
 });
 
 $('#lab_doc').click(function(){
+$('#btnGroupDrop1').text("Лабораторная работа");
+if($('#requirements').is(':hidden') || $('*').is('#field_for_course'))
+{
 $('#requirements').empty();
 $('#requirements').append('<div class="row" id="field_for_lab"</div>')
 $('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='teacher'>Преподаватель</label><input type='text' class='form-control' id='teacher'></div>");
@@ -11,40 +16,54 @@ $('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='number_group'
 $('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='theme'>Тема лабораторной работы</label><input type='text' class='form-control' id='theme' placeholder='' value=''></div>");
 $('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='discipline'>Название предмета</label><input type='text' class='form-control' id='discipline' placeholder='' value=''></div>");
 $('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='cathedra'>Кафедра</label><input type='text' class='form-control' id='cathedra' placeholder='' value=''></div>");
+$('#requirements').show("slow")
+}
 });
 
 $('#course_doc').click(function(){
+$('#btnGroupDrop1').text("Курсовая работа");
+
+if($('#requirements').is(':hidden') || $('*').is('#field_for_lab'))
+{
 $('#requirements').empty();
-$('#requirements').append('<div class="row" id="field_for_course"</div>')
+$('#requirements').append('<div class="row" id="field_for_course"</div>');
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='teacher'>Преподаватель</label><input type='text' class='form-control' id='teacher' placeholder='' value=''></div>");
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='student'>Студент</label><input type='text' class='form-control' id='student' placeholder='' value=''></div>");
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='number_group'>Номер группы</label><input type='text' class='form-control' id='number_group' placeholder='' value=''></div>");
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='theme'>Тема курсовой работы</label><input type='text' class='form-control' id='theme' placeholder='' value=''></div>");
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='discipline'>Название предмета</label><input type='text' class='form-control' id='discipline' placeholder='' value=''></div>");
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='cathedra'>Кафедра</label><input type='text' class='form-control' id='cathedra' placeholder='' value=''></div>");
-
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='content'>Содержание</label><input type='text' class='form-control' id='content' placeholder='' name='content' value=''></div>");
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='min_pages'>Минимальное количество страниц</label><input type='text' class='form-control' id='min_pages' placeholder='' value=''></div>");
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='date_start'>Дата начала</label><input type='text' class='form-control' id='date_start' placeholder='' value=''></div>");
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='date_finish'>Дата сдачи</label><input type='text' class='form-control' id='date_finish' placeholder='' value=''></div>");
 $('#field_for_course').append("<div class='col-md-6 mb-3'><label for='date_defend'>Дата защиты</label><input type='text' class='form-control' id='date_defend' placeholder='' value=''></div>");
+$('#requirements').show('show');
+}
 });
 
-$('#empty_doc').click(function(){
-    $('#btnGroupDrop1').text("пустой документ");
-})
 
-$('#course_doc').click(function(){
-    $('#btnGroupDrop1').text("Курсовая работа");
-})
-
-$('#lab_doc').click(function(){
-    $('#btnGroupDrop1').text("Лабораторная работа");
-})
+function checkImportantData(){
+    return $('#wiki_name').val() != '' && $('#repo_name').val() != '' && $('#branch').val() != ''
+}
 
 $('#btn_submit').click(function () {
-	$('#buttons_field').append('<div class="spinner-border text-success" role="status"></div>')
+if(checkImportantData())
+{$('#buttons_field').append('<div class="spinner-border text-success" role="status"></div>')}
 })
+
+$('#style_setter').click(function(){
+if ($('#style_settings').is(':hidden'))
+   {
+   $('#style_settings').show("slow")
+   $("#style_setter").css("background","#FF2400");
+   }
+else
+   {
+   $('#style_settings').hide("slow")
+   $("#style_setter").css("background","#007bff");
+   }
+});
+
 
 function submitForm(){
 $.ajax({
@@ -55,7 +74,6 @@ $.ajax({
                     console.log('Success for submit form');
                     location.reload();
                 },
-                
         })
 }
 
@@ -112,10 +130,6 @@ function get_data_from_form(){
  		if($("*").is("#cathedra")){
  			var cathedra = $('#cathedra').val();
  			result += `&cathedra=${cathedra}`;
- 			};
- 		if($("*").is("#content")){
- 			var content = $('#content').val();
- 			result += `&content=${content}`;
  			};
  		if($("*").is("#min_pages")){
  			var min_pages = $('#min_pages').val();
