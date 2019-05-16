@@ -9,9 +9,6 @@ link = ""
 def index():
     global link
     if request.method == 'POST':
-        for i in request.form:
-            print(i)
-        print("start post")
         update_settings(dict(request.form))
         repo = request.form['repo_name']
         wiki = request.form['wiki_name']
