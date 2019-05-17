@@ -362,13 +362,6 @@ class Dword:
             self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
 
     def add_comments(self):
-        '''
-
-        Функция добавляет комментарии в word-документ, взятые с github'a. Вид комментария:
-        1. исходный фрагмент кода
-        2. комментарии
-        3. исправление в виде diff
-        '''
         git = Gengit(branch=self.branch)
         self.add_page_break()
         self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
@@ -380,6 +373,10 @@ class Dword:
             self.add_line(element.body_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
             self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
             for body_element in element.body_comments:
-                self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True)
-            self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-            self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+                self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
+                              align=ALIGN_LEFT)
+
+        self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+        for element in comments:
+            if element.diff:
+                self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
