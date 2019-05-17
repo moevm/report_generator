@@ -221,7 +221,7 @@ class Dword:
         self.name = LOCAL_REPO
         self.download_settings()
         self.choose_path_template()
-        #self.make_title()
+        self.make_title()
         #self.doc = Document(self.name)
         self.add_text_from_wiki()
         #self.add_final_part()
@@ -273,7 +273,7 @@ class Dword:
         self.add_picture(filepath)
 
     def add_text_from_wiki(self):
-        self.document = Document(os.path.abspath(self.path))
+        self.document = Document(os.path.abspath(self.name))
         self.create_styles()
         tmp = []
 
