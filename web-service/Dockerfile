@@ -1,26 +1,22 @@
-FROM tknerr/baseimage-ubuntu:16.04
+FROM tknerr/baseimage-ubuntu:18.04
 RUN apt-get update
 RUN apt-get -y install nano
 RUN apt-get -y install git
 
+RUN apt-get -y install apache2=2.4.29-1ubuntu4.6  apache2-dev=2.4.29-1ubuntu4.6  mongodb  python3.6  python3-dev  python3-pip  python3-flask  vim  nano curl
+RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade Flask
 
-RUN apt-get install -y software-properties-common vim
-RUN add-apt-repository ppa:jonathonf/python-3.6
-RUN apt-get update
+RUN pip3 install --upgrade pip
+RUN pip3 install mod_wsgi
+RUN mod_wsgi-express module-config > /etc/apache2/mods-available/wsgi.load
+RUN a2enmod wsgi
 
-RUN apt-get install -y build-essential python3.6 python3.6-dev python3-pip
-
-RUN apt-get clean && apt-get update
-RUN apt-get -y install apache2 apache2-dev
-RUN python3.6 -m pip install -v mod_wsgi-httpd
-RUN python3.6 -m pip install mod_wsgi
-RUN apt-get clean
 
 ADD ./ /report_generator
 WORKDIR /report_generator
-RUN  mod_wsgi-express module-config
-#RUN a2enmod wsgi
 RUN ./scripts/local_deploy.sh
+WORKDIR /var/www/report_generator
 
 CMD /etc/init.d/apache2 restart && /usr/sbin/sshd -D \
     -o UseDNS=no\
