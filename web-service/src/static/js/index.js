@@ -48,7 +48,10 @@ function checkImportantData(){
 
 $('#btn_submit').click(function () {
 if(checkImportantData())
-{$('#buttons_field').append('<div class="spinner-border text-success" role="status"></div>')}
+{
+$( "div" ).remove( "#spinner_for_answer" );
+$('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" role="status"></div>')
+}
 })
 
 $('#style_setter').click(function(){
