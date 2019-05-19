@@ -235,19 +235,18 @@ class Dword:
 
     def create_styles(self):
         styles = self.document.styles
-        # стиль для обычного текста
+
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
         style.font.size = Pt(STANDART_FONT_SIZE)
         style.font.name = STANDART_FONT
-        # стиль для block_quote
+
         style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
         style.font.size,  style.font.name = Pt(STANDART_FONT_SIZE), STANDART_FONT
         style.font.italic = True
-        # стили для загаловков
-        for i in enumerate(self.js_content[FORMAT]):
-            style = styles.add_style(H_STYLE.format(i[0] + 1), WD_STYLE_TYPE.PARAGRAPH)
-            style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i[0] + 1)][SIZE])
-            style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i[0] + 1)][FONT]
+        for i in range(len(self.js_content[FORMAT])):
+            style = styles.add_style(H_STYLE.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
+            style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
+            style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
 
     def h_w(self, dimension):
         height, width = dimension
