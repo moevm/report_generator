@@ -102,7 +102,7 @@ ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
 RUN_AND_BREAK = 'p.add_run().add_break()'
 ADD_PARAGRAPH = "p = self.document.add_paragraph()"
-BLOCK_QUOTE = "p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\n"
+BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\n'
 CREATE_IMAGE = "self.add_image_by_url(\"{}\")"
 CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
 END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
@@ -115,6 +115,7 @@ SIZE = "size"
 TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
+REPLACE_FOR_QUOTE = ['p.add_run("', 'p = self.document.add_paragraph(text="']
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -172,7 +173,12 @@ class PythonDocxRenderer(mistune.Renderer):
         return PLUS_STR.format('\n'.join((ADD_PARAGRAPH, text, add_break)), '\n')
 
     def block_quote(self, text):
-        return BLOCK_QUOTE.format(text[text.find("\"") + 1:text.rfind("\"")], BLOCK_QUOTE_STYLE)
+        return self.convert_text_for_block_quote(BLOCK_QUOTE.format(text[text.find("\"") + 1:text.rfind("\"")],
+                                                                    BLOCK_QUOTE_STYLE).replace(NAME_STYLE,
+                                                                    BLOCK_QUOTE_STYLE))
+
+    def convert_text_for_block_quote(self, text):
+        return text.replace(REPLACE_FOR_QUOTE[0], REPLACE_FOR_QUOTE[1])
 
     def list(self, body, ordered):
         return LIST.format(body)
@@ -194,7 +200,7 @@ class PythonDocxRenderer(mistune.Renderer):
 
     # SPAN LEVEL
     def text(self, text):
-        return SPAN_TEXT.format(text, NAME_STYLE)
+        return SPAN_TEXT.format(text.replace('\n', '\\n'), NAME_STYLE)
 
     def emphasis(self, text):
         return SPAN_EMPHASIS.format(text[:-1])
