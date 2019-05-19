@@ -14,16 +14,17 @@ from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
-
-GIT_REPO = "wiki_dir"
+#ABS_PATH = "/home/light5551/job_april/report_generator/web-service/src/{}"
+ABS_PATH = "/var/www/report_generator/{}"
+GIT_REPO = ABS_PATH.format("wiki_dir")
 PATH_TO_WIKI = "{}/{}.md"
 NAME_REPORT = "report.docx"
-LOCAL_REPO = "generated_doc.docx"
+LOCAL_REPO = ABS_PATH.format("generated_doc.docx")
 TEMPLATE = "template"
 SETTINGS_FILE = "settings.json"
 COURSE_WORK = "KR"
 LAB_WORK = "LR"
-PATH_TO_TEMPLATE = "word_templates/{}.docx"
+PATH_TO_TEMPLATE = ABS_PATH.format("word_templates/{}.docx")
 TYPE_OF_WORK = "type"
 NOT_VALID = "not valid file"
 MD_EXTENSION = ".md"
@@ -276,7 +277,7 @@ class Dword:
 
     def add_image_by_url(self, url):
         req = requests.get(url)
-        filepath = os.path.join(os.getcwd(), PICTURE)
+        filepath = ABS_PATH.format(PICTURE)
         with open(filepath, 'wb') as file:
             file.write(req.content)
         self.add_picture(filepath)
@@ -295,7 +296,7 @@ class Dword:
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
-        self.document.save(os.path.abspath(NAME_REPORT))
+        self.document.save(ABS_PATH.format(NAME_REPORT))
 
     def make_title(self):
         doc = DocxTemplate(self.path)
@@ -384,12 +385,8 @@ class Dword:
         self.document.add_page_break()
 
     def download_settings(self):
-        paths = Path(os.getcwd()).rglob(SETTINGS_FILE)
-        for path in paths:
-            with open(path) as file:
-                print("was loaded")
-                self.js_content = json.load(file)
-                return
+        with open(ABS_PATH.format(SETTINGS_FILE), encoding="utf-8") as file:
+            self.js_content = json.load(file)
 
     def choose_path_template(self):
         if self.js_content[TYPE_OF_WORK] == COURSE_WORK:
