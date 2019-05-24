@@ -102,7 +102,7 @@ ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
 RUN_AND_BREAK = 'p.add_run().add_break()'
 ADD_PARAGRAPH = "p = self.document.add_paragraph()"
-BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\n'
+BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\np.add_run().add_break()\n'
 CREATE_IMAGE = "self.add_image_by_url(\"{}\")"
 CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
 END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
