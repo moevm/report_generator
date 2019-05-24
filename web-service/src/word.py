@@ -243,6 +243,7 @@ class Dword:
         style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
         style.font.size,  style.font.name = Pt(STANDART_FONT_SIZE), STANDART_FONT
         style.font.italic = True
+        style.font.underline = True
         for i in range(len(self.js_content[FORMAT])):
             style = styles.add_style(H_STYLE.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
             style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
