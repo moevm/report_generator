@@ -154,3 +154,13 @@ function get_data_from_form(){
         return result;
     }
 
+var _a = document.getElementById('repos');
+
+_a.addEventListener('click', changeRepo);
+function changeRepo()
+{
+var ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git'
+$("#repo_name").val(ssh_str);
+}
+
+

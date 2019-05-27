@@ -3,6 +3,7 @@ from main import main as create_word
 from json_api import JsonApi as update_settings
 from flask import render_template, redirect, url_for, request
 from flask_dance.contrib.github import github
+import requests
 
 link = ""
 @app.route('/', methods=["GET", 'POST'])
@@ -18,9 +19,12 @@ def index():
         return redirect(url_for("index"))
 
     current_github = ''
+    list_of_repo =[]
     if github.authorized:
         current_github = github.get('/user').json()
-    return render_template("home.html", link=link, github=current_github)
+        list_of_repo = create_list_of_repo()
+    return render_template("home.html", link=link, github=current_github, repositories=list_of_repo)
+
 
 @app.route('/github', methods=["GET", 'POST'])
 def github_login():
@@ -32,11 +36,21 @@ def github_login():
 
         if account_info.ok:
             account_info_json = account_info.json()
-            return 'Your github name is {login}'.format(login=account_info_json['login'])
-            #return render_template('sign.html', github_nick=account_info_json['login'],
-			#image=account_info_json['avatar_url'])
-    #return render_template('sign.html')
+            return 'Information about you!\n{}'.format(account_info_json)
+
     return 'OOPS'
 
+
+def create_list_of_repo():
+    if github.authorized:
+        repo_data = github.get('/user')
+        if repo_data.ok:
+            repo_url = repo_data.json()['repos_url']
+            repo = requests.get(repo_url).json()
+            list_of_repo = []
+            for i in repo:
+                list_of_repo.append({'url': i['html_url'], 'name': i['full_name'] })
+            return list_of_repo
+    return []
 
 
