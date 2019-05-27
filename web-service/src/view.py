@@ -19,7 +19,7 @@ def index():
         return redirect(url_for("index"))
 
     current_github = ''
-    list_of_repo =[]
+    list_of_repo = []
     if github.authorized:
         current_github = github.get('/user').json()
         list_of_repo = create_list_of_repo()
@@ -37,8 +37,12 @@ def github_login():
         if account_info.ok:
             account_info_json = account_info.json()
             return 'Information about you!\n{}'.format(account_info_json)
-
     return 'OOPS'
+
+
+@app.route('/login/github/authorized')
+def auth_login():
+    return redirect(url_for('index'))
 
 
 def create_list_of_repo():
