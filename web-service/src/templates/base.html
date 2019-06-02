@@ -26,14 +26,16 @@
     <a class="p-2 text-dark" href="#">Features</a>
 -->
   </nav>
+   <!--
     {% if not github %}
-    <a class="btn btn-outline-primary" href="{{url_for('github_login')}}">Sign in</a>
+    <a class="btn btn-outline-primary" href="{{url_for('login')}}">Sign in</a>
     {% else %}
      <nav class="my-2 my-md-0 mr-md-3">
          <a class="p-4 text-dark" href="{{ github['url'] }}">{{ github['login'] }}</a>
          <img src='{{ github["avatar_url"] }}' class="rounded-circle" alt="{{ github['url'] }}" height="40" width="40">
      </nav>
     {% endif %}
+    -->
 </div>
 
 <div class="row">
