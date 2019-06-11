@@ -25,36 +25,26 @@
 <!--
     <a class="p-2 text-dark" href="#">Features</a>
 -->
-  </nav>
-   <!--
-    {% if not github %}
-    <a class="btn btn-outline-primary" href="{{url_for('login')}}">Sign in</a>
+
+    {% if not current_user.is_authenticated %}
+    <a class="btn btn-outline-primary" href="/login">Sign in</a>
     {% else %}
-     <nav class="my-2 my-md-0 mr-md-3">
-         <a class="p-4 text-dark" href="{{ github['url'] }}">{{ github['login'] }}</a>
-         <img src='{{ github["avatar_url"] }}' class="rounded-circle" alt="{{ github['url'] }}" height="40" width="40">
-     </nav>
+    <a class="btn btn-outline-danger" href="/logout">Logout</a>
     {% endif %}
-    -->
+
+    {% if current_user.has_role('admin') %}
+    <a class="btn btn-outline-dark" href="/admin">admin</a>
+    {% endif %}
+    </nav>
 </div>
 
-<div class="row">
-{% if repositories %}
-    <div class="col-3">
-<p>List of repositories</p>
-<div class="list-group col-md-9" id="repos" role="tablist">
-{% for repo in repositories %}
-    <a href="{{ repo['url'] }}" class="list-group-item list-group-item-action" data-toggle="list" role="tab">{{ repo['name'] }}</a>
-    {% endfor %}
-</div>
-</div>
-{% endif %}
+{% block before_body %}
 
+{% endblock %}
 
-        {% block content %}
+{% block content %}
 
-        {% endblock %}
-</div>
+{% endblock %}
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-latest.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
