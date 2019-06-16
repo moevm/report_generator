@@ -88,6 +88,6 @@ def create_list_of_repo():
         repo = github.get('users/{}/repos'.format(repo_data['login']))
         list_of_repo = []
         for i in repo:
-            list_of_repo.append({'url': i['html_url'], 'name': i['full_name'] })
+            list_of_repo.append({'url': i['html_url'], 'name': i['full_name']})
         return list_of_repo
     return []
