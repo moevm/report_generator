@@ -29,22 +29,44 @@
     {% if not current_user.is_authenticated %}
     <a class="btn btn-outline-primary" href="/login">Sign in</a>
     {% else %}
-    <a class="btn btn-outline-danger" href="/logout">Logout</a>
+    <a class="btn btn-outline-danger" href="/_logout">Logout</a>
     {% endif %}
 
     {% if current_user.has_role('admin') %}
     <a class="btn btn-outline-dark" href="/admin">admin</a>
     {% endif %}
-    </nav>
+
+
+      {% if current_user.is_authenticated and github %}
+         <a class="p-4 text-dark" href="{{ github['url'] }}">{{ github['login'] }}</a>
+         <img src='{{ github["avatar_url"] }}' class="rounded-circle" alt="{{ github['url'] }}" height="40" width="40">
+
+      {% elif current_user.is_authenticated %}
+        <a class="btn btn-success" href="/github_login">Sign in throw Github</a>
+      {% endif %}
+
+
+  </nav>
 </div>
 
 {% block before_body %}
 
 {% endblock %}
-
+<div class="row">
+    {% if repositories and current_user.is_authenticated and github %}
+    <div class="col-3">
+<p>List of repositories</p>
+<div class="list-group col-md-9" id="repos" role="tablist">
+{% for repo in repositories %}
+    <a href="{{ repo['url'] }}" class="list-group-item list-group-item-action" data-toggle="list" role="tab">{{ repo['name'] }}</a>
+    {% endfor %}
+</div>
+</div>
+{% endif %}
 {% block content %}
 
 {% endblock %}
+</div>
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-latest.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>

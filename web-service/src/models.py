@@ -17,6 +17,7 @@ class User(db.Document, UserMixin):
 	username = db.StringField(max_length=50, required=True, unique=True)
 	email = db.StringField(max_length=100, required=True, unique=True)
 	password = db.StringField(max_length=100, required=True)
+	github_access_token = db.StringField()
 	active = db.BooleanField(default=True)
 	roles = db.ListField(db.ReferenceField(Role), default=[])
 
