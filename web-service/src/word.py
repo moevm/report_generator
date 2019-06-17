@@ -5,6 +5,7 @@ import json
 import re
 import subprocess
 import itertools
+import requests
 from docx import Document
 import mistune
 from pathlib import Path
@@ -77,13 +78,15 @@ UNOCONC_3RD = "-f"
 UNOCONC_4TH = "pdf"
 
 NAME_STYLE = "Mystyle"
+BLOCK_QUOTE_STYLE = "my_block_quote_style"
 HEAD_STYLE = "Myheadstyle"
 SPAN_TEXT = "p.add_run(\"{}\",style=\'{}\')\n"
 SPAN_EMPHASIS = "{}.italic = True\n"
 SPAN_DOUBLE_EMPHASIS = "{}.bold = True\n"
-SPAN_CODE = "p = self.document.add_paragraph()\np.add_run(\"{}\")\np.style = 'BasicUserQuote'\np.add_run().add_break()\n"
+SPAN_CODE = "p = self.document.add_paragraph()\np.add_run(\"{}\")\np.style='BasicUserQuote'\np.add_run().add_break()\n"
 SPAN_LINK = "{} ({})"
 SPAN_HRULE = "self.document.add_page_break()\n"
+
 
 BLOCK = "block"
 BLOCK_MATH = 'block_math'
@@ -99,6 +102,8 @@ ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
 RUN_AND_BREAK = 'p.add_run().add_break()'
 ADD_PARAGRAPH = "p = self.document.add_paragraph()"
+BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\np.add_run().add_break()\n'
+CREATE_IMAGE = "self.add_image_by_url(\"{}\")"
 CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
 END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
 ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
@@ -110,6 +115,7 @@ SIZE = "size"
 TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
+REPLACE_FOR_QUOTE = ['p.add_run("', 'p = self.document.add_paragraph(text="']
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -154,17 +160,25 @@ class PythonDocxRenderer(mistune.Renderer):
         self.table_memory = []
         self.img_counter = 0
 
-    def get_document(self, doc):
-        self.document = doc
-
     def header(self, text, level, raw):
         return HEADER.format(text[text.find("\"") + 1:text.rfind("\"")], H_STYLE.format(level))
+
+    def image(self, src, title, text):
+        return CREATE_IMAGE.format(src)
 
     def paragraph(self, text):
         if ADD_PICTURE in text:
             return text
         add_break = '' if text.endswith(END_STR) else RUN_AND_BREAK
         return PLUS_STR.format('\n'.join((ADD_PARAGRAPH, text, add_break)), '\n')
+
+    def block_quote(self, text):
+        return self.convert_text_for_block_quote(BLOCK_QUOTE.format(text[text.find("\"") + 1:text.rfind("\"")],
+                                                                    BLOCK_QUOTE_STYLE).replace(NAME_STYLE,
+                                                                    BLOCK_QUOTE_STYLE))
+
+    def convert_text_for_block_quote(self, text):
+        return text.replace(REPLACE_FOR_QUOTE[0], REPLACE_FOR_QUOTE[1])
 
     def list(self, body, ordered):
         return LIST.format(body)
@@ -186,7 +200,7 @@ class PythonDocxRenderer(mistune.Renderer):
 
     # SPAN LEVEL
     def text(self, text):
-        return SPAN_TEXT.format(text, NAME_STYLE)
+        return SPAN_TEXT.format(text.replace('\n', '\\n'), NAME_STYLE)
 
     def emphasis(self, text):
         return SPAN_EMPHASIS.format(text[:-1])
@@ -197,7 +211,6 @@ class PythonDocxRenderer(mistune.Renderer):
     def block_code(self, code, language):
         code = code.replace('\n', '\\n')
         return SPAN_CODE.format(code)
-
 
     def link(self, link, title, content):
         return SPAN_LINK.format(content, link)
@@ -214,7 +227,7 @@ class Dword:
         self.name = LOCAL_REPO
         self.download_settings()
         self.choose_path_template()
-        #self.make_title()
+        self.make_title()
         #self.doc = Document(self.name)
         self.add_text_from_wiki()
         #self.add_final_part()
@@ -222,18 +235,51 @@ class Dword:
 
     def create_styles(self):
         styles = self.document.styles
-        # стиль для обычного текста
+
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
         style.font.size = Pt(STANDART_FONT_SIZE)
         style.font.name = STANDART_FONT
-        # стили для загаловков
-        for i in enumerate(self.js_content[FORMAT]):
-            style = styles.add_style(H_STYLE.format(i[0] + 1), WD_STYLE_TYPE.PARAGRAPH)
-            style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i[0] + 1)][SIZE])
-            style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i[0] + 1)][FONT]
+
+        style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
+        style.font.size,  style.font.name = Pt(STANDART_FONT_SIZE), STANDART_FONT
+        style.font.italic = True
+        style.font.underline = True
+        for i in range(len(self.js_content[FORMAT])):
+            style = styles.add_style(H_STYLE.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
+            style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
+            style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
+
+    def h_w(self, dimension):
+        height, width = dimension
+        h = w = STANDART_SIZE_PICTURE
+        if height > width:
+            h *= height / width
+            if h / w > BORDER_OF_PICTURE:
+                while h / w > BORDER_OF_PICTURE:
+                    h *= SPEED_OF_REDUCING_PICTURE
+        else:
+            w *= width / height
+            if w / h > BORDER_OF_PICTURE:
+                while w / h > BORDER_OF_PICTURE:
+                    w *= SPEED_OF_REDUCING_PICTURE
+        return h, w
+
+    def add_picture(self, path):
+        paragraph = self.document.add_paragraph()
+        paragraph.paragraph_format.alignment = alignment_dict.get(ALIGN_CENTRE)
+
+        h, w = self.h_w(Image.open(path).size)
+        paragraph.add_run().add_picture(path, width=Inches(h), height=Inches(w))
+
+    def add_image_by_url(self, url):
+        req = requests.get(url)
+        filepath = os.path.join(os.getcwd(), PICTURE)
+        with open(filepath, 'wb') as file:
+            file.write(req.content)
+        self.add_picture(filepath)
 
     def add_text_from_wiki(self):
-        self.document = Document(os.path.abspath(self.path))
+        self.document = Document(os.path.abspath(self.name))
         self.create_styles()
         tmp = []
 
@@ -242,7 +288,7 @@ class Dword:
                 tmp.append(file.read())
 
         renderer = PythonDocxRenderer()
-        renderer.get_document(self.document)
+
         try:
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
