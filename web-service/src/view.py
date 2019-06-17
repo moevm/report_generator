@@ -43,9 +43,9 @@ def create_admin():
     user_datastore.find_or_create_role(name='admin')
     user_datastore.find_or_create_role(name='test_user')
     if not user_datastore.get_user('admin@example.com'):
-        user_datastore.create_user(username='admin', email='admin@example.com', password='password')
-    user_datastore.add_role_to_user('admin@example.com', 'admin')
+        user_datastore.create_user(username='light5551', email='sergey.glazunov.99@mail.ru')
+    user_datastore.add_role_to_user('sergey.glazunov.99@mail.ru', 'admin')
     if not user_datastore.get_user('test@example.com'):
-        user_datastore.create_user(username='test_user', email='test@example.com', password='testpass')
+        user_datastore.create_user(username='test_user', email='test@example.com')
     user_datastore.add_role_to_user('test@example.com', 'test_user')
 
