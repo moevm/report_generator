@@ -4,8 +4,6 @@ RUN apt-get -y install nano
 RUN apt-get -y install git
 
 RUN apt-get -y install apache2=2.4.29-1ubuntu4.6  apache2-dev=2.4.29-1ubuntu4.6  mongodb  python3.6  python3-dev  python3-pip  python3-flask  vim  nano curl unoconv
-RUN pip3 install --upgrade pip
-RUN pip3 install --upgrade Flask
 
 RUN pip3 install --upgrade pip
 RUN pip3 install mod_wsgi
@@ -17,7 +15,6 @@ ADD ./ /report_generator
 WORKDIR /report_generator
 RUN ./scripts/local_deploy.sh
 RUN ./scripts/create_ssh.sh
-WORKDIR /var/www/report_generator
 
 CMD /etc/init.d/apache2 restart && /usr/sbin/sshd -D \
     -o UseDNS=no\

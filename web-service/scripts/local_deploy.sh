@@ -28,5 +28,4 @@ cp ./src/config/"${CONFIG}" /etc/apache2/sites-available/
 chown -R www-data:www-data /var/www/"$CATALOG"
 a2ensite "${CONFIG}"
 a2dissite 000-default.conf
-service apache2 reload
 service apache2 restart
