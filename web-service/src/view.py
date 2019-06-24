@@ -1,12 +1,11 @@
 from app import app
 from main import main as create_word
 from json_api import JsonApi as update_settings
-from flask import render_template, redirect, url_for, request, jsonify, flash
+from flask import render_template, redirect, url_for, request, flash
 from flask_security import current_user, login_required, login_user, logout_user
 from flask_bcrypt import Bcrypt
 from admin_security import user_datastore
 from github_oauth import Github
-from models import User
 
 app.config['was_new_user'] = True
 
@@ -14,7 +13,7 @@ github = Github()
 bcrypt = Bcrypt(app)
 
 FIRST_ADMIN = 'light5551'
-FIRST_EMAIL_ADMIN = 'sergey.glazunov.99@mail.ru'#'doesnt matter'
+FIRST_EMAIL_ADMIN = 'example@mail.ru'
 
 link = ""
 @app.route('/', methods=["GET", 'POST'])

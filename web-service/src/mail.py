@@ -28,7 +28,7 @@ class Mail:
             self.configure_mail()
 
     def get_message(self, email):
-        msg = Message("check",
+        msg = Message("Access to Report Generator",
                       sender=self.mail_username,
                       recipients=[email])
 
