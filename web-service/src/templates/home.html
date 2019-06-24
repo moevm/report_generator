@@ -14,15 +14,51 @@ Home Page
     </div>
     <div class="col-md-10">
         <form method="POST" class="needs-validation" action="javascript:void(null);" onsubmit="submitForm()">
+
             <div class="mb-3">
                 <label for="wiki_name">Ссылка на вики:</label>
-                <input type="text" class="form-control" id="wiki_name" required>
+
+                <div class="input-group">
+                    <input type="text" class="form-control" id="wiki_name" required>
+
+                        <div class="input-group-append">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Wiki
+                                </button>
+                            <div class="dropdown-menu" id="wiki_menu">
+
+                                {% for repo in repositories %}
+                                        <a href="{{ repo['url'] }}"  class="dropdown-item">{{ repo['name'] }}</a>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                </div>
             </div>
+
+
 
 
             <div class="mb-3">
                 <label for="repo_name">Ссылка на репозиторий, куда будет отправлен отчет:</label>
-                <input type="text" class="form-control" id="repo_name" required>
+
+                <div class="input-group">
+                    <input type="text" class="form-control" id="repo_name" required>
+
+                    <div class="input-group-append">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Repositories
+                            </button>
+                        <div class="dropdown-menu" id="repo_menu">
+                            {% for repo in repositories %}
+                                    <a href="{{ repo['url'] }}"  class="dropdown-item">{{ repo['name'] }}</a>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+
+
+                </div>
             </div>
 
 

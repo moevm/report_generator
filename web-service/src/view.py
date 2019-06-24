@@ -1,20 +1,20 @@
 from app import app
 from main import main as create_word
 from json_api import JsonApi as update_settings
-from flask import render_template, redirect, url_for, request
-from flask_github import GitHub
-from flask_security import current_user, login_required
+from flask import render_template, redirect, url_for, request, jsonify, flash
+from flask_security import current_user, login_required, login_user, logout_user
 from flask_bcrypt import Bcrypt
 from admin_security import user_datastore
+from github_oauth import Github
+from models import User
 
-CLIENT_ID = '6bfefa93bab199af589e'
-CLIENT_SECRET = '49c1cf2398a705a235a9411a2a8fa7f3d7c5e974'
+app.config['was_new_user'] = True
 
-app.config['GITHUB_CLIENT_ID'] = CLIENT_ID
-app.config['GITHUB_CLIENT_SECRET'] = CLIENT_SECRET
-github = GitHub(app)
+github = Github()
 bcrypt = Bcrypt(app)
 
+FIRST_ADMIN = 'light5551'
+FIRST_EMAIL_ADMIN = 'sergey.glazunov.99@mail.ru'#'doesnt matter'
 
 link = ""
 @app.route('/', methods=["GET", 'POST'])
@@ -28,24 +28,63 @@ def index():
         branch = request.form['branch_name']
         link = create_word([repo, wiki, branch])
         return redirect(url_for("index"))
+    github_data = []
+    repos = []
 
-    return render_template("home.html", link=link)
+    if github.is_authorized:
+        github_data = github.get('user')
+        repos = create_list_of_repo(github_data)
+
+    return render_template("home.html", link=link, github=github_data, repositories=repos)
 
 
-@app.route('/me/')
-@login_required
-def me():
-    return "You are logged in as :{} {}".format(current_user.username, current_user.github_access_token)
+@app.route('/github_login')
+def github_login():
+    return github.authorize()
+
+
+@app.route('/log_out')
+def logout():
+    if current_user.is_authenticated:
+        flash('You were successfully logged out', 'success')
+        logout_user()
+    return redirect(url_for('index'))
 
 
 @app.before_first_request
 def create_admin():
     user_datastore.find_or_create_role(name='admin')
     user_datastore.find_or_create_role(name='test_user')
-    if not user_datastore.get_user('admin@example.com'):
-        user_datastore.create_user(username='light5551', email='sergey.glazunov.99@mail.ru')
-    user_datastore.add_role_to_user('sergey.glazunov.99@mail.ru', 'admin')
-    if not user_datastore.get_user('test@example.com'):
-        user_datastore.create_user(username='test_user', email='test@example.com')
-    user_datastore.add_role_to_user('test@example.com', 'test_user')
+    if not user_datastore.get_user(FIRST_EMAIL_ADMIN):
+        app.config['was_new_user'] = False
+        user_datastore.create_user(username=FIRST_ADMIN, email=FIRST_EMAIL_ADMIN)
+        app.config['was_new_user'] = False
+    user_datastore.add_role_to_user(FIRST_EMAIL_ADMIN, 'admin')
 
+
+@app.route('/login/github/authorized')
+def authorized():
+    github.set_code(request.args.get('code', None))
+    github.is_active = True
+    github_account = github.get('user')
+    user = user_datastore.find_user(username=github_account['login'])
+    if user:
+        flash('You were successfully logged in, {}'.format(github_account['login']), 'success')
+        if not user.avatar:
+            user.avatar = github_account['avatar_url']
+            app.config['was_new_user'] = False
+            user.save()
+        login_user(user)
+    else:
+        flash('Sorry, but you don\'t have access right', 'danger')
+    return redirect(url_for('index'))
+
+
+def create_list_of_repo(repo_data):
+    if repo_data:
+        repo = github.get('users/{}/repos'.format(repo_data['login']))
+        list_of_repo = []
+        for i in repo:
+            list_of_repo.append({'url': i['html_url'], 'name': i['full_name']})
+        return list_of_repo
+    return []

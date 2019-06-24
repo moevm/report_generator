@@ -15,6 +15,10 @@
 
         {% endblock %}
     </title>
+
+    <style>
+
+    </style>
 </head>
 
 
@@ -26,17 +30,30 @@
     <a class="p-2 text-dark" href="#">Features</a>
 -->
 
-    {% if not current_user.is_authenticated %}
-    <a class="btn btn-outline-primary" href="/login">Sign in</a>
-    {% else %}
-    <a class="btn btn-outline-danger" href="/logout">Logout</a>
-    {% endif %}
+      {% if current_user.is_authenticated %}
+         <a class="p-4 text-dark" href="#">{{ current_user.username }}</a>
+        <img src='{{ current_user.avatar }}' class="rounded-circle" alt="#" height="40" width="40">
+        &nbsp;&nbsp;
+        <a class="btn btn-danger" href="/log_out">Exit</a>
+      {% elif not current_user.is_authenticated %}
+        <a class="btn btn-success" href="/github_login">Github</a>
+      {% endif %}
 
-    {% if current_user.has_role('admin') %}
-    <a class="btn btn-outline-dark" href="/admin">admin</a>
-    {% endif %}
-    </nav>
+
+  </nav>
 </div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} fade show" role="alert">{{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
 {% block before_body %}
 
@@ -45,6 +62,7 @@
 {% block content %}
 
 {% endblock %}
+
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-latest.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>

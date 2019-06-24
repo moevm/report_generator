@@ -154,13 +154,25 @@ function get_data_from_form(){
         return result;
     }
 
-var _a = document.getElementById('repos');
+var _a = document.getElementById('repo_menu');
 
 _a.addEventListener('click', changeRepo);
-function changeRepo()
+function changeRepo(e)
 {
 var ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git'
 $("#repo_name").val(ssh_str);
+e.preventDefault();
 }
+
+var _b = document.getElementById('wiki_menu');
+
+_b.addEventListener('click', changeWiki);
+function changeWiki(e)
+{
+var wiki_str = event.target.href + '.wiki.git'
+$("#wiki_name").val(wiki_str);
+e.preventDefault();
+}
+
 
 
