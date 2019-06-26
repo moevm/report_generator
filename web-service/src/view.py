@@ -13,7 +13,7 @@ app.config['was_new_user'] = True
 github = Github()
 bcrypt = Bcrypt(app)
 
-FIRST_ADMIN = 'light5551'
+FIRST_ADMIN = '<your github account>'
 FIRST_EMAIL_ADMIN = 'example@mail.ru'
 
 link = ""
