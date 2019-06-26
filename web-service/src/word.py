@@ -15,15 +15,16 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
 
-GIT_REPO = "wiki_dir"
+ABS_PATH = "/var/www/report_generator/{}"
+GIT_REPO = ABS_PATH.format("wiki_dir")
 PATH_TO_WIKI = "{}/{}.md"
 NAME_REPORT = "report.docx"
-LOCAL_REPO = "generated_doc.docx"
+LOCAL_REPO = ABS_PATH.format("generated_doc.docx")
 TEMPLATE = "template"
 SETTINGS_FILE = "settings.json"
 COURSE_WORK = "KR"
 LAB_WORK = "LR"
-PATH_TO_TEMPLATE = "word_templates/{}.docx"
+PATH_TO_TEMPLATE = ABS_PATH.format("word_templates/{}.docx")
 TYPE_OF_WORK = "type"
 NOT_VALID = "not valid file"
 MD_EXTENSION = ".md"
@@ -112,6 +113,7 @@ H_STYLE = "my_header_{}"
 FORMAT = "format"
 FONT = "font"
 SIZE = "size"
+MAIN_TEXT = "main_text"
 TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
@@ -228,10 +230,18 @@ class Dword:
         self.download_settings()
         self.choose_path_template()
         self.make_title()
-        #self.doc = Document(self.name)
+        self.document = Document(os.path.abspath(self.path))
+        #self.convert_format()
         self.add_text_from_wiki()
         #self.add_final_part()
         #self.save(self.name)
+
+    def convert_format(self):
+        for paragraph in self.document.paragraphs:
+            for run in paragraph.runs:
+                font = run.font
+                font.name = self.js_content[MAIN_TEXT][FONT]
+                font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
 
     def create_styles(self):
         styles = self.document.styles
@@ -273,13 +283,12 @@ class Dword:
 
     def add_image_by_url(self, url):
         req = requests.get(url)
-        filepath = os.path.join(os.getcwd(), PICTURE)
+        filepath = ABS_PATH.format(PICTURE)
         with open(filepath, 'wb') as file:
             file.write(req.content)
         self.add_picture(filepath)
 
     def add_text_from_wiki(self):
-        self.document = Document(os.path.abspath(self.name))
         self.create_styles()
         tmp = []
 
@@ -293,7 +302,7 @@ class Dword:
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
-        self.document.save(os.path.abspath(NAME_REPORT))
+        self.document.save(ABS_PATH.format(NAME_REPORT))
 
     def make_title(self):
         doc = DocxTemplate(self.path)
@@ -321,6 +330,7 @@ class Dword:
 
         }
         doc.render(content)
+        self.path = self.name
         doc.save(self.name)
 
     def add_line(self, line, space_after=STANDART_PLACE_AFTER, set_bold=False, font_name=STANDART_FONT,
@@ -381,7 +391,7 @@ class Dword:
         self.document.add_page_break()
 
     def download_settings(self):
-        with open(SETTINGS_FILE) as file:
+        with open(ABS_PATH.format(SETTINGS_FILE), encoding="utf-8") as file:
             self.js_content = json.load(file)
 
     def choose_path_template(self):

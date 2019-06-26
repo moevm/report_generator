@@ -2,10 +2,11 @@
 import sys
 import os
 import git
+from word import ABS_PATH
 
 
-LOCAL_REPO = "repo_for_report"
-LOCAL_WIKI = "wiki_dir"
+LOCAL_REPO = ABS_PATH.format("repo_for_report")
+LOCAL_WIKI = ABS_PATH.format("wiki_dir")
 BEGIN_SSH = "git@github.com:{}"
 SIZE_OF_SSH_ADDRESS = 19
 COMMIT_MESSAGE = 'add report'
