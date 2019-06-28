@@ -34,6 +34,8 @@ DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 COMMA = ","
 COLON = ": "
+PAGES = 'pages'
+PAGES_OF_WIKI = 'pages_of_wiki'
 
 
 class JsonApi:
@@ -65,11 +67,19 @@ class JsonApi:
             self.json_data[TYPE] = EMPTY_DOC
         self.general_content()
 
+    def create_pages(self, pages):
+        d = pages.split(',')
+        return d
+
     def general_content(self):
         if self.new_settings[NEW_MAIN_FONT]: self.json_data[MAIN_TEXT][FONT] = self.new_settings[NEW_MAIN_FONT]
         if self.new_settings[NEW_MAIN_SIZE]: self.json_data[MAIN_TEXT][SIZE] = int(self.new_settings[NEW_MAIN_SIZE])
         if self.new_settings[NEW_CODE_FONT]: self.json_data[CODE_TEXT][FONT] = self.new_settings[NEW_CODE_FONT]
         if self.new_settings[NEW_CODE_SIZE]: self.json_data[CODE_TEXT][SIZE] = int(self.new_settings[NEW_CODE_SIZE])
+        if self.new_settings[PAGES]:
+            self.json_data[PAGES_OF_WIKI] = [self.new_settings[PAGES]]
+        else:
+            self.json_data[PAGES_OF_WIKI] = []
         for i in range(NUMBER_FOR_H1, NUMBER_FOR_H6):
             if self.new_settings[HEADER.format(i)]:
                 self.json_data[FORMAT][HEADER.format(i)][SIZE] = int(self.new_settings[HEADER.format(i)])

@@ -16,6 +16,7 @@ $('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='number_group'
 $('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='theme'>Тема лабораторной работы</label><input type='text' class='form-control' id='theme' placeholder='' value=''></div>");
 $('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='discipline'>Название предмета</label><input type='text' class='form-control' id='discipline' placeholder='' value=''></div>");
 $('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='cathedra'>Кафедра</label><input type='text' class='form-control' id='cathedra' placeholder='' value=''></div>");
+
 $('#requirements').show("slow")
 }
 });
@@ -94,7 +95,7 @@ function get_data_from_form(){
         var for_h4 = $('#for_h4').val();
         var for_h5 = $('#for_h6').val();
         var for_h6 = $('#for_h6').val();
-
+        var pages = $('#md_pages').val();
 
         var result = `repo_name=${repo_name}`;
         result += `&wiki_name=${wiki_name}`;
@@ -109,6 +110,7 @@ function get_data_from_form(){
  		result += `&h4=${for_h4}`;
  		result += `&h5=${for_h5}`;
  		result += `&h6=${for_h6}`;
+ 		result += `&pages=${pages}`;
 
  		if($("*").is("#teacher")){
  			var teacher = $('#teacher').val();

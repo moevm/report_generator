@@ -116,6 +116,7 @@ TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
 REPLACE_FOR_QUOTE = ['p.add_run("', 'p = self.document.add_paragraph(text="']
+NOT_MD_FILES = ['.git', '.', '..']
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -283,9 +284,20 @@ class Dword:
         self.create_styles()
         tmp = []
 
-        for path in self.js_content[PAGES]:
-            with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
-                tmp.append(file.read())
+        if self.js_content[PAGES]:
+            for path in self.js_content[PAGES]:
+                with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
+                    tmp.append(file.read())
+        else:
+            for filename in os.listdir(GIT_REPO):
+                if filename in NOT_MD_FILES:
+                    continue
+
+                try:
+                    with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3])) as file:
+                        tmp.append(file.read())
+                except FileNotFoundError:
+                    print('File was not found')
 
         renderer = PythonDocxRenderer()
 
