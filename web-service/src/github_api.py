@@ -66,13 +66,7 @@ class Gengit:
     def push(self):
         self.repo.git.push(ORIGIN, self.branch)
 
-
     def get_response(self, url):
-        '''
-
-        :param url: link github api
-        :return: response
-        '''
         params = {"sort": "updated"}
         response = requests.get(url, params=params)
         return response
@@ -81,11 +75,6 @@ class Gengit:
         return object[POSITION]
 
     def new_hunk(self, diff_string):
-        '''
-
-        :param diff_string: block code of diff
-        :return: lines, where there is plus
-        '''
         lines_of_diff = diff_string.split('\n')
         length = len(lines_of_diff) - 1
         new_str = []
@@ -95,11 +84,6 @@ class Gengit:
         return ''.join(new_str)
 
     def create_comments_for_word(self, my_json):
-        '''
-
-        :param my_json: list of data
-        :return: data for comments
-        '''
         mylist = []
         my_json = sorted(my_json, key=self.comporator)
         for comment in my_json:
@@ -116,12 +100,6 @@ class Gengit:
             self.diff = ""
 
     def optimization_comments(self, comments):
-        '''
-
-        :param comments: list, which contains messages.
-        :return: list, where every message has block code.
-        element's indexes:  0 - id | 1 - login | 2 - comment | 3 - body | 4 - commit
-        '''
         total_comments = []
         for element in comments:
             if len(total_comments) > 0 and element[0] == total_comments[len(total_comments) - 1].id:
@@ -135,13 +113,6 @@ class Gengit:
         return total_comments
 
     def get_comments(self, company, name_of_repo, pull_requests):
-        '''
-
-        :param company: name of owner
-        :param name_of_repo: name of repository
-        :param pull_requests: number of pull request
-        :return: [source code, comments, diff]
-        '''
         comments = []
         for number_of_pr in pull_requests:
             url = API_GITHUB.format(company, name_of_repo, number_of_pr)
@@ -151,12 +122,6 @@ class Gengit:
         return self.add_diff(main_comments, main_comments[0].commit)
 
     def add_diff(self, comments, original_commit):
-        '''
-
-        :param comments: [source code, commit, comments]
-        :param original_commit: first commit
-        :return: updated comments
-        '''
         self.create_log(self.local_repo)
         end_commit = self.find_next_commit(original_commit)
         self.create_dif(self.local_repo, self.branch, original_commit, end_commit)
