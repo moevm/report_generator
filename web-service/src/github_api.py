@@ -2,7 +2,7 @@
 import subprocess
 import git
 import requests
-
+import time
 
 LOCAL_REPO = "repo_for_report"
 LOCAL_WIKI = "wiki_dir"
@@ -134,10 +134,12 @@ class Gengit:
 
     def create_log(self, repo):
         subprocess.Popen(LOG_SH.format(repo), shell=True, stdout=subprocess.PIPE)
+        time.sleep(1)
 
     def create_dif(self, repo, branch, begin_commit, end_commit):
         subprocess.Popen(DIFF_SH.format(repo, begin_commit, end_commit), shell=True,
                          stdout=subprocess.PIPE)
+        time.sleep(1)
 
     def get_diffs(self):
         diffs = []
