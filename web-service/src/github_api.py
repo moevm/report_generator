@@ -133,13 +133,10 @@ class Gengit:
         return comments
 
     def create_log(self, repo):
-        subprocess.Popen(LOG_SH.format(repo), shell=True, stdout=subprocess.PIPE)
-        time.sleep(1)
+        subprocess.call(LOG_SH.format(repo), shell=True, stdout=subprocess.PIPE)
 
     def create_dif(self, repo, branch, begin_commit, end_commit):
-        subprocess.Popen(DIFF_SH.format(repo, begin_commit, end_commit), shell=True,
-                         stdout=subprocess.PIPE)
-        time.sleep(1)
+        subprocess.call(DIFF_SH.format(repo, begin_commit, end_commit), shell=True, stdout=subprocess.PIPE)
 
     def get_diffs(self):
         diffs = []
