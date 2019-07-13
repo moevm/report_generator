@@ -53,6 +53,7 @@ $('#btn_submit').click(function () {
 if(checkImportantData())
 {
 $( "div" ).remove( "#spinner_for_answer" );
+$( "a" ).remove( "#total_link" );
 $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" role="status"></div>')
 }
 })

@@ -1,7 +1,7 @@
 import json
 JSON_FILE = 'settings.json'
 LEN_COURSE_DOC = 24
-LEN_LAB_DOC = 19
+LEN_LAB_DOC = 20
 
 TYPE = "type"
 LR = "LR"
@@ -57,6 +57,7 @@ class JsonApi:
 
     def change_content(self):
         length_set = len(self.new_settings)
+        print(length_set)
         if length_set == LEN_COURSE_DOC:
             self.json_data[TYPE] = KR
             self.course_content()
