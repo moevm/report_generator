@@ -68,8 +68,7 @@ class JsonApi:
         self.general_content()
 
     def create_pages(self, pages):
-        d = pages.split(',')
-        return d
+        return pages.split(',')
 
     def general_content(self):
         if self.new_settings[NEW_MAIN_FONT]: self.json_data[MAIN_TEXT][FONT] = self.new_settings[NEW_MAIN_FONT]
@@ -94,7 +93,6 @@ class JsonApi:
 
     def course_content(self):
         self.lab_content()
-        if self.new_settings[NEW_CONTENT]: self.json_data[OLD_CONTENT] = self.new_settings[NEW_CONTENT]
         if self.new_settings[MIN_PAGES]: self.json_data[MIN_PAGES] = self.new_settings[MIN_PAGES]
         if self.new_settings[DATE_START]: self.json_data[DATE_START] = self.new_settings[DATE_START]
         if self.new_settings[DATE_FINISH]: self.json_data[DATE_FINISH] = self.new_settings[DATE_FINISH]

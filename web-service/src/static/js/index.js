@@ -21,6 +21,8 @@ $('#requirements').show("slow")
 }
 });
 
+$('.dropdown-toggle').dropdown()
+
 $('#course_doc').click(function(){
 $('#btnGroupDrop1').text("Курсовая работа");
 
