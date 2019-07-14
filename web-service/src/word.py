@@ -101,7 +101,10 @@ HEADER = "p = self.document.add_paragraph(text=\"{}\",style=\"{}\")\n"
 ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
 RUN_AND_BREAK = 'p.add_run().add_break()'
-ADD_PARAGRAPH = "p = self.document.add_paragraph()"
+#ADD_PARAGRAPH = "p = self.document.add_paragraph()\np.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY\n"
+ADD_PARAGRAPH = '''p = self.document.add_paragraph()\np.paragraph_format.line_spacing_rule = line_space_dict.get(1.5)\n
+p.paragraph_format.alignment=WD_PARAGRAPH_ALIGNMENT.JUSTIFY'''
+
 BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\np.add_run().add_break()\n'
 CREATE_IMAGE = "self.add_image_by_url(\"{}\")"
 CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
@@ -161,6 +164,7 @@ class PythonDocxRenderer(mistune.Renderer):
         self.img_counter = 0
 
     def header(self, text, level, raw):
+        print("!!!HEADER!!!")
         return HEADER.format(text[text.find("\"") + 1:text.rfind("\"")], H_STYLE.format(level))
 
     def image(self, src, title, text):
@@ -173,6 +177,7 @@ class PythonDocxRenderer(mistune.Renderer):
         return PLUS_STR.format('\n'.join((ADD_PARAGRAPH, text, add_break)), '\n')
 
     def block_quote(self, text):
+        #return text
         return self.convert_text_for_block_quote(BLOCK_QUOTE.format(text[text.find("\"") + 1:text.rfind("\"")],
                                                                     BLOCK_QUOTE_STYLE).replace(NAME_STYLE,
                                                                     BLOCK_QUOTE_STYLE))
@@ -236,16 +241,32 @@ class Dword:
     def create_styles(self):
         styles = self.document.styles
 
+
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
         style.font.size = Pt(STANDART_FONT_SIZE)
         style.font.name = STANDART_FONT
 
         style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
+        ################
+        paragraph_format = style.paragraph_format
+        paragraph_format.left_indent = Inches(0.25)
+        paragraph_format.first_line_indent = Inches(-0.25)
+        paragraph_format.space_before = Pt(12)
+#        paragraph_format.widow_control = True
+        paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+        ################
         style.font.size,  style.font.name = Pt(STANDART_FONT_SIZE), STANDART_FONT
         style.font.italic = True
         style.font.underline = True
         for i in range(len(self.js_content[FORMAT])):
             style = styles.add_style(H_STYLE.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
+            #for i in style:
+            paragraph_format = style.paragraph_format
+            paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            #paragraph_format.line_spacing_rule = line_space_dict.get(1.5)
+
+            #    print(i)
             style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
             style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
 
@@ -290,6 +311,8 @@ class Dword:
         renderer = PythonDocxRenderer()
 
         try:
+            f = MarkdownWithMath(renderer=renderer)('\n'.join(tmp))
+            print(f)
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
