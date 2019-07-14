@@ -57,7 +57,7 @@ def input_file(name):
 
 def main(type_of_input):
     all_ok = True
-    wiki_url, url, branch = type_of_input[0], type_of_input[1], type_of_input[2]
+    url, wiki_url, branch = type_of_input[0], type_of_input[1], type_of_input[2]
     git = Gengit(url, branch)
     git_wiki = Gengit(wiki_url)
 
