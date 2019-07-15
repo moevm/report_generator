@@ -29,7 +29,7 @@ urllib3==1.24.1
 URLObject==2.4.3
 Werkzeug==0.15.2
 wrapt==1.10.11
-flask-security
-flask_bcrypt
-flask-admin
-flask_mongoengine
+Flask-Security==3.0.0
+Flask-Bcrypt==0.7.1
+Flask-Admin==1.5.3
+flask-mongoengine==0.9.3
