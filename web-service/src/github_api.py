@@ -1,10 +1,10 @@
 #!./venv/bin/python3.6
 import subprocess
 import git
-from word import ABS_PATH
 import requests
 import time
 
+ABS_PATH = '/var/www/report_generator/{}'
 LOCAL_REPO = ABS_PATH.format("repo_for_report")
 LOCAL_WIKI = ABS_PATH.format("wiki_dir")
 BEGIN_SSH = "git@github.com:{}"
