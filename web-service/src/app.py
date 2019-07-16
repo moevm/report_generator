@@ -1,6 +1,6 @@
 import os
 from flask import Flask
-DB_NAME = 'database_of_rp_'
+DB_NAME = 'database_of_rphdgdf_'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 app = Flask(__name__)

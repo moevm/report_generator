@@ -1,16 +1,15 @@
 from app import app
-from db_service import getMongo
+from services.db_service import getMongo
 from flask_security import current_user, UserMixin, RoleMixin
 from flask_admin import AdminIndexView
 from flask_admin.contrib.mongoengine import ModelView
 from flask import redirect, url_for, request
 from mongoengine import signals
 from mail import Mail
-db = getMongo()
 
 
-class Role(db.Document, RoleMixin):
-	name = db.StringField(max_length=80, unique=True)
+class Role(getMongo().Document, RoleMixin):
+	name = getMongo().StringField(max_length=80, unique=True)
 
 	def __unicode__(self):
 		return self.name
@@ -19,12 +18,12 @@ class Role(db.Document, RoleMixin):
 		return self.name
 
 
-class User(db.Document, UserMixin):
-	username = db.StringField(max_length=50, required=True, unique=True)
-	email = db.StringField(max_length=100, required=True, unique=True)
-	active = db.BooleanField(default=True)
-	roles = db.ListField(db.ReferenceField(Role), default=[])
-	avatar = db.StringField()
+class User(getMongo().Document, UserMixin):
+	username = getMongo().StringField(max_length=50, required=True, unique=True)
+	email = getMongo().StringField(max_length=100, required=True, unique=True)
+	active = getMongo().BooleanField(default=True)
+	roles = getMongo().ListField(getMongo().ReferenceField(Role), default=[])
+	avatar = getMongo().StringField()
 
 	def __repr__(self):
 		return self.email

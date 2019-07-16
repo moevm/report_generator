@@ -2,7 +2,7 @@ from app import app
 from flask_admin import Admin
 from models import AdminView, HomeAdminView, User, Role
 from flask_security import MongoEngineUserDatastore, Security
-from db_service import getMongo
+from services.db_service import getMongo
 
 db = getMongo()
 

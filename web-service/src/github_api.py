@@ -27,11 +27,11 @@ class Gengit:
         self.repo = None
 
     def download_git(self):
-        try:
-            self.repo = git.Repo.clone_from(self.url, self.local_repo)
-        except Exception:
-            print(ERROR_REPO)
-            return False
+        #try:
+        self.repo = git.Repo.clone_from(self.url, self.local_repo)
+        #except Exception:
+        #    print(ERROR_REPO)
+        #    return False
         try:
             self.repo.git.checkout(self.branch)
         except Exception:

@@ -4,43 +4,53 @@ $('#empty_doc').click(function () {
     $('#requirements').empty();
 });
 
+var requirements = '#requirements'
 $('#lab_doc').click(function(){
 $('#btnGroupDrop1').text("Лабораторная работа");
 if($('#requirements').is(':hidden') || $('*').is('#field_for_course'))
 {
-$('#requirements').empty();
-$('#requirements').append('<div class="row" id="field_for_lab"</div>')
-$('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='teacher'>Преподаватель</label><input type='text' class='form-control' id='teacher'></div>");
-$('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='student'>Студент</label><input type='text' class='form-control' id='student' placeholder='' value=''></div>");
-$('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='number_group'>Номер группы</label><input type='text' class='form-control' id='number_group' placeholder='' value=''></div>");
-$('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='theme'>Тема лабораторной работы</label><input type='text' class='form-control' id='theme' placeholder='' value=''></div>");
-$('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='discipline'>Название предмета</label><input type='text' class='form-control' id='discipline' placeholder='' value=''></div>");
-$('#field_for_lab').append("<div class='col-md-6 mb-3'><label for='cathedra'>Кафедра</label><input type='text' class='form-control' id='cathedra' placeholder='' value=''></div>");
-$('#requirements').show("slow")
+var for_lab = '#field_for_lab'
+$(requirements).empty();
+$(requirements).append('<div class="row" id="field_for_lab"</div>')
+
+createLabsField(for_lab)
+
+$(requirements).show("slow")
 }
 });
 
 $('#course_doc').click(function(){
 $('#btnGroupDrop1').text("Курсовая работа");
 
-if($('#requirements').is(':hidden') || $('*').is('#field_for_lab'))
+if($(requirements).is(':hidden') || $('*').is('#field_for_lab'))
 {
-$('#requirements').empty();
-$('#requirements').append('<div class="row" id="field_for_course"</div>');
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='teacher'>Преподаватель</label><input type='text' class='form-control' id='teacher' placeholder='' value=''></div>");
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='student'>Студент</label><input type='text' class='form-control' id='student' placeholder='' value=''></div>");
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='number_group'>Номер группы</label><input type='text' class='form-control' id='number_group' placeholder='' value=''></div>");
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='theme'>Тема курсовой работы</label><input type='text' class='form-control' id='theme' placeholder='' value=''></div>");
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='discipline'>Название предмета</label><input type='text' class='form-control' id='discipline' placeholder='' value=''></div>");
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='cathedra'>Кафедра</label><input type='text' class='form-control' id='cathedra' placeholder='' value=''></div>");
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='min_pages'>Минимальное количество страниц</label><input type='text' class='form-control' id='min_pages' placeholder='' value=''></div>");
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='date_start'>Дата начала</label><input type='text' class='form-control' id='date_start' placeholder='' value=''></div>");
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='date_finish'>Дата сдачи</label><input type='text' class='form-control' id='date_finish' placeholder='' value=''></div>");
-$('#field_for_course').append("<div class='col-md-6 mb-3'><label for='date_defend'>Дата защиты</label><input type='text' class='form-control' id='date_defend' placeholder='' value=''></div>");
-$('#requirements').show('show');
+var for_course = '#field_for_course'
+$(requirements).empty();
+$(requirements).append('<div class="row" id="field_for_course"</div>');
+
+createLabsField(for_course)
+
+$(for_course).append(createFieldForConfigurator('min_pages', 'Минимальное количество страниц'))
+$(for_course).append(createFieldForConfigurator('date_start', 'Дата начала'))
+$(for_course).append(createFieldForConfigurator('date_finish', 'Дата сдачи'))
+$(for_course).append(createFieldForConfigurator('date_defend', 'Дата защиты'))
+
+$(requirements).show('show');
 }
 });
 
+function createLabsField(id){
+$(id).append(createFieldForConfigurator('teacher', 'Преподаватель'))
+$(id).append(createFieldForConfigurator('student', 'Студент'))
+$(id).append(createFieldForConfigurator('number_group', 'Номер группы'))
+$(id).append(createFieldForConfigurator('theme', 'Тема работы'))
+$(id).append(createFieldForConfigurator('discipline', 'Название предмета'))
+$(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
+}
+
+function createFieldForConfigurator(id, name){
+return  "<div class='col-md-6 mb-3'><label for='"+id+"'>"+name+"</label><input type='text' class='form-control' id='"+id+"' placeholder='' value=''></div>"
+}
 
 function checkImportantData(){
     return $('#wiki_name').val() != '' && $('#repo_name').val() != '' && $('#branch').val() != ''
