@@ -3,8 +3,8 @@ import subprocess
 import git
 import requests
 import time
+from app import ABS_PATH
 
-ABS_PATH = '/var/www/report_generator/{}'
 LOCAL_REPO = ABS_PATH.format("repo_for_report")
 LOCAL_WIKI = ABS_PATH.format("wiki_dir")
 BEGIN_SSH = "git@github.com:{}"

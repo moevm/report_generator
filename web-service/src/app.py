@@ -1,5 +1,6 @@
 import os
 from flask import Flask
+ABS_PATH = os.getcwd() + '/{}'
 DB_NAME = 'database_of_rp'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 

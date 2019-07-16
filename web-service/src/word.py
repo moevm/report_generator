@@ -15,8 +15,8 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
 from github_api import Gengit
+from app import ABS_PATH
 
-ABS_PATH = "/var/www/report_generator/{}"
 GIT_REPO = ABS_PATH.format("wiki_dir")
 PATH_TO_WIKI = "{}/{}.md"
 NAME_REPORT = "report.docx"
