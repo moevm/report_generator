@@ -3,6 +3,9 @@ from services.mail_service import getMail
 from flask_mail import Message
 from flask import render_template
 
+HEADER_LETTER = 'Access to Report Generator'
+MAIL_SERVER = 'MAIL_SERVER'
+
 
 class Mail:
 
@@ -24,11 +27,11 @@ class Mail:
         mail.init_app(app)
 
     def __init__(self):
-        if 'MAIL_SERVER' not in app.config:
+        if MAIL_SERVER not in app.config:
             self.configure_mail()
 
     def get_message(self, email):
-        msg = Message("Access to Report Generator",
+        msg = Message(HEADER_LETTER,
                       sender=self.mail_username,
                       recipients=[email])
 

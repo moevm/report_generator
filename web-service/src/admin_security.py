@@ -4,11 +4,17 @@ from models import AdminView, HomeAdminView, User, Role
 from flask_security import MongoEngineUserDatastore, Security
 from services.db_service import getMongo
 
-db = getMongo()
-
-admin = Admin(app, 'RP', url='/', index_view=HomeAdminView(name='Home'))
-admin.add_view(AdminView(User))
+USER_DATASTORE = None
 
 
-user_datastore = MongoEngineUserDatastore(db, User, Role)
-security = Security(app, user_datastore)
+def get_datastore():
+    return USER_DATASTORE
+
+
+def create_admin():
+    admin = Admin(app, 'RP', url='/', index_view=HomeAdminView(name='Home'))
+    admin.add_view(AdminView(User))
+
+    global  USER_DATASTORE
+    USER_DATASTORE = MongoEngineUserDatastore(getMongo(), User, Role)
+    security = Security(app, USER_DATASTORE)

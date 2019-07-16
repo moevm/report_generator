@@ -7,6 +7,13 @@ from flask import redirect, url_for, request
 from mongoengine import signals
 from mail import Mail
 
+ADMIN = 'admin'
+GITHUB_LOGIN = 'github_login'
+ROLES = 'roles'
+EMAIL = 'email'
+IS_NEW_USER = 'was_new_user'
+LOG_FAIL_EMAIL = 'Cant send to {}'
+
 
 class Role(getMongo().Document, RoleMixin):
 	name = getMongo().StringField(max_length=80, unique=True)
@@ -33,17 +40,17 @@ class User(getMongo().Document, UserMixin):
 
 	@classmethod
 	def post_save(cls, sender, document, **kwargs):
-		if app.config['was_new_user']:
+		if app.config[IS_NEW_USER]:
 			_mail = Mail()
 			user = list(User.objects)[-1]
 
-			if 'admin' not in user['roles']:
+			if ADMIN not in user[ROLES]:
 				try:
-					_mail.send_message(user['email'])
+					_mail.send_message(user[EMAIL])
 				except Exception:
-					print('Cant send to {}'.format(user['email']))
+					print(LOG_FAIL_EMAIL.format(user[EMAIL]))
 		else:
-			app.config['was_new_user'] = True
+			app.config[IS_NEW_USER] = True
 
 
 signals.post_save.connect(User.post_save, sender=User)
@@ -52,10 +59,10 @@ signals.post_save.connect(User.post_save, sender=User)
 class AdminMixin:
 
 	def is_accessible(self):
-		return current_user.has_role('admin')
+		return current_user.has_role(ADMIN)
 
 	def inaccessible_callback(self, name, **kwargs):
-		return redirect(url_for('github_login', next=request.url))
+		return redirect(url_for(GITHUB_LOGIN, next=request.url))
 
 
 class AdminView(AdminMixin, ModelView):

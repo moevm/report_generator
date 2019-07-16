@@ -39,29 +39,21 @@ COLON = ": "
 class JsonApi:
 
     def __init__(self, new_dict):
-        ''':param new_dict: словарь данных, полученных с html страницы '''
         self.read_json_file()
         self.new_settings = new_dict
         self.change_content()
         self.write_json_file()
 
     def read_json_file(self):
-        ''':Функция открывает json файл с конфигом документа'''
         with open(JSON_FILE, 'r') as file:
             self.json_data = json.load(file)
 
     def write_json_file(self):
-        '''Функция записывает изменные данные в конфиг файл'''
         with open(JSON_FILE, 'w') as file:
             file.write(json.dumps(self.json_data, sort_keys=False, indent=4, ensure_ascii=False,
                                   separators=(COMMA, COLON)))
 
     def change_content(self):
-        '''
-
-        Функция заполнят конфиг файл в зависимости от типа документа. Фактором определения вида документа
-        является кол-во переданных данных
-        '''
         length_set = len(self.new_settings)
         if length_set == LEN_COURSE_DOC:
             self.json_data[TYPE] = KR
