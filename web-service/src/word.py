@@ -14,6 +14,7 @@ from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
+from github_api import Gengit
 
 ABS_PATH = "/var/www/report_generator/{}"
 GIT_REPO = ABS_PATH.format("wiki_dir")
@@ -119,6 +120,16 @@ ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который 
 DISTANCE_NUMBER_CODE = " "
 REPLACE_FOR_QUOTE = ['p.add_run("', 'p = self.document.add_paragraph(text="']
 
+COMMENTS_PR = "Комментарии из пулл-реквестов"
+PR = "pull_request"
+OWNER_OF_PR = "owner"
+REPO_OF_PR = "repo"
+NUMBER_OF_PR = "number_of_pr"
+
+PR_SOURCE_CODE = "Исходный код:"
+PR_COMMENTS = "Комментарии:"
+PR_DIFFS = "Изменения:"
+
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
                   'centre': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -223,7 +234,8 @@ class PythonDocxRenderer(mistune.Renderer):
 
 class Dword:
 
-    def __init__(self):
+    def __init__(self, branch):
+        self.branch = branch
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
         self.name = LOCAL_REPO
@@ -234,7 +246,8 @@ class Dword:
         #self.convert_format()
         self.add_text_from_wiki()
         #self.add_final_part()
-        #self.save(self.name)
+        self.add_comments()
+        self.save(self.name)
 
     def convert_format(self):
         for paragraph in self.document.paragraphs:
@@ -302,6 +315,7 @@ class Dword:
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
+
         self.document.save(ABS_PATH.format(NAME_REPORT))
 
     def make_title(self):
@@ -366,7 +380,7 @@ class Dword:
             print(ERROR_MESSAGE_UNOCONV, e)
 
     def save(self, name=NAME_REPORT):
-        self.document.save(name)
+        self.document.save(os.path.abspath(name))
 
     def number_position(self, _number, code_size):
         max_len = len(str(code_size))
@@ -401,3 +415,23 @@ class Dword:
             self.path = PATH_TO_TEMPLATE.format(LAB_WORK)
         else:
             self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
+
+    def add_comments(self):
+        git = Gengit(branch=self.branch)
+        self.add_page_break()
+        self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
+        comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
+                         self.js_content[PR][NUMBER_OF_PR])
+
+        for element in comments:
+            self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            self.add_line(element.body_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            for body_element in element.body_comments:
+                self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
+                              align=ALIGN_LEFT)
+
+        self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+        for element in comments:
+            if element.diff:
+                self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
