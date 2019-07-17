@@ -10,7 +10,7 @@ from docx import Document
 import mistune
 from pathlib import Path
 from PIL import Image
-from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
+from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT, WD_BREAK
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
@@ -102,7 +102,7 @@ LIST = "{}\np.add_run().add_break()\n"
 HEADER = "p = self.document.add_paragraph(text=\"{}\",style=\"{}\")\n"
 ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
-RUN_AND_BREAK = 'p.add_run().add_break()'
+RUN_AND_BREAK = 'p.add_run().add_break(WD_BREAK.COLUMN)\n'
 STYLE_PAPAGRAPH = "paragraph_style"
 ADD_PARAGRAPH = '''p = self.document.add_paragraph(style='{}')\n'''.format(STYLE_PAPAGRAPH)
 BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\np.add_run().add_break()\n'
