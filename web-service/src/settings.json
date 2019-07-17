@@ -46,6 +46,11 @@
       "size": 14,
       "font": "Times New Roman"
     }
+  },
+  "pull_request" : {
+    "owner" : "light5551",
+    "repo": "test_gen",
+    "number_of_pr": [9]
   }
 }
 
