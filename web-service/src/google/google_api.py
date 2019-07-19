@@ -34,7 +34,7 @@ def post_file_api_request():
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
     file_metadata = {TITLE: NAME_OF_FILE, TYPE: PDF}
-    media = MediaFileUpload(NAME_OF_FILE,
+    media = MediaFileUpload('report.pdf',
                             mimetype=MEDIA_TYPE)
     file = drive.files().insert(body=file_metadata,
                                 media_body=media,

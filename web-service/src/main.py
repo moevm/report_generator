@@ -9,6 +9,7 @@ from word import Dword
 
 TIME_REPORT = "ready_project.docx"
 READY_WORD = "generated_doc.docx"
+REPORT = 'report.pdf'
 FROM_CONSOLE = "cmd"
 PDF = "PDF"
 PDF_EXTENSION = "{}.pdf"
@@ -72,6 +73,7 @@ def main(type_of_input):
         word.save(path_doc)
         if word.js_content[PDF]:
             word.convert_to_pdf(docname=path_doc)
+            shutil.copyfile("{}{}".format(path_doc[:-4], PDF.lower()), REPORT)
             report = PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION])
         git.add(report)
         git.push()
