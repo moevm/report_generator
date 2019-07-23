@@ -320,7 +320,6 @@ class Dword:
         renderer = PythonDocxRenderer()
 
         try:
-            print(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
