@@ -10,7 +10,7 @@ import googleapiclient.discovery
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 CREDENTIALS = 'credentials'
-CLIENT_SECRETS_FILE = "client_secrets.json"
+CLIENT_SECRETS_FILE = "google/client_secrets.json"
 TITLE = 'title'
 NAME_OF_FILE = 'report.pdf'
 TYPE = 'mimeType'
