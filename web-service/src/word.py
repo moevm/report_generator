@@ -107,7 +107,7 @@ RUN_AND_BREAK = 'p.add_run().add_break(WD_BREAK.COLUMN)\n'
 STYLE_PAPAGRAPH = "paragraph_style"
 ADD_PARAGRAPH = '''p = self.document.add_paragraph(style='{}')\n'''.format(STYLE_PAPAGRAPH)
 BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\np.add_run().add_break()\n'
-CREATE_IMAGE = "self.add_image_by_url(\"{}\")"
+CREATE_IMAGE = "p.add_run().add_break(WD_BREAK.COLUMN)\nself.add_image_by_url(\"{}\")"
 CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
 END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
 ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
@@ -320,6 +320,7 @@ class Dword:
         renderer = PythonDocxRenderer()
 
         try:
+            print(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
