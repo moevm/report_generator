@@ -6,6 +6,7 @@ from flask_security import current_user, login_required, login_user, logout_user
 from admin_security import get_datastore, create_admin
 from models import User, IS_NEW_USER
 from services.github_service import getGithub
+import google.google_api
 
 app.config[IS_NEW_USER] = True
 MAIN_PAGE = 'index'
@@ -29,7 +30,6 @@ URL = 'url'
 HTML_URL = 'html_url'
 NAME = 'name'
 FULL_NAME = 'full_name'
-
 POST = 'POST'
 GET = 'GET'
 
@@ -108,6 +108,11 @@ def authorized():
     return redirect(url_for(MAIN_PAGE))
 
 
+@app.route('/send', methods=['GET'])
+def send():
+    return redirect(url_for('google_authorize'))
+
+
 def create_list_of_repo(repo_data):
     if repo_data:
         repos = getGithub().get(GET_REPOS.format(repo_data[LOGIN]))
@@ -116,3 +121,4 @@ def create_list_of_repo(repo_data):
             list_of_repo.append({URL: repo[HTML_URL], NAME: repo[FULL_NAME]})
         return list_of_repo
     return []
+

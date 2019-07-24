@@ -9,5 +9,5 @@ app.config['SECRET_KEY'] = 'VERY_SECRET_KEY'
 app.config['MONGODB_SETTINGS'] = {
 	'db': DB_NAME
 }
-app.secret_key = 'very_secret'
 app.config['SECURITY_PASSWORD_SALT'] = 'salt'
+
