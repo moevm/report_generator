@@ -22,6 +22,7 @@ FLAG_ARG = "-f"
 LINK = "https://github.com/{}/blob/{}/{}"
 VAR_CONTENT = 3
 EMPTY_PLACE = ""
+MASTER = 'master'
 
 
 def create_parser():
@@ -77,7 +78,7 @@ def main(type_of_input):
         git.push()
         delete_directories_and_files(git, git_wiki)
         if not branch:
-            branch = 'master'
+            branch = MASTER
         return LINK.format(url[15:-4], branch, report)
     return EMPTY_PLACE
 

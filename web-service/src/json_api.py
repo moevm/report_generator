@@ -1,6 +1,6 @@
 import json
 JSON_FILE = 'settings.json'
-LEN_COURSE_DOC = 24
+LEN_COURSE_DOC = 23
 LEN_LAB_DOC = 19
 
 TYPE = "type"
@@ -42,7 +42,6 @@ class JsonApi:
 
     def __init__(self, new_dict):
         self.read_json_file()
-        print(new_dict)
         self.new_settings = new_dict
         self.change_content()
         self.write_json_file()
@@ -94,7 +93,6 @@ class JsonApi:
 
     def course_content(self):
         self.lab_content()
-        if self.new_settings[NEW_CONTENT]: self.json_data[OLD_CONTENT] = self.new_settings[NEW_CONTENT]
         if self.new_settings[MIN_PAGES]: self.json_data[MIN_PAGES] = self.new_settings[MIN_PAGES]
         if self.new_settings[DATE_START]: self.json_data[DATE_START] = self.new_settings[DATE_START]
         if self.new_settings[DATE_FINISH]: self.json_data[DATE_FINISH] = self.new_settings[DATE_FINISH]

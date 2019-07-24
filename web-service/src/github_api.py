@@ -39,7 +39,7 @@ class Gengit:
         self.local_wiki = LOCAL_WIKI
         self.branch = branch
         if branch is '':
-            self.branch = 'master'
+            self.branch = STANDART_BRANCH
         self.repo = None
 
     def download_git(self):

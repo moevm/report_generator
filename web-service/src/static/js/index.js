@@ -4,16 +4,16 @@ $('#empty_doc').click(function () {
     $('#requirements').empty();
 });
 
-var requirements = '#requirements'
+var requirements = '#requirements';
 $('#lab_doc').click(function(){
 $('#btnGroupDrop1').text("Лабораторная работа");
 if($('#requirements').is(':hidden') || $('*').is('#field_for_course'))
 {
-var for_lab = '#field_for_lab'
+var for_lab = '#field_for_lab';
 $(requirements).empty();
-$(requirements).append('<div class="row" id="field_for_lab"</div>')
+$(requirements).append('<div class="row" id="field_for_lab"</div>');
 
-createLabsField(for_lab)
+createLabsField(for_lab);
 
 $(requirements).show("slow")
 }
@@ -24,27 +24,27 @@ $('#btnGroupDrop1').text("Курсовая работа");
 
 if($(requirements).is(':hidden') || $('*').is('#field_for_lab'))
 {
-var for_course = '#field_for_course'
+var for_course = '#field_for_course';
 $(requirements).empty();
 $(requirements).append('<div class="row" id="field_for_course"</div>');
 
-createLabsField(for_course)
+createLabsField(for_course);
 
-$(for_course).append(createFieldForConfigurator('min_pages', 'Минимальное количество страниц'))
-$(for_course).append(createFieldForConfigurator('date_start', 'Дата начала'))
-$(for_course).append(createFieldForConfigurator('date_finish', 'Дата сдачи'))
-$(for_course).append(createFieldForConfigurator('date_defend', 'Дата защиты'))
+$(for_course).append(createFieldForConfigurator('min_pages', 'Минимальное количество страниц'));
+$(for_course).append(createFieldForConfigurator('date_start', 'Дата начала'));
+$(for_course).append(createFieldForConfigurator('date_finish', 'Дата сдачи'));
+$(for_course).append(createFieldForConfigurator('date_defend', 'Дата защиты'));
 
 $(requirements).show('show');
 }
 });
 
 function createLabsField(id){
-$(id).append(createFieldForConfigurator('teacher', 'Преподаватель'))
-$(id).append(createFieldForConfigurator('student', 'Студент'))
-$(id).append(createFieldForConfigurator('number_group', 'Номер группы'))
-$(id).append(createFieldForConfigurator('theme', 'Тема работы'))
-$(id).append(createFieldForConfigurator('discipline', 'Название предмета'))
+$(id).append(createFieldForConfigurator('teacher', 'Преподаватель'));
+$(id).append(createFieldForConfigurator('student', 'Студент'));
+$(id).append(createFieldForConfigurator('number_group', 'Номер группы'));
+$(id).append(createFieldForConfigurator('theme', 'Тема работы'));
+$(id).append(createFieldForConfigurator('discipline', 'Название предмета'));
 $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
 }
 
@@ -53,7 +53,7 @@ return  "<div class='col-md-6 mb-3'><label for='"+id+"'>"+name+"</label><input t
 }
 
 function checkImportantData(){
-    return $('#wiki_name').val() != '' && $('#repo_name').val() != '' && $('#branch').val() != ''
+    return $('#wiki_name').val() !== '' && $('#repo_name').val() !== '' && $('#branch').val() !== ''
 }
 
 $('#btn_submit').click(function () {
@@ -62,17 +62,17 @@ if(checkImportantData())
 $( "div" ).remove( "#spinner_for_answer" );
 $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" role="status"></div>')
 }
-})
+});
 
 $('#style_setter').click(function(){
 if ($('#style_settings').is(':hidden'))
    {
-   $('#style_settings').show("slow")
+   $('#style_settings').show("slow");
    $("#style_setter").css("background","#FF2400");
    }
 else
    {
-   $('#style_settings').hide("slow")
+   $('#style_settings').hide("slow");
    $("#style_setter").css("background","#007bff");
    }
 });
@@ -125,53 +125,52 @@ function get_data_from_form(){
  		if($("*").is("#teacher")){
  			var teacher = $('#teacher').val();
  			result += `&teacher=${teacher}`;
- 			};
- 		if($("*").is("#student")){
+		}
+	if($("*").is("#student")){
  			var student = $('#student').val();
  			result += `&student=${student}`;
- 			};
- 		if($("*").is("#number_group")){
+		}
+	if($("*").is("#number_group")){
  			var number_group = $('#number_group').val();
  			result += `&number_group=${number_group}`;
- 			};
- 		if($("*").is("#theme")){
+		}
+	if($("*").is("#theme")){
  			var theme = $('#theme').val();
  			result += `&theme=${theme}`;
- 			};
- 		if($("*").is("#discipline")){
+		}
+	if($("*").is("#discipline")){
  			var discipline = $('#discipline').val();
  			result += `&discipline=${discipline}`;
- 			};
- 		if($("*").is("#cathedra")){
+	}
+	if($("*").is("#cathedra")){
  			var cathedra = $('#cathedra').val();
  			result += `&cathedra=${cathedra}`;
- 			};
- 		if($("*").is("#min_pages")){
+		}
+	if($("*").is("#min_pages")){
  			var min_pages = $('#min_pages').val();
  			result += `&min_pages=${min_pages}`;
- 			};
- 		if($("*").is("#date_start")){
+		}
+	if($("*").is("#date_start")){
  			var date_start = $('#date_start').val();
  			result += `&date_start=${date_start}`;
- 			};
- 		if($("*").is("#date_finish")){
+		}
+	if($("*").is("#date_finish")){
  			var date_finish = $('#date_finish').val();
  			result += `&date_finish=${date_finish}`;
- 			};
- 		if($("*").is("#date_defend")){
+		}
+	if($("*").is("#date_defend")){
  			var date_defend = $('#date_defend').val();
  			result += `&date_defend=${date_defend}`;
- 			};
-
-        return result;
+		}
+	return result;
     }
 
-var _a = document.getElementById('repo_menu');
+const _a = document.getElementById('repo_menu');
 
 _a.addEventListener('click', changeRepo);
 function changeRepo(e)
 {
-var ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git'
+var ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git';
 $("#repo_name").val(ssh_str);
 e.preventDefault();
 }
@@ -181,8 +180,8 @@ var _b = document.getElementById('wiki_menu');
 _b.addEventListener('click', changeWiki);
 function changeWiki(e)
 {
-var wiki_str = event.target.href + '.wiki.git'
-$("#wiki_name").val(wiki_str);
+	const wiki_str = event.target.href + '.wiki.git';
+	$("#wiki_name").val(wiki_str);
 e.preventDefault();
 }
 
