@@ -38,6 +38,8 @@ class Gengit:
         self.local_repo = LOCAL_REPO
         self.local_wiki = LOCAL_WIKI
         self.branch = branch
+        if branch is '':
+            self.branch = 'master'
         self.repo = None
 
     def download_git(self):

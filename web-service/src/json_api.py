@@ -34,12 +34,15 @@ DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 COMMA = ","
 COLON = ": "
+STANDART_SIZE = 14
+MAX_SIZE = 100
 
 
 class JsonApi:
 
     def __init__(self, new_dict):
         self.read_json_file()
+        print(new_dict)
         self.new_settings = new_dict
         self.change_content()
         self.write_json_file()
@@ -67,12 +70,19 @@ class JsonApi:
 
     def general_content(self):
         if self.new_settings[NEW_MAIN_FONT]: self.json_data[MAIN_TEXT][FONT] = self.new_settings[NEW_MAIN_FONT]
-        if self.new_settings[NEW_MAIN_SIZE]: self.json_data[MAIN_TEXT][SIZE] = int(self.new_settings[NEW_MAIN_SIZE])
+        if self.new_settings[NEW_MAIN_SIZE]: self.json_data[MAIN_TEXT][SIZE] = self.get_size(
+                                                                                int(self.new_settings[NEW_MAIN_SIZE]))
         if self.new_settings[NEW_CODE_FONT]: self.json_data[CODE_TEXT][FONT] = self.new_settings[NEW_CODE_FONT]
-        if self.new_settings[NEW_CODE_SIZE]: self.json_data[CODE_TEXT][SIZE] = int(self.new_settings[NEW_CODE_SIZE])
+        if self.new_settings[NEW_CODE_SIZE]: self.json_data[CODE_TEXT][SIZE] = self.get_size(
+                                                                                int(self.new_settings[NEW_CODE_SIZE]))
         for i in range(NUMBER_FOR_H1, NUMBER_FOR_H6):
             if self.new_settings[HEADER.format(i)]:
-                self.json_data[FORMAT][HEADER.format(i)][SIZE] = int(self.new_settings[HEADER.format(i)])
+                self.json_data[FORMAT][HEADER.format(i)][SIZE] = self.get_size(int(self.new_settings[HEADER.format(i)]))
+
+    def get_size(self, size):
+        if size < MAX_SIZE:
+            return size
+        return STANDART_SIZE
 
     def lab_content(self):
         if self.new_settings[TEACHER]: self.json_data[TEACHER] = self.new_settings[TEACHER]

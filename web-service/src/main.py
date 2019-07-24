@@ -76,6 +76,8 @@ def main(type_of_input):
         git.add(report)
         git.push()
         delete_directories_and_files(git, git_wiki)
+        if not branch:
+            branch = 'master'
         return LINK.format(url[15:-4], branch, report)
     return EMPTY_PLACE
 

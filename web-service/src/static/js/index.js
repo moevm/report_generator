@@ -94,6 +94,8 @@ function get_data_from_form(){
         var repo_name = $('#repo_name').val();
         var wiki_name = $('#wiki_name').val();
         var branch_name = $('#branch_name').val();
+        if (branch_name === '')
+        	branch_name = 'master';
         var general_font = $('#general_font').val();
         var general_size = $('#general_size').val();
         var code_font = $('#code_font').val();
