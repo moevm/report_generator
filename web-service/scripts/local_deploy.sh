@@ -4,7 +4,7 @@ python3.6 -m pip install -r ./scripts/requirements.txt
 
 
 CATALOG='report_generator'
-HOSTS_STRING="127.0.1.1       report_generator"
+HOSTS_STRING="127.0.0.1       report_generator"
 CONFIG=$CATALOG.conf
 
 if ! grep -Fxq "$HOSTS_STRING" /etc/hosts

@@ -73,8 +73,7 @@ def main(type_of_input):
         if word.js_content[PDF]:
             word.convert_to_pdf(docname=path_doc)
             report = PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION])
-        git.add(report)
-        git.push()
+        report = git.push(report)
         delete_directories_and_files(git, git_wiki)
         return LINK.format(url[15:-4], branch, report)
     return EMPTY_PLACE
