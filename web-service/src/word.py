@@ -16,6 +16,7 @@ from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
 
 ABS_PATH = "/var/www/report_generator/{}"
+#ABS_PATH = os.getcwd() + '/{}'
 GIT_REPO = ABS_PATH.format("wiki_dir")
 PATH_TO_WIKI = "{}/{}.md"
 NAME_REPORT = "report.docx"

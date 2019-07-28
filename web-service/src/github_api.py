@@ -22,7 +22,7 @@ NEW_FILENAME = '{}{}.pdf'
 LEN_PDF = 4
 GEN_PATH_REPORT = '{}/{}'
 
-TOKEN = '4d7baf087e8e9536c68fbebe4a51ba4304f4cfa1'
+TOKEN = '56e2b3562f0ece30c1a667ce380e2300c67c2144'
 HEADER = {'Authorization': 'token {}'.format(TOKEN)}
 INVITE_PATH = 'user/repository_invitations'
 API = 'https://api.github.com/{}'
@@ -100,6 +100,5 @@ def get_invites():
 
 def check_invites():
     for invite in get_invites():
-        print(invite[INVITE_URL])
         accept_invite(invite[INVITE_URL])
 
