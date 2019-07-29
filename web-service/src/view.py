@@ -3,7 +3,8 @@ from main import main as create_word
 from json_api import JsonApi as update_settings
 from flask import render_template, redirect, url_for, session
 from flask import request
-
+#from google.google_api import *
+import google.google_api
 
 @app.route('/', methods=["GET", 'POST'])
 @app.route('/home', methods=["GET", 'POST'])
@@ -17,3 +18,9 @@ def index():
         return redirect(url_for("index"))
 
     return render_template("home.html", link=session.get('link'))
+
+
+@app.route('/send', methods=['GET'])
+def send():
+    return redirect(url_for('google_authorize'))
+
