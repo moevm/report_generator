@@ -36,12 +36,19 @@
               </div>
               <div>
                   <button class="btn btn-primary" type="submit">Отправить</button>
-                  {%  if link %}
-                  <a href={{link}} class="badge badge-primary">Ссылка на отчет</a>
-                  {% endif %}
               </div>
           </form>
+
+          {%  if link %}
+              <br>
+              <div class="col-md-10 row">
+              <a href={{link}} class="btn btn-success">Ссылка на отчет</a>
+                  &nbsp;
+              <a href="/send" class="fa fa-google btn-success"></a>
+              </div>
+          {% endif %}
       </div>
 </div>
 
 {% endblock %}
+
