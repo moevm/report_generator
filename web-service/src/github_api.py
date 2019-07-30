@@ -22,7 +22,7 @@ NEW_FILENAME = '{}{}.pdf'
 LEN_PDF = 4
 GEN_PATH_REPORT = '{}/{}'
 
-TOKEN = '56e2b3562f0ece30c1a667ce380e2300c67c2144'
+TOKEN = 'b21b77c742db5371675efd1a59ab97176d78f8f9'
 HEADER = {'Authorization': 'token {}'.format(TOKEN)}
 INVITE_PATH = 'user/repository_invitations'
 API = 'https://api.github.com/{}'
