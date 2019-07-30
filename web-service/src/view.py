@@ -2,7 +2,6 @@ from app import app
 from main import main as create_word
 from flask import render_template, redirect, url_for
 from flask import request
-#from google.google_api import *
 import google.google_api
 
 @app.route('/', methods=["GET", 'POST'])
