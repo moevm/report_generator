@@ -20,6 +20,9 @@ mkdir /var/www/"$CATALOG"
 cp ./src/*.py  /var/www/"$CATALOG"
 cp ./src/*.json  /var/www/"$CATALOG"
 cp ./src/"$CATALOG".wsgi /var/www/"$CATALOG"
+cp ./src/*.sh /var/www/"$CATALOG"
+cp ./src/*.txt /var/www/"$CATALOG"
+cp -r ./src/google /var/www/"$CATALOG"
 cp -r ./src/static /var/www/"$CATALOG"/static/
 cp -r ./src/templates /var/www/"$CATALOG"/templates/
 cp -r ./src/word_templates /var/www/"$CATALOG"/word_templates

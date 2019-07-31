@@ -2,13 +2,15 @@
 
 {% block title %}
 
-    Home Page
+Home Page
 
 {% endblock %}
 
 {% block content %}
 
 <div class="container">
+<!--
+<<<<<<< HEAD
       <div class="py-5 text-center">
           <h2>Генерация отчетов</h2>
       </div>
@@ -45,6 +47,140 @@
       <button onclick="myFunction()">Copy text</button>
 
       </div>
+=======
+-->
+    <div class="py-5 text-center">
+        <h2>Генерация отчетов</h2>
+    </div>
+    <div class="col-md-10">
+        <form method="POST" class="needs-validation" action="javascript:void(null);" onsubmit="submitForm()">
+            <div class="mb-3">
+                <label for="wiki_name">Ссылка на вики:</label>
+                <input type="text" class="form-control" id="wiki_name" required>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="repo_name">Ссылка на репозиторий, куда будет отправлен отчет:</label>
+                <input type="text" class="form-control" id="repo_name" required>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="branch_name">Название ветки</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="branch_name" placeholder="master">
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <input type="button" class="btn btn-primary" id="style_setter" value="Настройка стилей">
+                </div>
+
+                <div class="dropdown col-md-4 mb-3" role="group">
+                    <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
+                            data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                        Вид работы
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                        <a class="dropdown-item" id="empty_doc">-</a>
+                        <a class="dropdown-item" id="course_doc">Курсовая работа</a>
+                        <a class="dropdown-item" id="lab_doc">Лабораторная работа</a>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div id="style_settings" style="display:none;">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="general_font">Основной шрифт</label>
+                        <input type="text" class="form-control" id="general_font" placeholder="Times New Roman"
+                               value="">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="general_size">Кегль</label>
+                        <input type="text" class="form-control" id="general_size" placeholder="14">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="code_font">Шрифт кода</label>
+                        <input type="text" class="form-control" id="code_font" placeholder="Consolas">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="code_size">Кегль кода</label>
+                        <input type="text" class="form-control" id="code_size" placeholder="10">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="for_h1">Заголовок первого уровня</label>
+                        <input type="text" class="form-control" id="for_h1" placeholder="">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="for_h2">Заголовок второго уровня</label>
+                        <input type="text" class="form-control" id="for_h2" placeholder="">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="for_h3">Заголовок третьего уровня</label>
+                        <input type="text" class="form-control" id="for_h3" placeholder="">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="for_h4">Заголовок четвертого уровня</label>
+                        <input type="text" class="form-control" id="for_h4" placeholder="">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="for_h5">Заголовок пятого уровня</label>
+                        <input type="text" class="form-control" id="for_h5" placeholder="">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="for_h6">Заголовок шестого уровня</label>
+                        <input type="text" class="form-control" id="for_h6" placeholder="">
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label for="md_pages">Перечень wiki-страниц</label>
+                        <input type="text" class="form-control" id="md_pages" placeholder="">
+                    </div>
+
+                </div>
+
+
+            </div>
+            <p></p>
+
+            <div id="requirements" style="display:none;"></div>
+
+
+            <hr>
+            <div class="row col-md-6 mb-3" id="buttons_field">
+                <input type="submit" class="btn btn-primary" value="Сформировать отчет" id="btn_submit">
+                &nbsp;&nbsp;&nbsp;&nbsp;
+
+                {% if link %}
+                <a href={{link}} id="total_link" class="btn btn-success">Ссылка на отчет</a>
+                {% endif %}
+
+            </div>
+        </form>
+
+
+    </div>
+
+<!--
+>>>>>>> master
+-->
 </div>
+
 
 {% endblock %}

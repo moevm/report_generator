@@ -14,9 +14,9 @@ from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
+from github_api import Gengit
+from app import ABS_PATH
 
-ABS_PATH = "/var/www/report_generator/{}"
-#ABS_PATH = os.getcwd() + '/{}'
 GIT_REPO = ABS_PATH.format("wiki_dir")
 PATH_TO_WIKI = "{}/{}.md"
 NAME_REPORT = "report.docx"
@@ -111,6 +111,8 @@ END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
 ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
 PLUS_STR = "{}{}"
 H_STYLE = "my_header_{}"
+MAIN_TEXT = "main_text"
+CODE_TEXT = "code_text"
 FORMAT = "format"
 FONT = "font"
 SIZE = "size"
@@ -119,6 +121,17 @@ TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
 REPLACE_FOR_QUOTE = ['p.add_run("', 'p = self.document.add_paragraph(text="']
+NOT_MD_FILES = ['.git', '.', '..']
+
+COMMENTS_PR = "Комментарии из пулл-реквестов"
+PR = "pull_request"
+OWNER_OF_PR = "owner"
+REPO_OF_PR = "repo"
+NUMBER_OF_PR = "number_of_pr"
+
+PR_SOURCE_CODE = "Исходный код:"
+PR_COMMENTS = "Комментарии:"
+PR_DIFFS = "Изменения:"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -224,7 +237,8 @@ class PythonDocxRenderer(mistune.Renderer):
 
 class Dword:
 
-    def __init__(self):
+    def __init__(self, branch):
+        self.branch = branch
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
         self.name = LOCAL_REPO
@@ -235,7 +249,8 @@ class Dword:
         #self.convert_format()
         self.add_text_from_wiki()
         #self.add_final_part()
-        #self.save(self.name)
+        self.add_comments()
+        self.save(self.name)
 
     def convert_format(self):
         for paragraph in self.document.paragraphs:
@@ -248,11 +263,11 @@ class Dword:
         styles = self.document.styles
 
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
-        style.font.size = Pt(STANDART_FONT_SIZE)
-        style.font.name = STANDART_FONT
+        style.font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
+        style.font.name = self.js_content[MAIN_TEXT][FONT]
 
         style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
-        style.font.size,  style.font.name = Pt(STANDART_FONT_SIZE), STANDART_FONT
+        style.font.size,  style.font.name = Pt(self.js_content[MAIN_TEXT][SIZE]), self.js_content[MAIN_TEXT][FONT]
         style.font.italic = True
         style.font.underline = True
         for i in range(len(self.js_content[FORMAT])):
@@ -293,9 +308,20 @@ class Dword:
         self.create_styles()
         tmp = []
 
-        for path in self.js_content[PAGES]:
-            with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
-                tmp.append(file.read())
+        if self.js_content[PAGES]:
+            for path in self.js_content[PAGES]:
+                with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
+                    tmp.append(file.read())
+        else:
+            for filename in os.listdir(GIT_REPO):
+                if filename in NOT_MD_FILES:
+                    continue
+
+                try:
+                    with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3])) as file:
+                        tmp.append(file.read())
+                except FileNotFoundError:
+                    print('File was not found')
 
         renderer = PythonDocxRenderer()
 
@@ -367,7 +393,7 @@ class Dword:
             print(ERROR_MESSAGE_UNOCONV, e)
 
     def save(self, name=NAME_REPORT):
-        self.document.save(name)
+        self.document.save(os.path.abspath(name))
 
     def number_position(self, _number, code_size):
         max_len = len(str(code_size))
@@ -402,3 +428,23 @@ class Dword:
             self.path = PATH_TO_TEMPLATE.format(LAB_WORK)
         else:
             self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
+
+    def add_comments(self):
+        git = Gengit(branch=self.branch)
+        self.add_page_break()
+        self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
+        comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
+                         self.js_content[PR][NUMBER_OF_PR])
+
+        for element in comments:
+            self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            self.add_line(element.body_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            for body_element in element.body_comments:
+                self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
+                              align=ALIGN_LEFT)
+
+        self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+        for element in comments:
+            if element.diff:
+                self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
