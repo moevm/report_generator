@@ -110,6 +110,8 @@ END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
 ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
 PLUS_STR = "{}{}"
 H_STYLE = "my_header_{}"
+MAIN_TEXT = "main_text"
+CODE_TEXT = "code_text"
 FORMAT = "format"
 FONT = "font"
 SIZE = "size"
@@ -251,11 +253,11 @@ class Dword:
         styles = self.document.styles
 
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
-        style.font.size = Pt(STANDART_FONT_SIZE)
-        style.font.name = STANDART_FONT
+        style.font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
+        style.font.name = self.js_content[MAIN_TEXT][FONT]
 
         style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
-        style.font.size,  style.font.name = Pt(STANDART_FONT_SIZE), STANDART_FONT
+        style.font.size,  style.font.name = Pt(self.js_content[MAIN_TEXT][SIZE]), self.js_content[MAIN_TEXT][FONT]
         style.font.italic = True
         style.font.underline = True
         for i in range(len(self.js_content[FORMAT])):
