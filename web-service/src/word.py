@@ -110,6 +110,8 @@ END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
 ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
 PLUS_STR = "{}{}"
 H_STYLE = "my_header_{}"
+MAIN_TEXT = "main_text"
+CODE_TEXT = "code_text"
 FORMAT = "format"
 FONT = "font"
 SIZE = "size"
@@ -117,6 +119,7 @@ TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
 REPLACE_FOR_QUOTE = ['p.add_run("', 'p = self.document.add_paragraph(text="']
+NOT_MD_FILES = ['.git', '.', '..']
 
 COMMENTS_PR = "Комментарии из пулл-реквестов"
 PR = "pull_request"
@@ -250,11 +253,11 @@ class Dword:
         styles = self.document.styles
 
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
-        style.font.size = Pt(STANDART_FONT_SIZE)
-        style.font.name = STANDART_FONT
+        style.font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
+        style.font.name = self.js_content[MAIN_TEXT][FONT]
 
         style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
-        style.font.size,  style.font.name = Pt(STANDART_FONT_SIZE), STANDART_FONT
+        style.font.size,  style.font.name = Pt(self.js_content[MAIN_TEXT][SIZE]), self.js_content[MAIN_TEXT][FONT]
         style.font.italic = True
         style.font.underline = True
         for i in range(len(self.js_content[FORMAT])):
@@ -296,9 +299,20 @@ class Dword:
         self.create_styles()
         tmp = []
 
-        for path in self.js_content[PAGES]:
-            with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
-                tmp.append(file.read())
+        if self.js_content[PAGES]:
+            for path in self.js_content[PAGES]:
+                with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
+                    tmp.append(file.read())
+        else:
+            for filename in os.listdir(GIT_REPO):
+                if filename in NOT_MD_FILES:
+                    continue
+
+                try:
+                    with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3])) as file:
+                        tmp.append(file.read())
+                except FileNotFoundError:
+                    print('File was not found')
 
         renderer = PythonDocxRenderer()
 
