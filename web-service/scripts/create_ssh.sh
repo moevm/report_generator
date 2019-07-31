@@ -10,7 +10,6 @@ touch /var/www/.ssh/config
 
 chmod 600 /var/www/.ssh/config
 touch /var/www/.ssh/id_rsa
-cat ./scripts/config_for_docker/private_rsa > /vaw/www/.ssh/id_rsa
 
 chown www-data:www-data /var/www/.ssh/id_rsa
 chmod 600 /var/www/.ssh/id_rsa

@@ -4,6 +4,7 @@ import git
 import requests
 from app import ABS_PATH
 from github import Github
+from information import get_oauth
 
 
 LOCAL_REPO = ABS_PATH.format("repo_for_report")
@@ -21,7 +22,7 @@ NEW_FILENAME = '{}{}.pdf'
 LEN_PDF = 4
 GEN_PATH_REPORT = '{}/{}'
 
-TOKEN = '024f98b360e4372604a74a4bf81b837ad7421f3f'
+TOKEN = get_oauth()
 HEADER = {'Authorization': 'token {}'.format(TOKEN)}
 INVITE_PATH = 'user/repository_invitations'
 API = 'https://api.github.com/{}'
