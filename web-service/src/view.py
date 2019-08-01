@@ -1,7 +1,7 @@
 from app import app
 from main import main as create_word
 from json_api import JsonApi as update_settings
-from flask import render_template, redirect, url_for, request, flash, jsonify
+from flask import render_template, redirect, url_for, request, flash, jsonify, session
 from flask_security import current_user, login_required, login_user, logout_user
 from admin_security import get_datastore, create_admin
 from models import User, IS_NEW_USER
@@ -36,18 +36,17 @@ GET = 'GET'
 FIRST_ADMIN = 'light5551'
 FIRST_EMAIL_ADMIN = 'example@mail.ru'
 
-link = ""
+
 @app.route('/', methods=["GET", 'POST'])
 @app.route('/home', methods=["GET", 'POST'])
 def index():
     github = getGithub()
-    global link
     if request.method == POST:
         update_settings(dict(request.form))
         repo = request.form[REPO_NAME]
         wiki = request.form[WIKI_NAME]
         branch = request.form[BRANCH_NAME]
-        link = create_word([repo, wiki, branch])
+        session['link'] = create_word([repo, wiki, branch])
         return redirect(url_for(MAIN_PAGE))
     github_data = []
     repos = []
@@ -56,7 +55,7 @@ def index():
         github_data = github.get(USER)
         repos = create_list_of_repo(github_data)
 
-    return render_template("home.html", link=link, github=github_data, repositories=repos)
+    return render_template("home.html", link=session.get('link'), github=github_data, repositories=repos)
 
 
 @app.route('/github_login')
@@ -121,4 +120,3 @@ def create_list_of_repo(repo_data):
             list_of_repo.append({URL: repo[HTML_URL], NAME: repo[FULL_NAME]})
         return list_of_repo
     return []
-

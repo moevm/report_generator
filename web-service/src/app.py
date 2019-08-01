@@ -5,7 +5,7 @@ DB_NAME = 'database_of_rp'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'VERY_SECRET_KEY'
+app.secret_key = os.urandom(24)
 app.config['MONGODB_SETTINGS'] = {
 	'db': DB_NAME
 }

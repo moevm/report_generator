@@ -1,8 +1,7 @@
 import json
 JSON_FILE = 'settings.json'
-LEN_COURSE_DOC = 23
-LEN_LAB_DOC = 19
-
+LEN_COURSE_DOC = 24
+LEN_LAB_DOC = 20
 TYPE = "type"
 LR = "LR"
 KR = "KR"
@@ -36,6 +35,8 @@ COMMA = ","
 COLON = ": "
 STANDART_SIZE = 14
 MAX_SIZE = 100
+PAGES = 'pages'
+PAGES_OF_WIKI = 'pages_of_wiki'
 
 
 class JsonApi:
@@ -57,6 +58,7 @@ class JsonApi:
 
     def change_content(self):
         length_set = len(self.new_settings)
+        print(length_set)
         if length_set == LEN_COURSE_DOC:
             self.json_data[TYPE] = KR
             self.course_content()
@@ -67,6 +69,9 @@ class JsonApi:
             self.json_data[TYPE] = EMPTY_DOC
         self.general_content()
 
+    def create_pages(self, pages):
+        return pages.split(',')
+
     def general_content(self):
         if self.new_settings[NEW_MAIN_FONT]: self.json_data[MAIN_TEXT][FONT] = self.new_settings[NEW_MAIN_FONT]
         if self.new_settings[NEW_MAIN_SIZE]: self.json_data[MAIN_TEXT][SIZE] = self.get_size(
@@ -74,6 +79,10 @@ class JsonApi:
         if self.new_settings[NEW_CODE_FONT]: self.json_data[CODE_TEXT][FONT] = self.new_settings[NEW_CODE_FONT]
         if self.new_settings[NEW_CODE_SIZE]: self.json_data[CODE_TEXT][SIZE] = self.get_size(
                                                                                 int(self.new_settings[NEW_CODE_SIZE]))
+        if self.new_settings[PAGES]:
+            self.json_data[PAGES_OF_WIKI] = [self.new_settings[PAGES]]
+        else:
+            self.json_data[PAGES_OF_WIKI] = []
         for i in range(NUMBER_FOR_H1, NUMBER_FOR_H6):
             if self.new_settings[HEADER.format(i)]:
                 self.json_data[FORMAT][HEADER.format(i)][SIZE] = self.get_size(int(self.new_settings[HEADER.format(i)]))

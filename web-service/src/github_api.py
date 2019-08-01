@@ -45,29 +45,38 @@ class Gengit:
     def download_git(self):
         try:
             self.repo = git.Repo.clone_from(self.url, self.local_repo)
-        except Exception:
+        except git.GitCommandError as e:
             print(ERROR_REPO)
+            print(e.command)
             return False
         try:
             self.repo.git.checkout(self.branch)
-        except Exception:
+        except git.GitCommandError as e:
             print(ERROR_BRANCH)
+            print(e.command)
             return False
 
     def download_git_wiki(self):
         git_url = BEGIN_SSH.format(self.url[SIZE_OF_SSH_ADDRESS:])
         try:
             self.repo = git.Repo.clone_from(git_url, self.local_wiki)
-        except Exception:
+        except git.GitCommandError as e:
+            print(e.command)
             print(ERROR_WIKI)
             return False
 
     def add(self, filename):
-        self.repo.index.add([filename])
-        self.repo.index.commit(COMMIT_MESSAGE)
+        try:
+            self.repo.index.add([filename])
+            self.repo.index.commit(COMMIT_MESSAGE)
+        except git.GitCommandError as e:
+            print(e.command)
 
     def push(self):
-        self.repo.git.push(ORIGIN, self.branch)
+        try:
+            self.repo.git.push(ORIGIN, self.branch)
+        except git.GitCommandError as e:
+            print(e.command)
 
     def get_response(self, url):
         params = {"sort": "updated"}

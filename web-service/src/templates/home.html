@@ -75,7 +75,7 @@ Home Page
                     <input type="button" class="btn btn-primary" id="style_setter" value="Настройка стилей">
                 </div>
 
-                <div class="btn-group col-md-4 mb-3" role="group">
+                <div class="dropdown col-md-4 mb-3" role="group">
                     <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle"
                             data-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false">
@@ -121,7 +121,7 @@ Home Page
                         <input type="text" class="form-control" id="for_h1" placeholder="">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="for_h2">Заголовок второго уровня уровня</label>
+                        <label for="for_h2">Заголовок второго уровня</label>
                         <input type="text" class="form-control" id="for_h2" placeholder="">
                     </div>
                     <div class="col-md-6 mb-3">
@@ -141,17 +141,30 @@ Home Page
                         <input type="text" class="form-control" id="for_h6" placeholder="">
                     </div>
                 </div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label for="md_pages">Перечень wiki-страниц</label>
+                        <input type="text" class="form-control" id="md_pages" placeholder="">
+                    </div>
+
+                </div>
+
+
             </div>
             <p></p>
 
             <div id="requirements" style="display:none;"></div>
+
+
             <hr>
             <div class="row col-md-6 mb-3" id="buttons_field">
                 <input type="submit" class="btn btn-primary" value="Сформировать отчет" id="btn_submit">
                 &nbsp;&nbsp;&nbsp;&nbsp;
 
                 {% if link %}
-                <a href={{link}} class="btn btn-success">Ссылка на отчет</a>
+                <a href={{link}} id="total_link" class="btn btn-success">Ссылка на отчет</a>
                 {% endif %}
 
             </div>

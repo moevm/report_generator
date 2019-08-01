@@ -9,8 +9,8 @@ $('#lab_doc').click(function(){
 $('#btnGroupDrop1').text("Лабораторная работа");
 if($('#requirements').is(':hidden') || $('*').is('#field_for_course'))
 {
-var for_lab = '#field_for_lab';
-$(requirements).empty();
+	const for_lab = '#field_for_lab';
+	$(requirements).empty();
 $(requirements).append('<div class="row" id="field_for_lab"</div>');
 
 createLabsField(for_lab);
@@ -19,13 +19,15 @@ $(requirements).show("slow")
 }
 });
 
+$('.dropdown-toggle').dropdown()
+
 $('#course_doc').click(function(){
 $('#btnGroupDrop1').text("Курсовая работа");
 
 if($(requirements).is(':hidden') || $('*').is('#field_for_lab'))
 {
-var for_course = '#field_for_course';
-$(requirements).empty();
+	const for_course = '#field_for_course';
+	$(requirements).empty();
 $(requirements).append('<div class="row" id="field_for_course"</div>');
 
 createLabsField(for_course);
@@ -60,6 +62,7 @@ $('#btn_submit').click(function () {
 if(checkImportantData())
 {
 $( "div" ).remove( "#spinner_for_answer" );
+$( "a" ).remove( "#total_link" );
 $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" role="status"></div>')
 }
 });
@@ -91,24 +94,24 @@ $.ajax({
 }
 
 function get_data_from_form(){
-        var repo_name = $('#repo_name').val();
-        var wiki_name = $('#wiki_name').val();
-        var branch_name = $('#branch_name').val();
+	const repo_name = $('#repo_name').val();
+	const wiki_name = $('#wiki_name').val();
+	var branch_name = $('#branch_name').val();
         if (branch_name === '')
         	branch_name = 'master';
-        var general_font = $('#general_font').val();
-        var general_size = $('#general_size').val();
-        var code_font = $('#code_font').val();
-        var code_size = $('#code_size').val();
-        var for_h1 = $('#for_h1').val();
-        var for_h2 = $('#for_h2').val();
-        var for_h3 = $('#for_h3').val();
-        var for_h4 = $('#for_h4').val();
-        var for_h5 = $('#for_h6').val();
-        var for_h6 = $('#for_h6').val();
+	const general_font = $('#general_font').val();
+	const general_size = $('#general_size').val();
+	const code_font = $('#code_font').val();
+	const code_size = $('#code_size').val();
+	const for_h1 = $('#for_h1').val();
+	const for_h2 = $('#for_h2').val();
+	const for_h3 = $('#for_h3').val();
+	const for_h4 = $('#for_h4').val();
+	const for_h5 = $('#for_h5').val();
+	const for_h6 = $('#for_h6').val();
+	const pages = $('#md_pages').val();
 
-
-        var result = `repo_name=${repo_name}`;
+	var result = `repo_name=${repo_name}`;
         result += `&wiki_name=${wiki_name}`;
         result += `&branch_name=${branch_name}`;
  		result += `&general_font=${general_font}`;
@@ -121,6 +124,7 @@ function get_data_from_form(){
  		result += `&h4=${for_h4}`;
  		result += `&h5=${for_h5}`;
  		result += `&h6=${for_h6}`;
+ 		result += `&pages=${pages}`;
 
  		if($("*").is("#teacher")){
  			var teacher = $('#teacher').val();
