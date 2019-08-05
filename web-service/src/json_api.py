@@ -1,7 +1,7 @@
 import json
 JSON_FILE = 'settings.json'
-LEN_COURSE_DOC = 24
-LEN_LAB_DOC = 20
+LEN_COURSE_DOC = 25
+LEN_LAB_DOC = 21
 
 TYPE = "type"
 LR = "LR"
@@ -36,12 +36,20 @@ COMMA = ","
 COLON = ": "
 PAGES = 'pages'
 PAGES_OF_WIKI = 'pages_of_wiki'
+REPO = "repo_name"
+GIT_SSH = 15
+END_GIT = -4
+NUMBER_PR = 'number_of_pr'
+PR = 'pull_request'
+OWNER = 'owner'
+SET_REPO = 'repo'
 
 
 class JsonApi:
 
     def __init__(self, new_dict):
         self.read_json_file()
+        self.info_repo = new_dict[REPO][GIT_SSH:END_GIT].split('/')
         self.new_settings = new_dict
         self.change_content()
         self.write_json_file()
@@ -72,6 +80,12 @@ class JsonApi:
         return pages.split(',')
 
     def general_content(self):
+        if self.new_settings[NUMBER_PR]:
+            self.json_data[PR][NUMBER_PR] = [int(self.new_settings[NUMBER_PR])]
+            self.json_data[PR][OWNER] = self.info_repo[0]
+            self.json_data[PR][SET_REPO] = self.info_repo[1]
+        else:
+            self.json_data[PR][NUMBER_PR] = []
         if self.new_settings[NEW_MAIN_FONT]: self.json_data[MAIN_TEXT][FONT] = self.new_settings[NEW_MAIN_FONT]
         if self.new_settings[NEW_MAIN_SIZE]: self.json_data[MAIN_TEXT][SIZE] = int(self.new_settings[NEW_MAIN_SIZE])
         if self.new_settings[NEW_CODE_FONT]: self.json_data[CODE_TEXT][FONT] = self.new_settings[NEW_CODE_FONT]

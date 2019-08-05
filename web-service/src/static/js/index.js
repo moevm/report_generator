@@ -155,7 +155,10 @@ function get_data_from_form(){
  			var date_defend = $('#date_defend').val();
  			result += `&date_defend=${date_defend}`;
  			};
-
-        return result;
+ 		if($("*").is("#number_of_pr")){
+ 			var number_of_pr = $('#number_of_pr').val();
+ 			result += `&number_of_pr=${number_of_pr}`;
+		}
+	return result;
     }
 
