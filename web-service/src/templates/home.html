@@ -48,7 +48,7 @@ Home Page
                     <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                         <a class="dropdown-item" id="empty_doc">-</a>
                         <a class="dropdown-item" id="course_doc">Курсовая работа</a>
-                        <a class="dropdown-item" id="lab_doc">Лабораторная работа</a>
+                           <a class="dropdown-item" id="lab_doc">Лабораторная работа</a>
                     </div>
                 </div>
 
@@ -129,14 +129,51 @@ Home Page
 
                 {% if link %}
                 <a href={{link}} id="total_link" class="btn btn-success">Ссылка на отчет</a>
+                   &nbsp;&nbsp;&nbsp;&nbsp;
                 {% endif %}
 
+            </div>
+            <br>
+            <div class="row col-md-6 mb-3">
+                {% if not google %}
+                    <a href="/googleauthorize" class="btn btn-info">Authorize in Goggle Drive</a>
+                    {% else %}
+                       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">
+                        Save in Google Drive
+                       </button>
+            {% endif %}
             </div>
         </form>
 
 
-    </div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Save in Google Drive</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
 
+{% if google %}
+          <div class="list-group">
+          <a href="/post_report_pdf/0" class="list-group-item list-group-item-action">Корневая папка</a>
+              {% for i in google %}
+                <a href="/post_report_pdf/{{i['id']}}" class="list-group-item list-group-item-action">{{ i['name'] }}</a>
+              {% endfor %}
+          </div>
+{% endif %}
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 
 </div>
 

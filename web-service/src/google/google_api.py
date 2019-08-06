@@ -1,17 +1,19 @@
 import os
 from app import app
 import flask
-from flask import url_for, redirect
+from flask import url_for, redirect, jsonify
 
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 from googleapiclient.http import MediaFileUpload
 import googleapiclient.discovery
+from googleapiclient.discovery import build
+
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 CREDENTIALS = 'credentials'
 CLIENT_SECRETS_FILE = "google/client_secrets.json"
-TITLE = 'title'
+TITLE = 'name'
 NAME_OF_FILE = 'report.pdf'
 TYPE = 'mimeType'
 PDF = 'application/pdf'
@@ -19,13 +21,17 @@ MEDIA_TYPE = 'text/pdf'
 ID = 'id'
 OFFLINE = 'offline'
 STATE = 'state'
-SCOPES = ['https://www.googleapis.com/auth/drive.file']
+SCOPES = ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.metadata.readonly']
 API_SERVICE_NAME = 'drive'
-API_VERSION = 'v2'
+API_VERSION = 'v3'
+PARENTS = 'parents'
+GET_FOLDERS = "mimeType = 'application/vnd.google-apps.folder'"
+FIELDS = "nextPageToken, files(id, name, parents, capabilities)"
+FILES = 'files'
 
 
-@app.route('/post_report_pdf')
-def post_file_api_request():
+@app.route('/post_report_pdf/<id>')
+def post_file_api_request(id=None):
     if CREDENTIALS not in flask.session:
         return flask.redirect(url_for('google_authorize'))
     credentials = google.oauth2.credentials.Credentials(
@@ -33,10 +39,13 @@ def post_file_api_request():
     drive = googleapiclient.discovery.build(
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
-    file_metadata = {TITLE: NAME_OF_FILE, TYPE: PDF}
+    if id is "0":
+        file_metadata = {TITLE: NAME_OF_FILE, TYPE: PDF}
+    else:
+        file_metadata = {TITLE: NAME_OF_FILE, TYPE: PDF, PARENTS: [id]}
     media = MediaFileUpload('report.pdf',
                             mimetype=MEDIA_TYPE)
-    file = drive.files().insert(body=file_metadata,
+    file = drive.files().create(body=file_metadata,
                                 media_body=media,
                                 fields=ID).execute()
 
@@ -70,13 +79,12 @@ def oauth2callback():
         CLIENT_SECRETS_FILE, scopes=None, state=state)
     flow.redirect_uri = url_for('oauth2callback', _external=True)
     flow.code_verifier = os.urandom(50)
-
     authorization_response = flask.request.url
     flow.fetch_token(authorization_response=authorization_response)
     credentials = flow.credentials
     flask.session[CREDENTIALS] = credentials_to_dict(credentials)
 
-    return flask.redirect(url_for('post_file_api_request'))
+    return redirect(url_for('index'))
 
 
 def credentials_to_dict(credentials):
@@ -86,3 +94,16 @@ def credentials_to_dict(credentials):
             'client_id': credentials.client_id,
             'client_secret': credentials.client_secret,
             'scopes': credentials.scopes}
+
+
+def get_list():
+    if CREDENTIALS not in flask.session:
+        return None
+    credentials = google.oauth2.credentials.Credentials(
+        **flask.session[CREDENTIALS])
+    service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
+
+    results = service.files().list(q=GET_FOLDERS,
+                                   fields=FIELDS).execute()
+
+    return results.get(FILES, [])
