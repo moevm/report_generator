@@ -132,6 +132,7 @@ NUMBER_OF_PR = "number_of_pr"
 PR_SOURCE_CODE = "Исходный код:"
 PR_COMMENTS = "Комментарии:"
 PR_DIFFS = "Изменения:"
+BAD_URL = "Bad url: {}"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -298,7 +299,11 @@ class Dword:
         paragraph.add_run().add_picture(path, width=Inches(h), height=Inches(w))
 
     def add_image_by_url(self, url):
-        req = requests.get(url)
+        try:
+            req = requests.get(url)
+        except Exception:
+            print(BAD_URL.format(url))
+            return
         filepath = ABS_PATH.format(PICTURE)
         with open(filepath, 'wb') as file:
             file.write(req.content)
