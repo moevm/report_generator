@@ -34,4 +34,4 @@ Flask-Bcrypt==0.7.1
 Flask-Admin==1.5.3
 flask-mongoengine==0.9.3
 google-auth-oauthlib==0.3.0
-google-api-python-client
+google-api-python-client==1.7.9

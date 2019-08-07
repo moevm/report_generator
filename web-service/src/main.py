@@ -24,6 +24,7 @@ LINK = "https://github.com/{}/blob/{}/{}"
 VAR_CONTENT = 3
 EMPTY_PLACE = ""
 MASTER = 'master'
+LEN_PDF = 4
 
 
 def create_parser():
@@ -75,7 +76,7 @@ def main(type_of_input):
         word.save(path_doc)
         if word.js_content[PDF]:
             word.convert_to_pdf(docname=path_doc)
-            shutil.copyfile("{}{}".format(path_doc[:-4], PDF.lower()), REPORT)
+            shutil.copyfile("{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
             report = PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION])
         git.add(report)
         git.push()
