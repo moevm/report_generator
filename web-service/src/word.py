@@ -318,7 +318,7 @@ class Dword:
                     continue
 
                 try:
-                    with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3])) as file:
+                    with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3]), encoding="utf-8") as file:
                         tmp.append(file.read())
                 except FileNotFoundError:
                     print('File was not found')
