@@ -129,6 +129,9 @@ Home Page
 
                 {% if link %}
                 <a href={{link}} id="total_link" class="btn btn-success">Ссылка на отчет</a>
+                    <script type="text/javascript">
+                        window.open('{{ link }}', "_blank");
+                    </script>
                 {% endif %}
 
             </div>
