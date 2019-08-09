@@ -10,7 +10,7 @@ from docx import Document
 import mistune
 from pathlib import Path
 from PIL import Image
-from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
+from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT, WD_BREAK
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
@@ -88,7 +88,9 @@ SPAN_DOUBLE_EMPHASIS = "{}.bold = True\n"
 SPAN_CODE = "p = self.document.add_paragraph()\np.add_run(\"{}\")\np.style='BasicUserQuote'\np.add_run().add_break()\n"
 SPAN_LINK = "{} ({})"
 SPAN_HRULE = "self.document.add_page_break()\n"
-
+STANDART_PT = 6
+STANDART_INCHES = 0.5
+STANDART_PT_HEADER = 10
 
 BLOCK = "block"
 BLOCK_MATH = 'block_math'
@@ -102,10 +104,11 @@ LIST = "{}\np.add_run().add_break()\n"
 HEADER = "p = self.document.add_paragraph(text=\"{}\",style=\"{}\")\n"
 ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
-RUN_AND_BREAK = 'p.add_run().add_break()'
-ADD_PARAGRAPH = "p = self.document.add_paragraph()"
+RUN_AND_BREAK = 'p.add_run().add_break(WD_BREAK.COLUMN)\n'
+STYLE_PAPAGRAPH = "paragraph_style"
+ADD_PARAGRAPH = '''p = self.document.add_paragraph(style='{}')\n'''.format(STYLE_PAPAGRAPH)
 BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\np.add_run().add_break()\n'
-CREATE_IMAGE = "self.add_image_by_url(\"{}\")"
+CREATE_IMAGE = "p.add_run().add_break(WD_BREAK.COLUMN)\nself.add_image_by_url(\"{}\")"
 CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
 END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
 ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
@@ -225,8 +228,8 @@ class PythonDocxRenderer(mistune.Renderer):
     def double_emphasis(self, text):
         return SPAN_DOUBLE_EMPHASIS.format(text[:-1])
 
-    def block_code(self, code, language):
-        code = code.replace('\n', '\\n')
+    def block_code(self, code):
+        code = code.replace('\n', '\\n').replace("\"", "\\\"")
         return SPAN_CODE.format(code)
 
     def link(self, link, title, content):
@@ -262,19 +265,34 @@ class Dword:
 
     def create_styles(self):
         styles = self.document.styles
-
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
         style.font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
         style.font.name = self.js_content[MAIN_TEXT][FONT]
 
         style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
+        paragraph_format = style.paragraph_format
+        paragraph_format.left_indent = Inches(STANDART_INCHES)
+        paragraph_format.space_before = Pt(STANDART_PT)
+        paragraph_format.space_after = Pt(STANDART_PT)
+        paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
         style.font.size,  style.font.name = Pt(self.js_content[MAIN_TEXT][SIZE]), self.js_content[MAIN_TEXT][FONT]
         style.font.italic = True
-        style.font.underline = True
+
         for i in range(len(self.js_content[FORMAT])):
             style = styles.add_style(H_STYLE.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
+            paragraph_format = style.paragraph_format
+            paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            paragraph_format.space_after = Pt(STANDART_PT_HEADER)
+            paragraph_format.first_line_indent = Inches(STANDART_INCHES)
             style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
             style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
+
+        style = styles.add_style(STYLE_PAPAGRAPH, WD_STYLE_TYPE.PARAGRAPH)
+        paragraph_format = style.paragraph_format
+        paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+        paragraph_format.space_after = Pt(STANDART_PT)
+        paragraph_format.first_line_indent = Inches(STANDART_INCHES)
+        paragraph_format.line_spacing_rule = line_space_dict.get(STANDART_LINE_SPACING)
 
     def h_w(self, dimension):
         height, width = dimension
