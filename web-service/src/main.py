@@ -5,11 +5,12 @@ import os
 import shutil
 from github_api import Gengit, LOCAL_REPO, LOCAL_WIKI
 from word import Dword
+from app import ABS_PATH
 
 
 TIME_REPORT = "ready_project.docx"
 READY_WORD = "generated_doc.docx"
-REPORT = 'report.pdf'
+REPORT = ABS_PATH.format('report.pdf')
 FROM_CONSOLE = "cmd"
 PDF = "PDF"
 PDF_EXTENSION = "{}.pdf"
@@ -77,8 +78,7 @@ def main(type_of_input):
             word.convert_to_pdf(docname=path_doc)
             shutil.copyfile("{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
             report = PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION])
-        git.add(report)
-        git.push()
+        report = git.push(report)
         delete_dirs_and_files()
         return LINK.format(url[15:-4], branch, report)
     return EMPTY_PLACE

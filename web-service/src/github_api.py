@@ -2,10 +2,13 @@
 import subprocess
 import git
 import requests
-import time
+from app import ABS_PATH
+from github import Github
+from information import get_oauth
 
-LOCAL_REPO = "repo_for_report"
-LOCAL_WIKI = "wiki_dir"
+
+LOCAL_REPO = ABS_PATH.format("repo_for_report")
+LOCAL_WIKI = ABS_PATH.format("wiki_dir")
 BEGIN_SSH = "git@github.com:{}"
 SIZE_OF_SSH_ADDRESS = 19
 COMMIT_MESSAGE = 'add report'
@@ -14,6 +17,16 @@ STANDART_BRANCH = 'master'
 ERROR_WIKI = "Wrong link to wiki!"
 ERROR_REPO = "Wrong link to repository!"
 ERROR_BRANCH = "Branch doesnt exist!"
+ERROR_PUSH = 'this file has been in repository yet'
+NEW_FILENAME = '{}{}.pdf'
+LEN_PDF = 4
+GEN_PATH_REPORT = '{}/{}'
+
+TOKEN = get_oauth()
+HEADER = {'Authorization': 'token {}'.format(TOKEN)}
+INVITE_PATH = 'user/repository_invitations'
+API = 'https://api.github.com/{}'
+INVITE_URL = 'url'
 
 API_GITHUB = "https://api.github.com/repos/{}/{}/pulls/{}/comments"
 POSITION = "original_position"
@@ -22,10 +35,10 @@ LOGIN = "login"
 BODY = "body"
 COMMIT = "original_commit_id"
 DIFF_HUNK = "diff_hunk"
-FILENAME_DIFF = "diff_file.txt"
-FILENAME_LOG = "log_file.txt"
-LOG_SH = "./do_git_log.sh {}"
-DIFF_SH = "./do_git_diff.sh {} {} {}"
+FILENAME_DIFF = ABS_PATH.format("diff_file.txt")
+FILENAME_LOG = ABS_PATH.format("log_file.txt")
+LOG_SH = ABS_PATH.format("do_git_log.sh {}")
+DIFF_SH = ABS_PATH.format("do_git_diff.sh {} {} {}")
 PLUS = "+"
 MINUS = "-"
 
@@ -33,6 +46,7 @@ MINUS = "-"
 class Gengit:
 
     def __init__(self, ssh_url="", branch=STANDART_BRANCH):
+        check_invites()
         self.url = ssh_url
         self.local_repo = LOCAL_REPO
         self.local_wiki = LOCAL_WIKI
@@ -69,11 +83,24 @@ class Gengit:
         except git.GitCommandError as e:
             print(e.command)
 
-    def push(self):
-        try:
-            self.repo.git.push(ORIGIN, self.branch)
-        except git.GitCommandError as e:
-            print(e.command)
+    def push(self, filename=''):
+        path = GEN_PATH_REPORT.format(LOCAL_REPO, filename)
+        my_github = Github(TOKEN)
+        content = ''
+        with open(path, 'rb') as file:
+            content = file.read()
+        repo = my_github.get_repo(self.url[15:-4])
+        is_sent = False
+        number_try = 0
+        while not is_sent:
+            try:
+                repo.create_file(filename, COMMIT_MESSAGE, content, branch=self.branch)
+                is_sent = True
+            except Exception:
+                print(ERROR_PUSH)
+                filename = NEW_FILENAME.format(filename[:-LEN_PDF - number_try], number_try)
+                number_try += 1
+        return filename
 
     def get_response(self, url):
         params = {"sort": "updated"}
@@ -173,3 +200,23 @@ class Gengit:
             if commit == prev_commit:
                 return next_commit
             next_commit = commit
+
+
+def get_requests(path, full_path=False):
+    if not full_path:
+        return requests.get(API.format(path), headers=HEADER).json()
+    else:
+        return requests.patch(path, headers=HEADER)
+
+
+def accept_invite(invite):
+    get_requests(invite, full_path=True)
+
+
+def get_invites():
+    return get_requests(INVITE_PATH)
+
+
+def check_invites():
+    for invite in get_invites():
+        accept_invite(invite[INVITE_URL])
