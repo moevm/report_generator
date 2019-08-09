@@ -27,6 +27,7 @@ cp -r ./src/static /var/www/"$CATALOG"/static/
 cp -r ./src/templates /var/www/"$CATALOG"/templates/
 cp -r ./src/word_templates /var/www/"$CATALOG"/word_templates
 cp ./src/config/"${CONFIG}" /etc/apache2/sites-available/
+cp -r ./src/services /var/www/"$CATALOG"/services/
 
 chown -R www-data:www-data /var/www/"$CATALOG"
 a2ensite "${CONFIG}"
