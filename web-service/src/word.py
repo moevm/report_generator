@@ -112,6 +112,8 @@ CREATE_IMAGE = "p.add_run().add_break(WD_BREAK.COLUMN)\nself.add_image_by_url(\"
 CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
 END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
 ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
+CODESPAN = "p.add_run(\"{}\",style='codespan_style')\n"
+CODESPAN_STYLE = 'codespan_style'
 PLUS_STR = "{}{}"
 H_STYLE = "my_header_{}"
 MAIN_TEXT = "main_text"
@@ -222,6 +224,9 @@ class PythonDocxRenderer(mistune.Renderer):
     def text(self, text):
         return SPAN_TEXT.format(text.replace('\n', '\\n'), NAME_STYLE)
 
+    def codespan(self, text):
+        return CODESPAN.format(text)
+
     def emphasis(self, text):
         return SPAN_EMPHASIS.format(text[:-1])
 
@@ -268,6 +273,12 @@ class Dword:
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
         style.font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
         style.font.name = self.js_content[MAIN_TEXT][FONT]
+
+        style = styles.add_style(CODESPAN_STYLE, WD_STYLE_TYPE.CHARACTER)
+        style.font.size = Pt(STANDART_FONT_SIZE)
+        style.font.name = STANDART_FONT
+        style.font.italic = True
+
 
         style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
         paragraph_format = style.paragraph_format
