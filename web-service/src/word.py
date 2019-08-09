@@ -464,6 +464,8 @@ class Dword:
             self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
 
     def add_comments(self):
+        if not self.js_content[PR][NUMBER_OF_PR]:
+            return
         git = Gengit(branch=self.branch)
         self.add_page_break()
         self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
