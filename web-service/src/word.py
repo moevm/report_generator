@@ -132,6 +132,7 @@ NUMBER_OF_PR = "number_of_pr"
 PR_SOURCE_CODE = "Исходный код:"
 PR_COMMENTS = "Комментарии:"
 PR_DIFFS = "Изменения:"
+BAD_URL = "Bad url: {}"
 
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -298,7 +299,11 @@ class Dword:
         paragraph.add_run().add_picture(path, width=Inches(h), height=Inches(w))
 
     def add_image_by_url(self, url):
-        req = requests.get(url)
+        try:
+            req = requests.get(url)
+        except Exception:
+            print(BAD_URL.format(url))
+            return
         filepath = ABS_PATH.format(PICTURE)
         with open(filepath, 'wb') as file:
             file.write(req.content)
@@ -318,7 +323,7 @@ class Dword:
                     continue
 
                 try:
-                    with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3])) as file:
+                    with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3]), encoding="utf-8") as file:
                         tmp.append(file.read())
                 except FileNotFoundError:
                     print('File was not found')
@@ -329,7 +334,6 @@ class Dword:
             exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
-
         self.document.save(ABS_PATH.format(NAME_REPORT))
 
     def make_title(self):

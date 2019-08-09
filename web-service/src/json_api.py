@@ -1,5 +1,7 @@
 import json
-JSON_FILE = 'settings.json'
+from app import ABS_PATH
+
+JSON_FILE = ABS_PATH.format('settings.json')
 LEN_COURSE_DOC = 24
 LEN_LAB_DOC = 20
 TYPE = "type"
@@ -48,11 +50,11 @@ class JsonApi:
         self.write_json_file()
 
     def read_json_file(self):
-        with open(JSON_FILE, 'r') as file:
+        with open(JSON_FILE, 'r', encoding="utf-8") as file:
             self.json_data = json.load(file)
 
     def write_json_file(self):
-        with open(JSON_FILE, 'w') as file:
+        with open(JSON_FILE, 'w', encoding="utf-8") as file:
             file.write(json.dumps(self.json_data, sort_keys=False, indent=4, ensure_ascii=False,
                                   separators=(COMMA, COLON)))
 
