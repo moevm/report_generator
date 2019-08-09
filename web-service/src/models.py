@@ -26,11 +26,12 @@ class Role(getMongo().Document, RoleMixin):
 
 
 class User(getMongo().Document, UserMixin):
-	username = getMongo().StringField(max_length=50, required=True, unique=True)
-	email = getMongo().StringField(max_length=100, required=True, unique=True)
-	active = getMongo().BooleanField(default=True)
-	roles = getMongo().ListField(getMongo().ReferenceField(Role), default=[])
-	avatar = getMongo().StringField()
+	model = getMongo()
+	username = model.StringField(max_length=50, required=True, unique=True)
+	email = model.StringField(max_length=100, required=True, unique=True)
+	active = model.BooleanField(default=True)
+	roles = model.ListField(model.ReferenceField(Role), default=[])
+	avatar = model.StringField()
 
 	def __repr__(self):
 		return self.email

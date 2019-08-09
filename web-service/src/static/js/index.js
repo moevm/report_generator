@@ -11,13 +11,10 @@ if($('#requirements').is(':hidden') || $('*').is('#field_for_course'))
 {
 	const for_lab = '#field_for_lab';
 	$(requirements).empty();
-$(requirements).append('<div class="row" id="field_for_lab"</div>');
-
-createLabsField(for_lab);
-
-$(requirements).show("slow")
-}
-});
+	$(requirements).append('<div class="row" id="field_for_lab"</div>');
+	createLabsField(for_lab);
+	$(requirements).show("slow")
+}});
 
 $('.dropdown-toggle').dropdown()
 
@@ -174,9 +171,9 @@ const _a = document.getElementById('repo_menu');
 _a.addEventListener('click', changeRepo);
 function changeRepo(e)
 {
-var ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git';
-$("#repo_name").val(ssh_str);
-e.preventDefault();
+	var ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git';
+	$("#repo_name").val(ssh_str);
+	e.preventDefault();
 }
 
 var _b = document.getElementById('wiki_menu');
@@ -186,7 +183,7 @@ function changeWiki(e)
 {
 	const wiki_str = event.target.href + '.wiki.git';
 	$("#wiki_name").val(wiki_str);
-e.preventDefault();
+	e.preventDefault();
 }
 
 

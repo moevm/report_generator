@@ -51,7 +51,7 @@ class Gengit:
         self.local_repo = LOCAL_REPO
         self.local_wiki = LOCAL_WIKI
         self.branch = branch
-        if branch is '':
+        if not branch:
             self.branch = STANDART_BRANCH
         self.repo = None
 
