@@ -104,12 +104,12 @@ def authorized():
         login_user(user)
     else:
         flash(NO_ACCESS, DANGER)
-    return redirect(url_for(MAIN_PAGE))
+    return render_template("home.html", link=session.get('link'), google=google.google_api.get_list())
 
 
 @app.route('/send', methods=['GET'])
 def send():
-    return redirect(url_for('google_authorize'))
+    return redirect(url_for('post_file_api_request'))
 
 
 def create_list_of_repo(repo_data):
