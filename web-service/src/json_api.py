@@ -1,16 +1,9 @@
 import json
-#<<<<<<< HEAD
 from app import ABS_PATH
 
 JSON_FILE = ABS_PATH.format('settings.json')
-#LEN_COURSE_DOC = 24
-#LEN_LAB_DOC = 20
-#=======
-#JSON_FILE = 'settings.json'
 LEN_COURSE_DOC = 25
 LEN_LAB_DOC = 21
-
-#>>>>>>> 76_issue
 TYPE = "type"
 LR = "LR"
 KR = "KR"
@@ -90,7 +83,7 @@ class JsonApi:
         return pages.split(',')
 
     def general_content(self):
-        if self.new_settings[NUMBER_PR]:
+        if NUMBER_PR in self.new_settings and self.new_settings[NUMBER_PR]:
             self.json_data[PR][NUMBER_PR] = [int(self.new_settings[NUMBER_PR])]
             self.json_data[PR][OWNER] = self.info_repo[0]
             self.json_data[PR][SET_REPO] = self.info_repo[1]

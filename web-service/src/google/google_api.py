@@ -1,6 +1,6 @@
 #!./venv/bin/python3.6
 import os
-from app import app
+from app import app, ABS_PATH
 import flask
 from flask import url_for, redirect, jsonify
 
@@ -13,7 +13,7 @@ from googleapiclient.discovery import build
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 CREDENTIALS = 'credentials'
-CLIENT_SECRETS_FILE = "google/client_secrets.json"
+CLIENT_SECRETS_FILE = ABS_PATH.format("google/client_secrets.json")
 TITLE = 'name'
 NAME_OF_FILE = 'report.pdf'
 TYPE = 'mimeType'
@@ -58,7 +58,8 @@ def post_file_api_request(id=None):
 @app.route('/googleauthorize')
 def google_authorize():
     if CREDENTIALS in flask.session:
-        return flask.redirect(url_for('post_file_api_request'))
+        #return flask.redirect(url_for('post_file_api_request'))
+        return redirect(url_for('index'))
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=SCOPES)
 
     flow.redirect_uri = url_for('oauth2callback', _external=True)

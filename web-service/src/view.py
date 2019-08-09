@@ -55,7 +55,8 @@ def index():
         github_data = github.get(USER)
         repos = create_list_of_repo(github_data)
 
-    return render_template("home.html", link=session.get('link'), github=github_data, repositories=repos)
+    return render_template("home.html", link=session.get('link'), google=google.google_api.get_list(),
+                           github=github_data, repositories=repos)
 
 
 @app.route('/github_login')
@@ -104,7 +105,7 @@ def authorized():
         login_user(user)
     else:
         flash(NO_ACCESS, DANGER)
-    return render_template("home.html", link=session.get('link'), google=google.google_api.get_list())
+    return redirect(url_for(MAIN_PAGE))
 
 
 @app.route('/send', methods=['GET'])

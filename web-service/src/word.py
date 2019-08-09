@@ -233,7 +233,7 @@ class PythonDocxRenderer(mistune.Renderer):
     def double_emphasis(self, text):
         return SPAN_DOUBLE_EMPHASIS.format(text[:-1])
 
-    def block_code(self, code):
+    def block_code(self, code, lang):
         code = code.replace('\n', '\\n').replace("\"", "\\\"")
         return SPAN_CODE.format(code)
 
