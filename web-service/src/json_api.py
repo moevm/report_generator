@@ -1,5 +1,6 @@
 import json
 from app import ABS_PATH
+from shutil import copyfile
 
 JSON_FILE = ABS_PATH.format('settings.json')
 LEN_COURSE_DOC = 24
@@ -43,10 +44,14 @@ PAGES_OF_WIKI = 'pages_of_wiki'
 class JsonApi:
 
     def __init__(self, new_dict):
+        self.set_default()
         self.read_json_file()
         self.new_settings = new_dict
         self.change_content()
         self.write_json_file()
+
+    def set_default(self):
+        copyfile(ABS_PATH.format('default_settings.json'), JSON_FILE)
 
     def read_json_file(self):
         with open(JSON_FILE, 'r', encoding="utf-8") as file:
