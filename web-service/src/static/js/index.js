@@ -65,9 +65,6 @@ $('#style_setter').click(function () {
     }
 });
 
-function checkFields() {
-    return true;
-}
 
 function validate(event) {
 	if ((event.keyCode < 48 || event.keyCode > 57))
