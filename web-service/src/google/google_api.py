@@ -44,7 +44,7 @@ def post_file_api_request(id=None):
         file_metadata = {TITLE: NAME_OF_FILE, TYPE: PDF}
     else:
         file_metadata = {TITLE: NAME_OF_FILE, TYPE: PDF, PARENTS: [id]}
-    media = MediaFileUpload('report.pdf',
+    media = MediaFileUpload(ABS_PATH.format('report.pdf'),
                             mimetype=MEDIA_TYPE)
     file = drive.files().create(body=file_metadata,
                                 media_body=media,

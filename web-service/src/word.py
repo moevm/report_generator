@@ -353,14 +353,15 @@ class Dword:
 
                 try:
                     with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3]), encoding="utf-8") as file:
-                        tmp.append(file.read())
+                        tmp.append(file.read().encode('utf-8'))
                 except FileNotFoundError:
                     print('File was not found')
 
         renderer = PythonDocxRenderer()
 
         try:
-            exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+            print(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+            exec( (MarkdownWithMath(renderer=renderer)('\n'.join(tmp))))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(NAME_REPORT))
