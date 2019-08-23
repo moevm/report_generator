@@ -1,7 +1,10 @@
 import json
 from app import ABS_PATH
+from shutil import copyfile
 
 JSON_FILE = ABS_PATH.format('settings.json')
+DEFAULT_SETTINGS = ABS_PATH.format('default_settings.json')
+
 LEN_COURSE_DOC = 25
 LEN_LAB_DOC = 21
 TYPE = "type"
@@ -51,11 +54,15 @@ SET_REPO = 'repo'
 class JsonApi:
 
     def __init__(self, new_dict):
+        self.set_default()
         self.read_json_file()
         self.info_repo = new_dict[REPO][GIT_SSH:END_GIT].split('/')
         self.new_settings = new_dict
         self.change_content()
         self.write_json_file()
+
+    def set_default(self):
+        copyfile(DEFAULT_SETTINGS, JSON_FILE)
 
     def read_json_file(self):
         with open(JSON_FILE, 'r', encoding="utf-8") as file:
