@@ -3,6 +3,7 @@ from app import ABS_PATH
 from shutil import copyfile
 
 JSON_FILE = ABS_PATH.format('settings.json')
+DEFAULT_SETTINGS = ABS_PATH.format('default_settings.json')
 LEN_COURSE_DOC = 24
 LEN_LAB_DOC = 20
 
@@ -51,7 +52,7 @@ class JsonApi:
         self.write_json_file()
 
     def set_default(self):
-        copyfile(ABS_PATH.format('default_settings.json'), JSON_FILE)
+        copyfile(DEFAULT_SETTINGS, JSON_FILE)
 
     def read_json_file(self):
         with open(JSON_FILE, 'r', encoding="utf-8") as file:
