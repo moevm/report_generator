@@ -14,7 +14,7 @@ from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT, WD_BREAK
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
-from github_api import Gengit
+from github_api import Gengit, LOCAL_REPO as github_local
 from app import ABS_PATH
 
 GIT_REPO = ABS_PATH.format("wiki_dir")
@@ -73,11 +73,10 @@ DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
 INTRODUCTION = "introduction"
 
-ERROR_MESSAGE_UNOCONV = "Unoconv error: "
-UNOCONC_1ST = "/usr/bin/python3"
-UNOCONC_2ND = "/usr/bin/unoconv"
-UNOCONC_3RD = "-f"
-UNOCONC_4TH = "pdf"
+ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
+#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf report.docx"
+LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
+
 
 NAME_STYLE = "Mystyle"
 BLOCK_QUOTE_STYLE = "my_block_quote_style"
@@ -422,10 +421,9 @@ class Dword:
     @staticmethod
     def convert_to_pdf(docname):
         try:
-            subprocess.check_call(
-                [UNOCONC_1ST, UNOCONC_2ND, UNOCONC_3RD, UNOCONC_4TH, docname])
+            subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(github_local, docname).split())
         except subprocess.CalledProcessError as e:
-            print(ERROR_MESSAGE_UNOCONV, e)
+            print(ERROR_MESSAGE_CONVERT_TO_PDF, e)
 
     def save(self, name=NAME_REPORT):
         self.document.save(os.path.abspath(name))
