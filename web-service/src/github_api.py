@@ -5,6 +5,7 @@ import requests
 
 from app import ABS_PATH
 from github import Github
+from github import GithubException
 from information import get_oauth
 
 LOCAL_REPO = ABS_PATH.format("repo_for_report")
@@ -92,16 +93,12 @@ class Gengit:
         with open(path, 'rb') as file:
             content = file.read()
         repo = my_github.get_repo(self.url[15:-4])
-        is_sent = False
-        number_try = 0
-        while not is_sent:
-            try:
-                repo.create_file(filename, COMMIT_MESSAGE, content, branch=self.branch)
-                is_sent = True
-            except Exception:
-                print(ERROR_PUSH)
-                filename = NEW_FILENAME.format(filename[:-LEN_PDF - number_try], number_try)
-                number_try += 1
+        try:
+            repo.create_file(filename, COMMIT_MESSAGE, content, branch=self.branch)
+        except GithubException:
+             contentfile = repo.get_contents(filename, ref=self.branch)
+             repo.update_file(contentfile.path, COMMIT_MESSAGE, content, contentfile.sha, branch=self.branch)
+
         return filename
 
     def get_response(self, url):

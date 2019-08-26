@@ -12,7 +12,10 @@ RUN apt-get update
 RUN apt-get -y install git
 
 RUN apt-get -y install apache2=2.4.29-1ubuntu4.8  apache2-dev=2.4.29-1ubuntu4.8  mongodb
-RUN apt-get -y install python3.6  python3-dev  python3-pip  python3-flask  vim  nano curl unoconv
+RUN apt-get -y install python3.6  python3-dev  python3-pip  python3-flask  vim  nano curl
+
+#RUN apt-get -y install unoconv
+RUN apt-get -y install libreoffice
 
 RUN pip3 install --upgrade pip
 RUN pip3 install mod_wsgi
