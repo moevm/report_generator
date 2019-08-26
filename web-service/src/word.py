@@ -301,7 +301,7 @@ class Dword:
     def add_image_by_url(self, url):
         try:
             req = requests.get(url)
-        except Exception:
+        except requests.exceptions.RequestException:
             print(BAD_URL.format(url))
             return
         filepath = ABS_PATH.format(PICTURE)

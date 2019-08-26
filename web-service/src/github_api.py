@@ -22,8 +22,6 @@ NEW_FILENAME = '{}{}.pdf'
 LEN_PDF = 4
 GEN_PATH_REPORT = '{}/{}'
 
-TOKEN = get_oauth()
-HEADER = {'Authorization': 'token {}'.format(TOKEN)}
 INVITE_PATH = 'user/repository_invitations'
 API = 'https://api.github.com/{}'
 INVITE_URL = 'url'
@@ -85,7 +83,7 @@ class Gengit:
 
     def push(self, filename=''):
         path = GEN_PATH_REPORT.format(LOCAL_REPO, filename)
-        my_github = Github(TOKEN)
+        my_github = Github(get_oauth())
         content = ''
         with open(path, 'rb') as file:
             content = file.read()
@@ -202,11 +200,15 @@ class Gengit:
             next_commit = commit
 
 
+def get_header():
+    return {'Authorization': 'token {}'.format(get_oauth())}
+
+
 def get_requests(path, full_path=False):
     if not full_path:
-        return requests.get(API.format(path), headers=HEADER).json()
+        return requests.get(API.format(path), headers=get_header()).json()
     else:
-        return requests.patch(path, headers=HEADER)
+        return requests.patch(path, headers=get_header())
 
 
 def accept_invite(invite):
