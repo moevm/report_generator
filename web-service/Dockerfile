@@ -18,9 +18,6 @@ RUN apt-get -y install python3.6  python3-dev  python3-pip  python3-flask  vim  
 RUN apt-get -y install libreoffice
 
 RUN pip3 install --upgrade pip
-RUN pip3 install mod_wsgi
-RUN mod_wsgi-express module-config > /etc/apache2/mods-available/wsgi.load
-RUN a2enmod wsgi
 
 
 ADD ./ /report_generator

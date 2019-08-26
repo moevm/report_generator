@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 python3.6 -m pip install -r ./scripts/requirements.txt
-
+pip3.6 install mod_wsgi
+mod_wsgi-express module-config > /etc/apache2/mods-available/wsgi.load
+a2enmod wsgi
 
 CATALOG='report_generator'
 HOSTS_STRING="127.0.0.1       report_generator"
