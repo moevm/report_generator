@@ -2,10 +2,11 @@
 import subprocess
 import git
 import requests
+
 from app import ABS_PATH
 from github import Github
+from github import GithubException
 from information import get_oauth
-
 
 LOCAL_REPO = ABS_PATH.format("repo_for_report")
 LOCAL_WIKI = ABS_PATH.format("wiki_dir")
@@ -22,8 +23,6 @@ NEW_FILENAME = '{}{}.pdf'
 LEN_PDF = 4
 GEN_PATH_REPORT = '{}/{}'
 
-TOKEN = get_oauth()
-HEADER = {'Authorization': 'token {}'.format(TOKEN)}
 INVITE_PATH = 'user/repository_invitations'
 API = 'https://api.github.com/{}'
 INVITE_URL = 'url'
@@ -51,6 +50,8 @@ class Gengit:
         self.local_repo = LOCAL_REPO
         self.local_wiki = LOCAL_WIKI
         self.branch = branch
+        if not branch:
+            self.branch = STANDART_BRANCH
         self.repo = None
 
     def download_git(self):
@@ -85,21 +86,17 @@ class Gengit:
 
     def push(self, filename=''):
         path = GEN_PATH_REPORT.format(LOCAL_REPO, filename)
-        my_github = Github(TOKEN)
+        my_github = Github(get_oauth())
         content = ''
         with open(path, 'rb') as file:
             content = file.read()
         repo = my_github.get_repo(self.url[15:-4])
-        is_sent = False
-        number_try = 0
-        while not is_sent:
-            try:
-                repo.create_file(filename, COMMIT_MESSAGE, content, branch=self.branch)
-                is_sent = True
-            except Exception:
-                print(ERROR_PUSH)
-                filename = NEW_FILENAME.format(filename[:-LEN_PDF - number_try], number_try)
-                number_try += 1
+        try:
+            repo.create_file(filename, COMMIT_MESSAGE, content, branch=self.branch)
+        except GithubException:
+             contentfile = repo.get_contents(filename, ref=self.branch)
+             repo.update_file(contentfile.path, COMMIT_MESSAGE, content, contentfile.sha, branch=self.branch)
+
         return filename
 
     def get_response(self, url):
@@ -202,11 +199,15 @@ class Gengit:
             next_commit = commit
 
 
+def get_header():
+    return {'Authorization': 'token {}'.format(get_oauth())}
+
+
 def get_requests(path, full_path=False):
     if not full_path:
-        return requests.get(API.format(path), headers=HEADER).json()
+        return requests.get(API.format(path), headers=get_header()).json()
     else:
-        return requests.patch(path, headers=HEADER)
+        return requests.patch(path, headers=get_header())
 
 
 def accept_invite(invite):

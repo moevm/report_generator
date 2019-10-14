@@ -24,6 +24,7 @@ FLAG_ARG = "-f"
 LINK = "https://github.com/{}/blob/{}/{}"
 VAR_CONTENT = 3
 EMPTY_PLACE = ""
+MASTER = 'master'
 LEN_PDF = 4
 
 
@@ -78,6 +79,8 @@ def main(type_of_input):
             word.convert_to_pdf(docname=path_doc)
             shutil.copyfile("{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
             report = PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION])
+        if not branch:
+            branch = MASTER
         report = git.push(report)
         delete_dirs_and_files()
         return LINK.format(url[15:-4], branch, report)

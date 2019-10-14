@@ -10,11 +10,11 @@ from docx import Document
 import mistune
 from pathlib import Path
 from PIL import Image
-from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
+from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT, WD_BREAK
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
-from github_api import Gengit
+from github_api import Gengit, LOCAL_REPO as github_local
 from app import ABS_PATH
 
 GIT_REPO = ABS_PATH.format("wiki_dir")
@@ -73,11 +73,10 @@ DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
 INTRODUCTION = "introduction"
 
-ERROR_MESSAGE_UNOCONV = "Unoconv error: "
-UNOCONC_1ST = "/usr/bin/python3"
-UNOCONC_2ND = "/usr/bin/unoconv"
-UNOCONC_3RD = "-f"
-UNOCONC_4TH = "pdf"
+ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
+#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
+LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
+
 
 NAME_STYLE = "Mystyle"
 BLOCK_QUOTE_STYLE = "my_block_quote_style"
@@ -88,7 +87,9 @@ SPAN_DOUBLE_EMPHASIS = "{}.bold = True\n"
 SPAN_CODE = "p = self.document.add_paragraph()\np.add_run(\"{}\")\np.style='BasicUserQuote'\np.add_run().add_break()\n"
 SPAN_LINK = "{} ({})"
 SPAN_HRULE = "self.document.add_page_break()\n"
-
+STANDART_PT = 6
+STANDART_INCHES = 0.5
+STANDART_PT_HEADER = 10
 
 BLOCK = "block"
 BLOCK_MATH = 'block_math'
@@ -102,13 +103,16 @@ LIST = "{}\np.add_run().add_break()\n"
 HEADER = "p = self.document.add_paragraph(text=\"{}\",style=\"{}\")\n"
 ADD_PICTURE = "add_picture"
 END_STR = ':")\n'
-RUN_AND_BREAK = 'p.add_run().add_break()'
-ADD_PARAGRAPH = "p = self.document.add_paragraph()"
+RUN_AND_BREAK = 'p.add_run().add_break(WD_BREAK.COLUMN)\n'
+STYLE_PAPAGRAPH = "paragraph_style"
+ADD_PARAGRAPH = '''p = self.document.add_paragraph(style='{}')\n'''.format(STYLE_PAPAGRAPH)
 BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\np.add_run().add_break()\n'
-CREATE_IMAGE = "self.add_image_by_url(\"{}\")"
+CREATE_IMAGE = "p.add_run().add_break(WD_BREAK.COLUMN)\nself.add_image_by_url(\"{}\")"
 CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
 END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
 ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
+CODESPAN = "p.add_run(\"{}\",style='codespan_style')\n"
+CODESPAN_STYLE = 'codespan_style'
 PLUS_STR = "{}{}"
 H_STYLE = "my_header_{}"
 MAIN_TEXT = "main_text"
@@ -219,14 +223,17 @@ class PythonDocxRenderer(mistune.Renderer):
     def text(self, text):
         return SPAN_TEXT.format(text.replace('\n', '\\n'), NAME_STYLE)
 
+    def codespan(self, text):
+        return CODESPAN.format(text)
+
     def emphasis(self, text):
         return SPAN_EMPHASIS.format(text[:-1])
 
     def double_emphasis(self, text):
         return SPAN_DOUBLE_EMPHASIS.format(text[:-1])
 
-    def block_code(self, code, language):
-        code = code.replace('\n', '\\n')
+    def block_code(self, code, lang):
+        code = code.replace('\n', '\\n').replace("\"", "\\\"")
         return SPAN_CODE.format(code)
 
     def link(self, link, title, content):
@@ -262,19 +269,40 @@ class Dword:
 
     def create_styles(self):
         styles = self.document.styles
-
         style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
         style.font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
         style.font.name = self.js_content[MAIN_TEXT][FONT]
 
+        style = styles.add_style(CODESPAN_STYLE, WD_STYLE_TYPE.CHARACTER)
+        style.font.size = Pt(STANDART_FONT_SIZE)
+        style.font.name = STANDART_FONT
+        style.font.italic = True
+
+
         style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
+        paragraph_format = style.paragraph_format
+        paragraph_format.left_indent = Inches(STANDART_INCHES)
+        paragraph_format.space_before = Pt(STANDART_PT)
+        paragraph_format.space_after = Pt(STANDART_PT)
+        paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
         style.font.size,  style.font.name = Pt(self.js_content[MAIN_TEXT][SIZE]), self.js_content[MAIN_TEXT][FONT]
         style.font.italic = True
-        style.font.underline = True
+
         for i in range(len(self.js_content[FORMAT])):
             style = styles.add_style(H_STYLE.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
+            paragraph_format = style.paragraph_format
+            paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            paragraph_format.space_after = Pt(STANDART_PT_HEADER)
+            paragraph_format.first_line_indent = Inches(STANDART_INCHES)
             style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
             style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
+
+        style = styles.add_style(STYLE_PAPAGRAPH, WD_STYLE_TYPE.PARAGRAPH)
+        paragraph_format = style.paragraph_format
+        paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+        paragraph_format.space_after = Pt(STANDART_PT)
+        paragraph_format.first_line_indent = Inches(STANDART_INCHES)
+        paragraph_format.line_spacing_rule = line_space_dict.get(STANDART_LINE_SPACING)
 
     def h_w(self, dimension):
         height, width = dimension
@@ -301,7 +329,7 @@ class Dword:
     def add_image_by_url(self, url):
         try:
             req = requests.get(url)
-        except Exception:
+        except requests.exceptions.RequestException:
             print(BAD_URL.format(url))
             return
         filepath = ABS_PATH.format(PICTURE)
@@ -331,7 +359,8 @@ class Dword:
         renderer = PythonDocxRenderer()
 
         try:
-            exec(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+            print(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+            exec( (MarkdownWithMath(renderer=renderer)('\n'.join(tmp))))
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(NAME_REPORT))
@@ -392,10 +421,9 @@ class Dword:
     @staticmethod
     def convert_to_pdf(docname):
         try:
-            subprocess.check_call(
-                [UNOCONC_1ST, UNOCONC_2ND, UNOCONC_3RD, UNOCONC_4TH, docname])
+            subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(github_local, docname).split())
         except subprocess.CalledProcessError as e:
-            print(ERROR_MESSAGE_UNOCONV, e)
+            print(ERROR_MESSAGE_CONVERT_TO_PDF, e)
 
     def save(self, name=NAME_REPORT):
         self.document.save(os.path.abspath(name))
@@ -435,6 +463,8 @@ class Dword:
             self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
 
     def add_comments(self):
+        if not self.js_content[PR][NUMBER_OF_PR]:
+            return
         git = Gengit(branch=self.branch)
         self.add_page_break()
         self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
