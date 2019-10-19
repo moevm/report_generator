@@ -37,7 +37,11 @@ class Github:
 
         if self.is_valid_response(resp):
             response = resp.json()
+            print('VALID RESPONSE')
+            print(response)
+            print(self.code)
             if 'error' not in response:
+                print('NOT ERROR')
                 self.access_token = response['access_token']
                 return response['access_token']
 
@@ -45,6 +49,9 @@ class Github:
         if not self.access_token:
             self.access_token = self.get_access_token()
 
+        print('GET!!!!!!!!!!!!!!')
+        #self.access_token = self.get_access_token()
+        print(self.access_token)
         params = {'access_token': self.access_token,
                   'client_secret': client_secret,
                   'scope': "user,repo",

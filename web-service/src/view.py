@@ -55,6 +55,8 @@ def index():
         github_data = github.get(USER)
         repos = create_list_of_repo(github_data)
 
+    github.access_token = None
+
     return render_template("home.html", link=session.get('link'), google=google.google_api.get_list(),
                            github=github_data, repositories=repos)
 
@@ -91,10 +93,13 @@ def first_request():
 
 @app.route('/login/github/authorized')
 def authorized():
+    print('authorized')
     github = getGithub()
+    print('code - ' + request.args.get(CODE, None))
     github.set_code(request.args.get(CODE, None))
     github.is_active = True
     github_account = github.get(USER)
+    print('good github_accout!!')
     user = get_datastore().find_user(username=github_account[LOGIN])
     if user:
         flash(SUCCESS_LOG_IN.format(github_account[LOGIN]), SUCCESS)
