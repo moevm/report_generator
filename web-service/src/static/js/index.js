@@ -44,6 +44,7 @@ function createLabsField(id) {
     $(id).append(createFieldForConfigurator('theme', 'Тема работы'));
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета'));
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
+
 }
 
 function createFieldForConfigurator(id, name, pl='') {
