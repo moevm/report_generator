@@ -75,8 +75,8 @@ ANNOTATION = "annotation"
 INTRODUCTION = "introduction"
 
 ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
-#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
-LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
+LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
+#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
 
 
 NAME_STYLE = "Mystyle"
@@ -255,6 +255,7 @@ class Dword:
         self.choose_path_template()
         self.make_title()
         self.document = Document(os.path.abspath(self.path))
+        self.update_title_list()
         #self.convert_format()
         self.add_text_from_wiki()
         #self.add_final_part()
@@ -394,6 +395,17 @@ class Dword:
         doc.render(content)
         self.path = self.name
         doc.save(self.name)
+
+    def update_title_list(self):
+        print('TITLE START')
+        for paragraph in self.document.paragraphs:
+            print(paragraph.text)
+            font = paragraph.style.font
+            font.name = self.js_content[MAIN_TEXT][FONT]
+            font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
+        print('TITLE END')
+
+        pass
 
     def add_line(self, line, space_after=STANDART_PLACE_AFTER, set_bold=False, font_name=STANDART_FONT,
                  keep_with_next=False, font_size=STANDART_FONT_SIZE, space_before=STANDART_PLACE_BEFORE,
