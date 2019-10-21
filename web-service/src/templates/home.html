@@ -19,7 +19,7 @@ Home Page
                 <label for="wiki_name">Ссылка на вики:</label>
 
                 <div class="input-group">
-                    <input type="text" class="form-control" id="wiki_name" required>
+                    <input type="text" class="form-control" id="wiki_name" placeholder="https://github.com/<owner_repo>/<repo>.wiki.git" required>
 
                         <div class="input-group-append">
                                 <button class="btn btn-outline-secondary dropdown-toggle" type="button"
@@ -43,7 +43,7 @@ Home Page
                 <label for="repo_name">Ссылка на репозиторий, куда будет отправлен отчет:</label>
 
                 <div class="input-group">
-                    <input type="text" class="form-control" id="repo_name" required>
+                    <input type="text" class="form-control" id="repo_name" placeholder="git@github.com:<owner_repo>/<repo>.git" required>
 
                     <div class="input-group-append">
                             <button class="btn btn-outline-secondary dropdown-toggle" type="button"
@@ -118,27 +118,27 @@ Home Page
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="for_h1">Заголовок первого уровня</label>
-                        <input type="text" class="form-control" id="for_h1" placeholder="" onkeypress="validate(event)">
+                        <input type="text" class="form-control" id="for_h1" placeholder="Заголовок 1 уровня" onkeypress="validate(event)">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="for_h2">Заголовок второго уровня</label>
-                        <input type="text" class="form-control" id="for_h2" placeholder="" onkeypress="validate(event)">
+                        <input type="text" class="form-control" id="for_h2" placeholder="Заголовок 2 уровня" onkeypress="validate(event)">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="for_h3">Заголовок третьего уровня</label>
-                        <input type="text" class="form-control" id="for_h3" placeholder="" onkeypress="validate(event)">
+                        <input type="text" class="form-control" id="for_h3" placeholder="Заголовок 3 уровня" onkeypress="validate(event)">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="for_h4">Заголовок четвертого уровня</label>
-                        <input type="text" class="form-control" id="for_h4" placeholder="" onkeypress="validate(event)">
+                        <input type="text" class="form-control" id="for_h4" placeholder="Заголовок 4 уровня" onkeypress="validate(event)">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="for_h5">Заголовок пятого уровня</label>
-                        <input type="text" class="form-control" id="for_h5" placeholder="" onkeypress="validate(event)">
+                        <input type="text" class="form-control" id="for_h5" placeholder="Заголовок 5 уровня" onkeypress="validate(event)">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="for_h6">Заголовок шестого уровня</label>
-                        <input type="text" class="form-control" id="for_h6" placeholder="" onkeypress="validate(event)">
+                        <input type="text" class="form-control" id="for_h6" placeholder="Заголовок 6 уровня" onkeypress="validate(event)">
                     </div>
                 </div>
 
@@ -146,7 +146,7 @@ Home Page
 
                     <div class="col-md-6 mb-3">
                         <label for="md_pages">Перечень wiki-страниц</label>
-                        <input type="text" class="form-control" id="md_pages" placeholder="">
+                        <input type="text" class="form-control" id="md_pages" placeholder="Без расширения .md">
                     </div>
 
                 </div>
@@ -156,8 +156,6 @@ Home Page
             <p></p>
 
             <div id="requirements" style="display:none;"></div>
-
-
             <hr>
             <div class="dropdown">
 
@@ -203,6 +201,20 @@ Home Page
             {% endif %}
             </div>
         </form>
+
+        <br>
+        <div class="well">
+            <h4>Инструкция по использованию</h4>
+            <ul class="list-group">
+                <li class="list-group-item">Добавить в collaborators бота Prsender с правами <i>Write</i>, в репозиторий, который:</li>
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>1.</strong>  Хранит вики, по которой будет создан отчет</li>
+                    <li class="list-group-item"><strong>2.</strong>  репозиторий, куда надо отправить отчет</li>
+                </ul>
+            </ul>
+
+
+        </div>
 
 
 <!-- Modal -->

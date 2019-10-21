@@ -29,9 +29,9 @@ $('#course_doc').click(function () {
         createLabsField(for_course);
 
         $(for_course).append(createFieldForConfigurator('min_pages', 'Минимальное количество страниц'));
-        $(for_course).append(createFieldForConfigurator('date_start', 'Дата начала'));
-        $(for_course).append(createFieldForConfigurator('date_finish', 'Дата сдачи'));
-        $(for_course).append(createFieldForConfigurator('date_defend', 'Дата защиты'));
+        $(for_course).append(createFieldForConfigurator('date_start', 'Дата начала', '0.0.1970'));
+        $(for_course).append(createFieldForConfigurator('date_finish', 'Дата сдачи', '0.0.1970'));
+        $(for_course).append(createFieldForConfigurator('date_defend', 'Дата защиты', '0.0.1970'));
 
         $(requirements).show('show');
     }
@@ -40,14 +40,16 @@ $('#course_doc').click(function () {
 function createLabsField(id) {
     $(id).append(createFieldForConfigurator('teacher', 'Преподаватель'));
     $(id).append(createFieldForConfigurator('student', 'Студент'));
-    $(id).append(createFieldForConfigurator('number_group', 'Номер группы'));
+    $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '1111'));
     $(id).append(createFieldForConfigurator('theme', 'Тема работы'));
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета'));
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
 }
 
-function createFieldForConfigurator(id, name) {
-    return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='' value=''></div>"
+function createFieldForConfigurator(id, name, pl='') {
+    if (!pl)
+        pl = name;
+    return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl +"' value=''></div>"
 }
 
 function checkImportantData() {
@@ -191,6 +193,3 @@ function changeWiki(e) {
     $("#wiki_name").val(wiki_str);
     e.preventDefault();
 }
-
-
-

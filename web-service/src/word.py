@@ -6,6 +6,7 @@ import re
 import subprocess
 import itertools
 import requests
+import datetime
 from docx import Document
 import mistune
 from pathlib import Path
@@ -387,8 +388,8 @@ class Dword:
             DATE_FINISH: RichText(self.js_content[DATE_FINISH]),
             DATE_DEFEND: RichText(self.js_content[DATE_DEFEND]),
             ANNOTATION: RichText(self.js_content[ANNOTATION]),
-            INTRODUCTION: RichText(self.js_content[INTRODUCTION])
-
+            INTRODUCTION: RichText(self.js_content[INTRODUCTION]),
+            'year': RichText(datetime.datetime.now().year)
         }
         doc.render(content)
         self.path = self.name
