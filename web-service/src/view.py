@@ -55,6 +55,8 @@ def index():
         github_data = github.get(USER)
         repos = create_list_of_repo(github_data)
 
+    github.access_token = None
+
     return render_template("home.html", link=session.get('link'), google=google.google_api.get_list(),
                            github=github_data, repositories=repos)
 

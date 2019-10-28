@@ -51,11 +51,11 @@
         }
     },
     "main_text": {
-        "size": 12,
+        "size": 14,
         "font": "Times New Roman"
     },
     "code_text": {
-        "size": 15,
+        "size": 10,
         "font": "Consolas"
     },
     "pull_request": {
