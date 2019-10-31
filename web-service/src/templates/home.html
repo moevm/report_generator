@@ -36,9 +36,6 @@ Home Page
                 </div>
             </div>
 
-
-
-
             <div class="mb-3">
                 <label for="repo_name">Ссылка на репозиторий, куда будет отправлен отчет:</label>
 
@@ -163,13 +160,13 @@ Home Page
                             Доп. возможности</button>
 
             <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                    <button class="dropdown-item" id="comments_pr" type="button">Комментарии из пул реквестов</button>
+                    <button class="dropdown-item" id="comments_pr" type="button">Комментарии из пулл-реквестов</button>
             </div>
 
             </div>
 
             <div id="opportunity" style="display: none;">
-                <div class='col-md-6 mb-3 row' id='window_of_opportunity'><label for='number_of_pr'>Номер пул реквеста</label><input type='text' class='form-control' id='number_of_pr'> </div>
+                <div class='col-md-6 mb-3 row' id='window_of_opportunity'><label for='number_of_pr'>Номер пулл реквеста</label><input type='text' class='form-control' id='number_of_pr'> </div>
             </div>
 
 
@@ -193,10 +190,10 @@ Home Page
             <br>
             <div class="row col-md-6 mb-3">
                 {% if not google %}
-                    <a href="/googleauthorize" class="btn btn-info">Authorize in Goggle Drive</a>
+                    <a href="/googleauthorize" class="btn btn-info">Сохранить на google drive</a>
                     {% else %}
                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">
-                        Save in Google Drive
+                        Выбрать место на google drive
                        </button>
             {% endif %}
             </div>
@@ -209,7 +206,7 @@ Home Page
                 <li class="list-group-item">Добавить в collaborators бота Prsender с правами <i>Write</i>, в репозиторий, который:</li>
                 <ul class="list-group">
                     <li class="list-group-item"><strong>1.</strong>  Хранит вики, по которой будет создан отчет</li>
-                    <li class="list-group-item"><strong>2.</strong>  репозиторий, куда надо отправить отчет</li>
+                    <li class="list-group-item"><strong>2.</strong>  Репозиторий, куда надо отправить отчет</li>
                 </ul>
             </ul>
 

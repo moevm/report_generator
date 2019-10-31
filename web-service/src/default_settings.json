@@ -26,11 +26,11 @@
     ],
     "format": {
         "h1": {
-            "size": 14,
+            "size": 19,
             "font": "Times New Roman"
         },
         "h2": {
-            "size": 18,
+            "size": 17,
             "font": "Times New Roman"
         },
         "h3": {
