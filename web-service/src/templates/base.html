@@ -63,6 +63,10 @@
 
 {% endblock %}
 
+{% block footer %}
+    {% include "footer.html" %}
+{% endblock %}
+
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/popper.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js')}}"></script>
