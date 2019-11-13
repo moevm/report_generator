@@ -1,8 +1,9 @@
 from flask import redirect, request
 import requests
+import os
 
-client_id = '6bfefa93bab199af589e'
-client_secret = '49c1cf2398a705a235a9411a2a8fa7f3d7c5e974'
+client_id = os.environ.get('github_ci')
+client_secret = os.environ.get('github_cs')
 
 
 class Github:
