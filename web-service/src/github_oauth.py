@@ -1,14 +1,16 @@
 from flask import redirect, request
 import requests
 import os
-
-client_id = os.environ.get('github_ci')
-client_secret = os.environ.get('github_cs')
+from app import ABS_PATH
 
 
 class Github:
 
     def __init__(self):
+        with open(ABS_PATH.format('github_data.txt'), 'r') as file:
+            github_list = file.read().strip().split('\n')
+            self.client_id = github_list[0]
+            self.client_secret = github_list[1]
         self.headers = {'Accept': 'application/json'}
         self.code = None
         self.access_token = None
@@ -23,7 +25,7 @@ class Github:
 
     def authorize(self):
         self.is_active = True
-        return redirect("https://github.com/login/oauth/authorize?client_id={}&scope=user%20repo".format(client_id),
+        return redirect("https://github.com/login/oauth/authorize?client_id={}&scope=user%20repo".format(self.client_id),
                         code=302)
 
     def is_valid_response(self, response):
@@ -32,8 +34,8 @@ class Github:
     def get_access_token(self):
         resp = requests.post("https://github.com/login/oauth/access_token",
                              headers=self.headers,
-                             data={'client_id': client_id,
-                                   'client_secret': client_secret,
+                             data={'client_id': self.client_id,
+                                   'client_secret': self.client_secret,
                                    'code': self.code})
 
         if self.is_valid_response(resp):
@@ -47,7 +49,7 @@ class Github:
             self.access_token = self.get_access_token()
 
         params = {'access_token': self.access_token,
-                  'client_secret': client_secret,
+                  'client_secret': self.client_secret,
                   'scope': "user,repo",
                   'code': self.code}
 
