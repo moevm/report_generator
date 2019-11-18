@@ -7,6 +7,7 @@ ENV LANG ru_RU.UTF-8
 ENV LC_ALL ru_RU.UTF-8
 RUN locale-gen ru_RU.UTF-8 && dpkg-reconfigure locales
 
+
 RUN apt-get update
 RUN apt-get -y install git
 
