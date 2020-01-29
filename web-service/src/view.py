@@ -1,7 +1,9 @@
+import os
+
 from app import app
-from main import main as create_word
+from main import main as create_word, create_report_from_md
 from json_api import JsonApi as update_settings
-from flask import render_template, redirect, url_for, request, flash, jsonify, session
+from flask import render_template, redirect, url_for, request, flash, jsonify, session, send_from_directory, send_file
 from flask_security import current_user, login_required, login_user, logout_user
 from admin_security import get_datastore, create_admin
 from models import User, IS_NEW_USER
@@ -123,3 +125,28 @@ def create_list_of_repo(repo_data):
             list_of_repo.append({URL: repo[HTML_URL], NAME: repo[FULL_NAME]})
         return list_of_repo
     return []
+
+
+@app.route('/download', methods=[GET, POST])
+def download_to_main_page():
+    if request.method == POST:
+        update_settings(dict(request.form))
+        print("IS MD EDITOR ON? ", request.form['is_md_editor'] == "true")
+        if request.form['is_md_editor'] == "true":
+            print('no no')
+            print(request.form)
+            create_report_from_md(request.form['md'])
+        else:
+            print('raz raz')
+            repo = request.form[REPO_NAME]
+            wiki = request.form[WIKI_NAME]
+            branch = request.form[BRANCH_NAME]
+            path_report = create_word([repo, wiki, branch], need_push=False)
+            print(path_report)
+    return ''
+
+
+@app.route('/dw_report')
+def dw_report():
+    return send_from_directory('/home/sergey/job/projects/report_generator/web-service/src', 'report.pdf',  cache_timeout=0)
+

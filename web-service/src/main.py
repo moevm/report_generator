@@ -10,6 +10,7 @@ from app import ABS_PATH
 
 TIME_REPORT = "ready_project.docx"
 READY_WORD = "generated_doc.docx"
+NAME_REPORT = "report.docx"
 REPORT = ABS_PATH.format('report.pdf')
 FROM_CONSOLE = "cmd"
 PDF = "PDF"
@@ -59,7 +60,7 @@ def input_file(name):
     return content[:VAR_CONTENT]
 
 
-def main(type_of_input):
+def main(type_of_input, need_push=True):
     delete_dirs_and_files()
     all_ok = True
     url, wiki_url, branch = type_of_input[0], type_of_input[1], type_of_input[2]
@@ -77,14 +78,23 @@ def main(type_of_input):
         word.save(path_doc)
         if word.js_content[PDF]:
             word.convert_to_pdf(docname=path_doc)
+            print(path_doc, "{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
             shutil.copyfile("{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
             report = PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION])
+            print(report)
         if not branch:
             branch = MASTER
-        report = git.push(report)
-        delete_dirs_and_files()
-        return LINK.format(url[15:-4], branch, report)
+        print('NEED PUSH ', need_push)
+        if need_push:
+            report = git.push(report)
+            delete_dirs_and_files()
+            return LINK.format(url[15:-4], branch, report)
     return EMPTY_PLACE
+
+
+def create_report_from_md(md):
+    word = Dword('', md)
+    word.convert_to_pdf_native(NAME_REPORT)
 
 
 if __name__ == "__main__":

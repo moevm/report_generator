@@ -2,6 +2,7 @@ $('#empty_doc').click(function () {
     $('#btnGroupDrop1').text("Пустой документ");
     $('#requirements').hide('slow');
     $('#requirements').empty();
+    pull_settings()
 });
 
 var requirements = '#requirements';
@@ -14,6 +15,7 @@ $('#lab_doc').click(function () {
         createLabsField(for_lab);
         $(requirements).show("slow")
     }
+    pull_settings()
 });
 
 $('.dropdown-toggle').dropdown()
@@ -35,6 +37,7 @@ $('#course_doc').click(function () {
 
         $(requirements).show('show');
     }
+        pull_settings()
 });
 
 function createLabsField(id) {
@@ -47,10 +50,10 @@ function createLabsField(id) {
 
 }
 
-function createFieldForConfigurator(id, name, pl='') {
+function createFieldForConfigurator(id, name, pl = '') {
     if (!pl)
         pl = name;
-    return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl +"' value=''></div>"
+    return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>"
 }
 
 function checkImportantData() {
@@ -83,6 +86,9 @@ function validate(event) {
 }
 
 function submitForm() {
+    let check_send = $('#is_send_to_github').prop('checked')
+    console.log(check_send)
+    if (check_send)
         $.ajax({
             type: "POST",
             crossDomain: true,
@@ -92,6 +98,39 @@ function submitForm() {
                 location.reload();
             },
         })
+    else {
+        console.log('to /download')
+        console.log(window.location.origin + '/download')
+        //window.open(window.location.origin + '/download')
+        $.ajax({
+                type: "POST",
+                url: window.location.origin + '/download',
+                data: get_data_from_md(),
+                success: function(data, status){
+                    window.open(window.location.origin + '/dw_report')
+                    //location.reload()
+                    console.log(window.location.origin + '/download_file')
+                    //$.ajax({
+                    //    type: 'GET',
+                    //    url: window.location.origin + '/download_file',
+                    //    target: true,
+                    //    success: function (data, status) {
+                    //        console.log(data)
+                    //    }
+                    //})
+                    $('#spinner_for_answer').remove()
+                }
+        })
+    }
+}
+
+function get_data_from_md() {
+    console.log(simplemde.value())
+    let info = get_data_from_form()
+    let mdText = simplemde.value()
+    info += `&md=${mdText}`
+    info += `&is_md_editor=${localStorage['md-editor']}`
+    return info
 }
 
 function get_data_from_form() {
@@ -111,6 +150,7 @@ function get_data_from_form() {
     const for_h5 = $('#for_h5').val();
     const for_h6 = $('#for_h6').val();
     const pages = $('#md_pages').val();
+    const source_files = $('#source_files').val();
 
     var result = `repo_name=${repo_name}`;
     result += `&wiki_name=${wiki_name}`;
@@ -126,6 +166,7 @@ function get_data_from_form() {
     result += `&h5=${for_h5}`;
     result += `&h6=${for_h6}`;
     result += `&pages=${pages}`;
+    result += `&download=${source_files.replace(' ', '')}`;
 
     if ($("*").is("#teacher")) {
         var teacher = $('#teacher').val();

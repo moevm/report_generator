@@ -76,8 +76,8 @@ INTRODUCTION = "introduction"
 YEAR = 'year'
 
 ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
-#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
-LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
+LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
+#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
 
 
 NAME_STYLE = "Mystyle"
@@ -247,7 +247,7 @@ class PythonDocxRenderer(mistune.Renderer):
 
 class Dword:
 
-    def __init__(self, branch):
+    def __init__(self, branch, md=None):
         self.branch = branch
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
@@ -258,8 +258,11 @@ class Dword:
         self.document = Document(os.path.abspath(self.path))
         self.update_title_list()
         #self.convert_format()
-        self.add_text_from_wiki()
-        #self.add_final_part()
+        if not md:
+            self.add_text_from_wiki()
+        else:
+            self.add_text_from_md(md)
+        self.add_final_part()
         self.add_comments()
         self.save(self.name)
 
@@ -434,6 +437,13 @@ class Dword:
         except subprocess.CalledProcessError as e:
             print(ERROR_MESSAGE_CONVERT_TO_PDF, e)
 
+    @staticmethod
+    def convert_to_pdf_native(path):
+        try:
+            subprocess.call("libreoffice --headless --convert-to pdf --outdir {} {}".format(ABS_PATH[:-3], path).split())
+        except subprocess.CalledProcessError as e:
+            print(ERROR_MESSAGE_CONVERT_TO_PDF, e)
+
     def save(self, name=NAME_REPORT):
         self.document.save(os.path.abspath(name))
 
@@ -444,9 +454,12 @@ class Dword:
         return PLUS_STR.format(DISTANCE_NUMBER_CODE * (max_len - len_number), number)
 
     def add_code(self):
+        print('WAS ADD CODE')
+        print(self.js_content[DICT_FILENAMES])
         for filename in self.js_content[DICT_FILENAMES]:
             gen_path = Path(os.getcwd()).rglob(filename)
             for path in gen_path:
+                print(path)
                 code = NOT_VALID
                 with open(path) as file:
                     code = file.readlines()
@@ -492,3 +505,13 @@ class Dword:
         for element in comments:
             if element.diff:
                 self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+
+    def add_text_from_md(self, md):
+        self.create_styles()
+        renderer = PythonDocxRenderer()
+        try:
+            print(MarkdownWithMath(renderer=renderer)(md))
+            exec((MarkdownWithMath(renderer=renderer)(md)))
+        except SyntaxError:
+            print(ERROR_STYLE_IN_MD)
+        self.document.save(ABS_PATH.format(NAME_REPORT))
