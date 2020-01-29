@@ -76,8 +76,8 @@ INTRODUCTION = "introduction"
 YEAR = 'year'
 
 ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
-LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
-#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
+#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
+LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
 
 
 NAME_STYLE = "Mystyle"
@@ -440,7 +440,7 @@ class Dword:
     @staticmethod
     def convert_to_pdf_native(path):
         try:
-            subprocess.call("libreoffice --headless --convert-to pdf --outdir {} {}".format(ABS_PATH[:-3], path).split())
+            subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], path).split())
         except subprocess.CalledProcessError as e:
             print(ERROR_MESSAGE_CONVERT_TO_PDF, e)
 
