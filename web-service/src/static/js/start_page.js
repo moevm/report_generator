@@ -11,19 +11,32 @@ const SETTINGS_CONFIGURATION = ['general_font', 'general_size', 'code_font', 'co
 
 
 function pull_settings() {
-    let defaultSettings = {}
-    if ('start_dict' in localStorage)
-        defaultSettings = JSON.parse(localStorage['start_dict'])
-    else
-        return
-    console.log(defaultSettings)
-    SETTINGS_CONFIGURATION.forEach((value => {
-        if (value in defaultSettings){
-                let el = $('#' + value)
-                if (el)
-                    el.val(defaultSettings[value])
-            }
-        }))
+
+    let query = decodeURI(window.location.search).split('?')[1]
+    let d = {}
+    if (query){
+        query.split('&').forEach((value) => {
+        let val = value.split('=')
+        d[val[0]] = val[1].replace(new RegExp("_",'g'), ' ')
+    })
+    }
+
+    let defaultSettings = d
+    if (defaultSettings){
+        console.log(defaultSettings)
+        SETTINGS_CONFIGURATION.forEach((value => {
+            if (value in defaultSettings){
+                    let el = $('#' + value)
+                    if (el)
+                        el.val(defaultSettings[value])
+                }
+            }))
+    }
+
+    //if ('start_dict' in localStorage)
+    //    defaultSettings = JSON.parse(localStorage['start_dict'])
+    //else
+    //    return
 }
 
 pull_settings()
