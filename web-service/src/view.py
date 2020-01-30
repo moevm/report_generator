@@ -148,5 +148,6 @@ def download_to_main_page():
 
 @app.route('/dw_report')
 def dw_report():
-    return send_from_directory('/home/sergey/job/projects/report_generator/web-service/src', 'report.pdf',  cache_timeout=0)
+    return send_from_directory('/var/www/report_generator/', 'report.pdf',  cache_timeout=0)
+
 

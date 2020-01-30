@@ -433,6 +433,7 @@ class Dword:
     @staticmethod
     def convert_to_pdf(docname):
         try:
+            print(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(github_local, docname))
             subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(github_local, docname).split())
         except subprocess.CalledProcessError as e:
             print(ERROR_MESSAGE_CONVERT_TO_PDF, e)
@@ -440,9 +441,12 @@ class Dword:
     @staticmethod
     def convert_to_pdf_native(path):
         try:
-            subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], path).split())
+            print(ABS_PATH[:-3], ABS_PATH.format(path))
+            print(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3]+"/test", ABS_PATH.format(path)))
+            subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], ABS_PATH.format(path)).split())
         except subprocess.CalledProcessError as e:
             print(ERROR_MESSAGE_CONVERT_TO_PDF, e)
+
 
     def save(self, name=NAME_REPORT):
         self.document.save(os.path.abspath(name))
@@ -515,3 +519,4 @@ class Dword:
         except SyntaxError:
             print(ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(NAME_REPORT))
+

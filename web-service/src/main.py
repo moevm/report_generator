@@ -76,6 +76,7 @@ def main(type_of_input, need_push=True):
         word = Dword(branch=branch)
         path_doc = os.path.join(git.local_repo, TIME_REPORT)
         word.save(path_doc)
+        print(path_doc)
         if word.js_content[PDF]:
             word.convert_to_pdf(docname=path_doc)
             print(path_doc, "{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
@@ -94,6 +95,8 @@ def main(type_of_input, need_push=True):
 
 def create_report_from_md(md):
     word = Dword('', md)
+    word.save(ABS_PATH.format(NAME_REPORT))
+    print(os.listdir(path="/var/www/report_generator"))
     word.convert_to_pdf_native(NAME_REPORT)
 
 
@@ -105,4 +108,5 @@ if __name__ == "__main__":
         main(input_cmd())
     else:
         main(input_file(namespace.f))
+
 
