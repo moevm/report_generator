@@ -442,7 +442,7 @@ class Dword:
     def convert_to_pdf_native(path):
         try:
             print(ABS_PATH[:-3], ABS_PATH.format(path))
-            print(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3]+"/test", ABS_PATH.format(path)))
+            print(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], ABS_PATH.format(path)))
             subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], ABS_PATH.format(path)).split())
         except subprocess.CalledProcessError as e:
             print(ERROR_MESSAGE_CONVERT_TO_PDF, e)

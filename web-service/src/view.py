@@ -1,6 +1,6 @@
 import os
 
-from app import app
+from app import app, ABS_PATH
 from main import main as create_word, create_report_from_md
 from json_api import JsonApi as update_settings
 from flask import render_template, redirect, url_for, request, flash, jsonify, session, send_from_directory, send_file
@@ -148,6 +148,6 @@ def download_to_main_page():
 
 @app.route('/dw_report')
 def dw_report():
-    return send_from_directory('/var/www/report_generator/', 'report.pdf',  cache_timeout=0)
+    return send_from_directory(ABS_PATH[:-3], 'report.pdf',  cache_timeout=0)
 
 
