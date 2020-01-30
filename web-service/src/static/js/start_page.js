@@ -19,15 +19,10 @@ function pull_settings() {
     console.log(defaultSettings)
     SETTINGS_CONFIGURATION.forEach((value => {
         if (value in defaultSettings){
-            if (value === "md"){
-                simplemde.value(defaultSettings[value])
-            }else {
                 let el = $('#' + value)
                 if (el)
                     el.val(defaultSettings[value])
             }
-
-        }
         }))
 }
 
