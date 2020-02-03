@@ -17,9 +17,6 @@ from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
 from github_api import Gengit, LOCAL_REPO as github_local
 from app import ABS_PATH
-from markdown2html2word import MyHTMLParser, pre_header, pre_blockquote
-from markdown2 import Markdown
-
 
 GIT_REPO = ABS_PATH.format("wiki_dir")
 PATH_TO_WIKI = "{}/{}.md"
@@ -79,8 +76,8 @@ INTRODUCTION = "introduction"
 YEAR = 'year'
 
 ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
-LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
-#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
+#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
+LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
 
 
 NAME_STYLE = "Mystyle"
@@ -155,6 +152,99 @@ line_space_dict = {1: WD_LINE_SPACING.SINGLE,
                    0: WD_LINE_SPACING.EXACTLY}
 
 
+class MathBlockGrammar(mistune.BlockGrammar):
+    block_math = re.compile(r"^\$\$(.*?)\$\$", re.DOTALL)
+
+
+class MathBlockLexer(mistune.BlockLexer):
+    default_rules = [BLOCK_MATH] + mistune.BlockLexer.default_rules
+
+    def __init__(self, rules=None, **kwargs):
+        if rules is None:
+            rules = MathBlockGrammar()
+        super(MathBlockLexer, self).__init__(rules, **kwargs)
+
+    def parse_block_math(self, m):
+        self.tokens.append({TOKEN_TYPE: BLOCK_MATH, TOKEN_TEXT: m.group(1)})
+
+
+class MarkdownWithMath(mistune.Markdown):
+    def __init__(self, renderer, **kwargs):
+        kwargs[BLOCK] = MathBlockLexer
+        super(MarkdownWithMath, self).__init__(renderer, **kwargs)
+
+    def output_block_math(self):
+        return self.renderer.block_math(self.token[TOKEN_TEXT])
+
+
+class PythonDocxRenderer(mistune.Renderer):
+    def __init__(self, **kwds):
+        super(PythonDocxRenderer, self).__init__(**kwds)
+        self.table_memory = []
+        self.img_counter = 0
+
+    def header(self, text, level, raw):
+        return HEADER.format(text[text.find("\"") + 1:text.rfind("\"")], H_STYLE.format(level))
+
+    def image(self, src, title, text):
+        return CREATE_IMAGE.format(src)
+
+    def paragraph(self, text):
+        if ADD_PICTURE in text:
+            return text
+        add_break = '' if text.endswith(END_STR) else RUN_AND_BREAK
+        return PLUS_STR.format('\n'.join((ADD_PARAGRAPH, text, add_break)), '\n')
+
+    def block_quote(self, text):
+        return self.convert_text_for_block_quote(BLOCK_QUOTE.format(text[text.find("\"") + 1:text.rfind("\"")],
+                                                                    BLOCK_QUOTE_STYLE).replace(NAME_STYLE,
+                                                                    BLOCK_QUOTE_STYLE))
+
+    def convert_text_for_block_quote(self, text):
+        return text.replace(REPLACE_FOR_QUOTE[0], REPLACE_FOR_QUOTE[1])
+
+    def list(self, body, ordered):
+        return LIST.format(body)
+
+    def list_item(self, text):
+        return '\n'.join((LIST_ITEM, text))
+
+    def table(self, header, body):
+        number_cols = header.count('\n') - 2
+        number_rows = int(len(self.table_memory) / number_cols)
+        cells = [ONE_PART_OF_TABLE.format(i, j, self.table_memory.pop(0)[1:])
+                 for i, j in itertools.product(range(number_rows), range(number_cols))]
+        tmp = "\n".join([CREATE_TABLE.format(number_rows, number_cols)] + cells)
+        return PLUS_STR.format(tmp, END_TABLE)
+
+    def table_cell(self, content, **flags):
+        self.table_memory.append(content)
+        return content
+
+    # SPAN LEVEL
+    def text(self, text):
+        return SPAN_TEXT.format(text.replace('\n', '\\n'), NAME_STYLE)
+
+    def codespan(self, text):
+        return CODESPAN.format(text)
+
+    def emphasis(self, text):
+        return SPAN_EMPHASIS.format(text[:-1])
+
+    def double_emphasis(self, text):
+        return SPAN_DOUBLE_EMPHASIS.format(text[:-1])
+
+    def block_code(self, code, lang):
+        code = code.replace('\n', '\\n').replace("\"", "\\\"")
+        return SPAN_CODE.format(code)
+
+    def link(self, link, title, content):
+        return SPAN_LINK.format(content, link)
+
+    def hrule(self):
+        return SPAN_HRULE
+
+
 class Dword:
 
     def __init__(self, branch, md=None):
@@ -165,18 +255,13 @@ class Dword:
         self.download_settings()
         self.choose_path_template()
         self.make_title()
-        if self.path:
-            self.document = Document(os.path.abspath(self.path))
-        else:
-            self.document = Document()
+        self.document = Document(os.path.abspath(self.path))
         self.update_title_list()
         #self.convert_format()
         if not md:
-            print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
             self.add_text_from_wiki()
         else:
             self.add_text_from_md(md)
-
         self.add_final_part()
         self.add_comments()
         self.save(self.name)
@@ -277,21 +362,12 @@ class Dword:
                 except FileNotFoundError:
                     print('File was not found')
 
-        # renderer = PythonDocxRenderer()
+        renderer = PythonDocxRenderer()
 
-        #try:
-        #    print(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
-        #    exec( (MarkdownWithMath(renderer=renderer)('\n'.join(tmp))))
-        #except SyntaxError:
-        #    print(ERROR_STYLE_IN_MD)
         try:
-            pre_header(self.document)
-            pre_blockquote(self.document)
-            p = MyHTMLParser(self.document)
-            markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
-            html = markdowner.convert('\n'.join(tmp))
-            p.feed(html)
-        except:
+            print(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
+            exec( (MarkdownWithMath(renderer=renderer)('\n'.join(tmp))))
+        except SyntaxError:
             print(ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(NAME_REPORT))
 
@@ -406,7 +482,7 @@ class Dword:
         elif self.js_content[TYPE_OF_WORK] == LAB_WORK:
             self.path = PATH_TO_TEMPLATE.format(LAB_WORK)
         else:
-            self.path = None#PATH_TO_TEMPLATE.format("mytemplate")#(TEMPLATE)
+            self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
 
     def add_comments(self):
         if not self.js_content[PR][NUMBER_OF_PR]:
@@ -431,15 +507,11 @@ class Dword:
                 self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
 
     def add_text_from_md(self, md):
-        #self.create_styles()
-
+        self.create_styles()
+        renderer = PythonDocxRenderer()
         try:
-            pre_header(self.document)
-            pre_blockquote(self.document)
-            p = MyHTMLParser(self.document)
-            markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
-            html = markdowner.convert(md)
-            p.feed(html)
-        except:
+            print(MarkdownWithMath(renderer=renderer)(md))
+            exec((MarkdownWithMath(renderer=renderer)(md)))
+        except SyntaxError:
             print(ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(NAME_REPORT))
