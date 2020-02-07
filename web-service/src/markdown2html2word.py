@@ -40,11 +40,15 @@ TYPE_OF_HEADER = "h{}"
 MAIN_TEXT = "main_text"
 CODE_TEXT = "code_text"
 
+ERROR = "error in HTMLParser. text: {}"
+PICTURE_NAME = "picture"
+MARKDOWN_EXTRAS = ["tables", "cuddled-lists", "smarty-pants"]
+
 
 class MyHTMLParser(HTMLParser):
 
     def error(self, message):
-        print("ERROR: {}".format(message))
+        print(ERROR.format(message))
 
     def __init__(self, document, json_setting):
         HTMLParser.__init__(self)
@@ -91,7 +95,6 @@ class MyHTMLParser(HTMLParser):
                 paragraph_format.space_before = Pt(STANDART_PT)
                 paragraph_format.space_after = Pt(STANDART_PT)
                 paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-                #self.italic = True
         elif tag == STRONG:
             self.bold = True
         elif tag in [H1, H2, H3, H4, H5, H6]:
@@ -109,10 +112,10 @@ class MyHTMLParser(HTMLParser):
         elif tag == IMG:
             url = attrs[0][1]
             picture = requests.get(url).content
-            with open(ABS_PATH.format('picture'), 'wb') as file:
+            with open(ABS_PATH.format(PICTURE_NAME), 'wb') as file:
                 file.write(picture)
             try:
-                self.document.add_picture(ABS_PATH.format('picture'), width=Inches(4), height=Inches(3))
+                self.document.add_picture(ABS_PATH.format(PICTURE_NAME), width=Inches(4), height=Inches(3))
             except:
                 pass
         elif tag == A:

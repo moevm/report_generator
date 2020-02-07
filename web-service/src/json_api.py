@@ -68,7 +68,6 @@ class JsonApi:
     def read_json_file(self):
         with open(JSON_FILE, 'r', encoding="utf-8") as file:
             self.json_data = json.load(file)
-        print('READ FULL JSON DATA:', self.json_data)
 
     def write_json_file(self):
         with open(JSON_FILE, 'w', encoding="utf-8") as file:

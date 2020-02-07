@@ -96,7 +96,7 @@ def main(type_of_input, need_push=True):
 def create_report_from_md(md):
     word = Dword('', md)
     word.save(ABS_PATH.format(NAME_REPORT))
-    word.convert_to_pdf_native(NAME_REPORT)
+    word.convert_to_pdf_native(ABS_PATH.format(NAME_REPORT))
 
 
 if __name__ == "__main__":
