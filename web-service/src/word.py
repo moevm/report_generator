@@ -1,22 +1,22 @@
 #!./venv/bin/python3.6
-import sys
-import os
-import json
-import re
-import subprocess
-import itertools
-import requests
 import datetime
-from docx import Document
-import mistune
+import json
+import os
+import subprocess
 from pathlib import Path
+
+import requests
 from PIL import Image
-from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT, WD_BREAK
+from docx import Document
 from docx.enum.style import WD_STYLE_TYPE
+from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt, Inches
 from docxtpl import DocxTemplate, RichText
-from github_api import Gengit, LOCAL_REPO as github_local
+from markdown2 import Markdown
+
 from app import ABS_PATH
+from github_api import Gengit, LOCAL_REPO as github_local
+from markdown2html2word import MyHTMLParser, pre_header, pre_blockquote
 
 GIT_REPO = ABS_PATH.format("wiki_dir")
 PATH_TO_WIKI = "{}/{}.md"
@@ -79,16 +79,6 @@ ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
 #LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
 LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
 
-
-NAME_STYLE = "Mystyle"
-BLOCK_QUOTE_STYLE = "my_block_quote_style"
-HEAD_STYLE = "Myheadstyle"
-SPAN_TEXT = "p.add_run(\"{}\",style=\'{}\')\n"
-SPAN_EMPHASIS = "{}.italic = True\n"
-SPAN_DOUBLE_EMPHASIS = "{}.bold = True\n"
-SPAN_CODE = "p = self.document.add_paragraph()\np.add_run(\"{}\")\np.style='BasicUserQuote'\np.add_run().add_break()\n"
-SPAN_LINK = "{} ({})"
-SPAN_HRULE = "self.document.add_page_break()\n"
 STANDART_PT = 6
 STANDART_INCHES = 0.5
 STANDART_PT_HEADER = 10
@@ -100,33 +90,15 @@ TOKEN_TEXT = "text"
 EMPTY = " "
 DASH = "-"
 
-LIST_ITEM = "p = self.document.add_paragraph('', style = 'BasicUserList')"
-LIST = "{}\np.add_run().add_break()\n"
-HEADER = "p = self.document.add_paragraph(text=\"{}\",style=\"{}\")\n"
-ADD_PICTURE = "add_picture"
-END_STR = ':")\n'
-RUN_AND_BREAK = 'p.add_run().add_break(WD_BREAK.COLUMN)\n'
-STYLE_PAPAGRAPH = "paragraph_style"
-ADD_PARAGRAPH = '''p = self.document.add_paragraph(style='{}')\n'''.format(STYLE_PAPAGRAPH)
-BLOCK_QUOTE = 'p = self.document.add_paragraph(text=\"{}\",style=\'{}\')\np.add_run().add_break()\n'
-CREATE_IMAGE = "p.add_run().add_break(WD_BREAK.COLUMN)\nself.add_image_by_url(\"{}\")"
-CREATE_TABLE = "table = self.document.add_table(rows={}, cols={}, style = 'BasicUserTable')"
-END_TABLE = 'self.document.add_paragraph().add_run().add_break()\n'
-ONE_PART_OF_TABLE = "table.rows[{}].cells[{}].paragraphs[0]{}\n"
-CODESPAN = "p.add_run(\"{}\",style='codespan_style')\n"
-CODESPAN_STYLE = 'codespan_style'
 PLUS_STR = "{}{}"
-H_STYLE = "my_header_{}"
 MAIN_TEXT = "main_text"
 CODE_TEXT = "code_text"
 FORMAT = "format"
 FONT = "font"
 SIZE = "size"
-MAIN_TEXT = "main_text"
 TYPE_OF_HEADER = "h{}"
 ERROR_STYLE_IN_MD = "В Markdown файле есть стиль, который не поддерживается программой!"
 DISTANCE_NUMBER_CODE = " "
-REPLACE_FOR_QUOTE = ['p.add_run("', 'p = self.document.add_paragraph(text="']
 NOT_MD_FILES = ['.git', '.', '..']
 
 COMMENTS_PR = "Комментарии из пулл-реквестов"
@@ -140,6 +112,7 @@ PR_COMMENTS = "Комментарии:"
 PR_DIFFS = "Изменения:"
 BAD_URL = "Bad url: {}"
 
+
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
                   'centre': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -152,102 +125,9 @@ line_space_dict = {1: WD_LINE_SPACING.SINGLE,
                    0: WD_LINE_SPACING.EXACTLY}
 
 
-class MathBlockGrammar(mistune.BlockGrammar):
-    block_math = re.compile(r"^\$\$(.*?)\$\$", re.DOTALL)
-
-
-class MathBlockLexer(mistune.BlockLexer):
-    default_rules = [BLOCK_MATH] + mistune.BlockLexer.default_rules
-
-    def __init__(self, rules=None, **kwargs):
-        if rules is None:
-            rules = MathBlockGrammar()
-        super(MathBlockLexer, self).__init__(rules, **kwargs)
-
-    def parse_block_math(self, m):
-        self.tokens.append({TOKEN_TYPE: BLOCK_MATH, TOKEN_TEXT: m.group(1)})
-
-
-class MarkdownWithMath(mistune.Markdown):
-    def __init__(self, renderer, **kwargs):
-        kwargs[BLOCK] = MathBlockLexer
-        super(MarkdownWithMath, self).__init__(renderer, **kwargs)
-
-    def output_block_math(self):
-        return self.renderer.block_math(self.token[TOKEN_TEXT])
-
-
-class PythonDocxRenderer(mistune.Renderer):
-    def __init__(self, **kwds):
-        super(PythonDocxRenderer, self).__init__(**kwds)
-        self.table_memory = []
-        self.img_counter = 0
-
-    def header(self, text, level, raw):
-        return HEADER.format(text[text.find("\"") + 1:text.rfind("\"")], H_STYLE.format(level))
-
-    def image(self, src, title, text):
-        return CREATE_IMAGE.format(src)
-
-    def paragraph(self, text):
-        if ADD_PICTURE in text:
-            return text
-        add_break = '' if text.endswith(END_STR) else RUN_AND_BREAK
-        return PLUS_STR.format('\n'.join((ADD_PARAGRAPH, text, add_break)), '\n')
-
-    def block_quote(self, text):
-        return self.convert_text_for_block_quote(BLOCK_QUOTE.format(text[text.find("\"") + 1:text.rfind("\"")],
-                                                                    BLOCK_QUOTE_STYLE).replace(NAME_STYLE,
-                                                                    BLOCK_QUOTE_STYLE))
-
-    def convert_text_for_block_quote(self, text):
-        return text.replace(REPLACE_FOR_QUOTE[0], REPLACE_FOR_QUOTE[1])
-
-    def list(self, body, ordered):
-        return LIST.format(body)
-
-    def list_item(self, text):
-        return '\n'.join((LIST_ITEM, text))
-
-    def table(self, header, body):
-        number_cols = header.count('\n') - 2
-        number_rows = int(len(self.table_memory) / number_cols)
-        cells = [ONE_PART_OF_TABLE.format(i, j, self.table_memory.pop(0)[1:])
-                 for i, j in itertools.product(range(number_rows), range(number_cols))]
-        tmp = "\n".join([CREATE_TABLE.format(number_rows, number_cols)] + cells)
-        return PLUS_STR.format(tmp, END_TABLE)
-
-    def table_cell(self, content, **flags):
-        self.table_memory.append(content)
-        return content
-
-    # SPAN LEVEL
-    def text(self, text):
-        return SPAN_TEXT.format(text.replace('\n', '\\n'), NAME_STYLE)
-
-    def codespan(self, text):
-        return CODESPAN.format(text)
-
-    def emphasis(self, text):
-        return SPAN_EMPHASIS.format(text[:-1])
-
-    def double_emphasis(self, text):
-        return SPAN_DOUBLE_EMPHASIS.format(text[:-1])
-
-    def block_code(self, code, lang):
-        code = code.replace('\n', '\\n').replace("\"", "\\\"")
-        return SPAN_CODE.format(code)
-
-    def link(self, link, title, content):
-        return SPAN_LINK.format(content, link)
-
-    def hrule(self):
-        return SPAN_HRULE
-
-
 class Dword:
 
-    def __init__(self, branch):
+    def __init__(self, branch, md=None):
         self.branch = branch
         self.num_of_pictures = 1
         self.number_of_paragraph = 0
@@ -255,11 +135,18 @@ class Dword:
         self.download_settings()
         self.choose_path_template()
         self.make_title()
-        self.document = Document(os.path.abspath(self.path))
+        if self.path:
+            self.document = Document(os.path.abspath(self.path))
+        else:
+            self.document = Document()
         self.update_title_list()
         #self.convert_format()
-        self.add_text_from_wiki()
-        #self.add_final_part()
+        if not md:
+            self.add_text_from_wiki()
+        else:
+            self.add_text_from_md(md)
+
+        self.add_final_part()
         self.add_comments()
         self.save(self.name)
 
@@ -269,43 +156,6 @@ class Dword:
                 font = run.font
                 font.name = self.js_content[MAIN_TEXT][FONT]
                 font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
-
-    def create_styles(self):
-        styles = self.document.styles
-        style = styles.add_style(NAME_STYLE, WD_STYLE_TYPE.CHARACTER)
-        style.font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
-        style.font.name = self.js_content[MAIN_TEXT][FONT]
-
-        style = styles.add_style(CODESPAN_STYLE, WD_STYLE_TYPE.CHARACTER)
-        style.font.size = Pt(STANDART_FONT_SIZE)
-        style.font.name = STANDART_FONT
-        style.font.italic = True
-
-
-        style = styles.add_style(BLOCK_QUOTE_STYLE, WD_STYLE_TYPE.PARAGRAPH)
-        paragraph_format = style.paragraph_format
-        paragraph_format.left_indent = Inches(STANDART_INCHES)
-        paragraph_format.space_before = Pt(STANDART_PT)
-        paragraph_format.space_after = Pt(STANDART_PT)
-        paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-        style.font.size,  style.font.name = Pt(self.js_content[MAIN_TEXT][SIZE]), self.js_content[MAIN_TEXT][FONT]
-        style.font.italic = True
-
-        for i in range(len(self.js_content[FORMAT])):
-            style = styles.add_style(H_STYLE.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
-            paragraph_format = style.paragraph_format
-            paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-            paragraph_format.space_after = Pt(STANDART_PT_HEADER)
-            paragraph_format.first_line_indent = Inches(STANDART_INCHES)
-            style.font.size = Pt(self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
-            style.font.name = self.js_content[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
-
-        style = styles.add_style(STYLE_PAPAGRAPH, WD_STYLE_TYPE.PARAGRAPH)
-        paragraph_format = style.paragraph_format
-        paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-        paragraph_format.space_after = Pt(STANDART_PT)
-        paragraph_format.first_line_indent = Inches(STANDART_INCHES)
-        paragraph_format.line_spacing_rule = line_space_dict.get(STANDART_LINE_SPACING)
 
     def h_w(self, dimension):
         height, width = dimension
@@ -341,7 +191,6 @@ class Dword:
         self.add_picture(filepath)
 
     def add_text_from_wiki(self):
-        self.create_styles()
         tmp = []
 
         if self.js_content[PAGES]:
@@ -352,19 +201,20 @@ class Dword:
             for filename in os.listdir(GIT_REPO):
                 if filename in NOT_MD_FILES:
                     continue
-
                 try:
                     with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3]), encoding="utf-8") as file:
                         tmp.append(file.read())
                 except FileNotFoundError:
                     print('File was not found')
 
-        renderer = PythonDocxRenderer()
-
         try:
-            print(MarkdownWithMath(renderer=renderer)('\n'.join(tmp)))
-            exec( (MarkdownWithMath(renderer=renderer)('\n'.join(tmp))))
-        except SyntaxError:
+            pre_header(self.document, self.js_content)
+            pre_blockquote(self.document)
+            parser_html = MyHTMLParser(self.document, self.js_content)
+            markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
+            html = markdowner.convert('\n'.join(tmp))
+            parser_html.feed(html)
+        except:
             print(ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(NAME_REPORT))
 
@@ -400,6 +250,10 @@ class Dword:
     def update_title_list(self):
         for paragraph in self.document.paragraphs:
             font = paragraph.style.font
+            runs = paragraph.runs
+            for run in runs:
+                run.font.name = self.js_content[MAIN_TEXT][FONT]
+                run.font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
             font.name = self.js_content[MAIN_TEXT][FONT]
             font.size = Pt(self.js_content[MAIN_TEXT][SIZE])
 
@@ -423,14 +277,26 @@ class Dword:
         paragraph_format.keep_together = keep_together
 
     def add_final_part(self):
-        self.add_page_break()
-        self.add_line(ATTACHMENT, set_bold=True, align=ALIGN_CENTRE)
-        self.add_code()
+        if self.js_content[DICT_FILENAMES]:
+            self.add_page_break()
+            self.add_line(ATTACHMENT, set_bold=True, align=ALIGN_CENTRE)
+            self.add_code()
 
     @staticmethod
     def convert_to_pdf(docname):
         try:
+            print(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(github_local, docname))
             subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(github_local, docname).split())
+        except subprocess.CalledProcessError as e:
+            print(ERROR_MESSAGE_CONVERT_TO_PDF, e)
+
+    @staticmethod
+    def convert_to_pdf_native(path):
+        try:
+            #print(ABS_PATH[:-3], ABS_PATH.format(path))
+            print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP')
+            print(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], path))
+            subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], path).split())
         except subprocess.CalledProcessError as e:
             print(ERROR_MESSAGE_CONVERT_TO_PDF, e)
 
@@ -444,9 +310,11 @@ class Dword:
         return PLUS_STR.format(DISTANCE_NUMBER_CODE * (max_len - len_number), number)
 
     def add_code(self):
+        print(self.js_content[DICT_FILENAMES])
         for filename in self.js_content[DICT_FILENAMES]:
             gen_path = Path(os.getcwd()).rglob(filename)
             for path in gen_path:
+                print(path)
                 code = NOT_VALID
                 with open(path) as file:
                     code = file.readlines()
@@ -469,7 +337,7 @@ class Dword:
         elif self.js_content[TYPE_OF_WORK] == LAB_WORK:
             self.path = PATH_TO_TEMPLATE.format(LAB_WORK)
         else:
-            self.path = PATH_TO_TEMPLATE.format(TEMPLATE)
+            self.path = None
 
     def add_comments(self):
         if not self.js_content[PR][NUMBER_OF_PR]:
@@ -492,3 +360,15 @@ class Dword:
         for element in comments:
             if element.diff:
                 self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+
+    def add_text_from_md(self, md):
+        #try:
+        pre_header(self.document, self.js_content)
+        pre_blockquote(self.document)
+        parser_html = MyHTMLParser(self.document, self.js_content)
+        markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
+        html = markdowner.convert(md)
+        parser_html.feed(html)
+        #except:
+        #    print(ERROR_STYLE_IN_MD)
+        self.document.save(ABS_PATH.format(NAME_REPORT))

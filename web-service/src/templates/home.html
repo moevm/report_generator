@@ -13,13 +13,60 @@ Home Page
         <h2>Генерация отчетов</h2>
     </div>
     <div class="col-md-10">
+        <div class="btn-group" role="group">
+              <button type="button" id="md-editor-github" class="btn btn-secondary" onclick="toggle_top()">Markdown Editor</button>
+        </div>
+        <br>
+        <br>
+        <div id="markdown-place-editor">
+            <textarea name="md" id="md" cols="30" rows="10">
+## An h2 header
+
+Paragraphs are separated by a blank line.
+
+2nd paragraph. *Italic*, **bold**. Itemized lists
+look like:
+
+* this one
+* that one
+* the other one
+
+> Block quotes are
+> written like so.
+>
+> They can span multiple paragraphs,
+> if you like.
+
+
+```php
+  <?php
+$myvar = 'Here is my code';
+echo $myvar;
+?>
+```
+
+### An h3 header
+
+Paragraphs are separated by a blank line.
+
+* this one
+* that one
+* the other one
+
+> Block quotes are
+> written like so.
+</textarea>
+        </div>
+
         <form method="POST" class="needs-validation" action="javascript:void(null);" onsubmit="submitForm()">
 
-            <div class="mb-3">
+            <div id="github-manager" style="display: none">
+
+                <div class="mb-3">
                 <label for="wiki_name">Ссылка на вики:</label>
 
                 <div class="input-group">
-                    <input type="text" class="form-control" id="wiki_name" placeholder="https://github.com/<owner_repo>/<repo>.wiki.git" required>
+                    <input type="text" class="form-control" id="wiki_name" placeholder="https://github.com/<owner_repo>/<repo>.wiki.git">
 
                         <div class="input-group-append">
                                 <button class="btn btn-outline-secondary dropdown-toggle" type="button"
@@ -40,7 +87,7 @@ Home Page
                 <label for="repo_name">Ссылка на репозиторий, куда будет отправлен отчет:</label>
 
                 <div class="input-group">
-                    <input type="text" class="form-control" id="repo_name" placeholder="git@github.com:<owner_repo>/<repo>.git" required>
+                    <input type="text" class="form-control" id="repo_name" placeholder="git@github.com:<owner_repo>/<repo>.git">
 
                     <div class="input-group-append">
                             <button class="btn btn-outline-secondary dropdown-toggle" type="button"
@@ -66,6 +113,9 @@ Home Page
                 </div>
             </div>
 
+            </div>
+
+
 
             <div class="row">
                 <div class="col-md-3 mb-3">
@@ -80,8 +130,8 @@ Home Page
                     </button>
                     <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                         <a class="dropdown-item" id="empty_doc">-</a>
+                        <a class="dropdown-item" id="lab_doc">Лабораторная работа</a>
                         <a class="dropdown-item" id="course_doc">Курсовая работа</a>
-                           <a class="dropdown-item" id="lab_doc">Лабораторная работа</a>
                     </div>
                 </div>
 
@@ -92,8 +142,7 @@ Home Page
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="general_font">Основной шрифт</label>
-                        <input type="text" class="form-control" id="general_font" placeholder="Times New Roman"
-                               value="">
+                        <input type="text" class="form-control" id="general_font" placeholder="Times New Roman">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="general_size">Кегль</label>
@@ -146,6 +195,11 @@ Home Page
                         <input type="text" class="form-control" id="md_pages" placeholder="Без расширения .md">
                     </div>
 
+                    <div class="col-md-6 mb-3">
+                        <label for="for_h6">Файлы для приложения</label>
+                        <input type="text" class="form-control" id="source_files" placeholder="Ex. ./src/main.c">
+                    </div>
+
                 </div>
 
 
@@ -174,6 +228,12 @@ Home Page
 
 
             <hr>
+            <p>
+                <label>
+                    <input type="checkbox" value="" id="is_send_to_github">
+                    Отправить отчет на Github
+                </label>
+            </p>
             <div class="row col-md-6 mb-3" id="buttons_field">
                 <input type="submit" class="btn btn-primary" value="Сформировать отчет" id="btn_submit">
                 &nbsp;&nbsp;&nbsp;&nbsp;

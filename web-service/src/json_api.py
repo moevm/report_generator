@@ -5,8 +5,8 @@ from shutil import copyfile
 JSON_FILE = ABS_PATH.format('settings.json')
 DEFAULT_SETTINGS = ABS_PATH.format('default_settings.json')
 
-LEN_COURSE_DOC = 25
-LEN_LAB_DOC = 21
+LEN_COURSE_DOC = 26
+LEN_LAB_DOC = 24
 TYPE = "type"
 LR = "LR"
 KR = "KR"
@@ -36,6 +36,7 @@ MIN_PAGES = "min_pages"
 DATE_START = "date_start"
 DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
+DOWNLOAD = "download"
 COMMA = ","
 COLON = ": "
 STANDART_SIZE = 14
@@ -75,6 +76,7 @@ class JsonApi:
 
     def change_content(self):
         length_set = len(self.new_settings)
+        print(self.new_settings)
         print(length_set)
         if length_set == LEN_COURSE_DOC:
             self.json_data[TYPE] = KR
@@ -106,6 +108,12 @@ class JsonApi:
             self.json_data[PAGES_OF_WIKI] = [self.new_settings[PAGES]]
         else:
             self.json_data[PAGES_OF_WIKI] = []
+
+        if self.new_settings[DOWNLOAD]:
+            self.json_data[DOWNLOAD] = self.new_settings[DOWNLOAD].split(',')
+        else:
+            self.json_data[DOWNLOAD] = []
+
         for i in range(NUMBER_FOR_H1, NUMBER_FOR_H6):
             if self.new_settings[HEADER.format(i)]:
                 self.json_data[FORMAT][HEADER.format(i)][SIZE] = self.get_size(int(self.new_settings[HEADER.format(i)]))
