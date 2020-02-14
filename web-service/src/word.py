@@ -77,7 +77,7 @@ YEAR = 'year'
 
 ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
 #LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
-# LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
+LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
 
 STANDART_PT = 6
 STANDART_INCHES = 0.5
