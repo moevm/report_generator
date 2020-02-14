@@ -32,7 +32,7 @@ CODE = "code"
 
 STANDART_PT_HEADER = 10
 STANDART_PT = 6
-STANDART_INCHES = 0.5
+STANDART_INCHES = 0.25
 FORMAT = "format"
 FONT = "font"
 SIZE = "size"
@@ -62,6 +62,7 @@ class MyHTMLParser(HTMLParser):
         self.italic = False
         self.list_level = 0
         self.hyperlink = None
+        self.need_dot_li = False
         self.font = json_setting[MAIN_TEXT][FONT]
         self.normal_font = json_setting[MAIN_TEXT][FONT]
         self.code_font = json_setting[CODE_TEXT][FONT]
@@ -103,10 +104,7 @@ class MyHTMLParser(HTMLParser):
             self.list_level += 1
         elif tag == LI:
             self.paragraph = self.document.add_paragraph()
-            _style = "List Bullet"
-            if self.list_level > 1:
-                _style += " {}".format(self.list_level)
-            self.paragraph.style = _style
+            self.need_dot_li = True
             self.font = self.normal_font
             self.size = self.normal_size
         elif tag == IMG:
@@ -117,7 +115,7 @@ class MyHTMLParser(HTMLParser):
             try:
                 self.document.add_picture(ABS_PATH.format(PICTURE_NAME), width=Inches(4), height=Inches(3))
             except:
-                pass
+                print('ERROR WITH IMAGE {}'.format(url))
         elif tag == A:
             self.hyperlink = attrs[0][1]
         elif tag == BLOCKQUOTE:
@@ -158,7 +156,7 @@ class MyHTMLParser(HTMLParser):
             self.table_mode = False
         elif tag == THEAD:
             self.table_thead_mode = False
-            self.table = self.document.add_table(1, len(self.thead), 'Table Grid')
+            self.table = self.document.add_table(1, len(self.thead), 'Table Normal') # Table Grid
             self.table_max_col = len(self.thead)
             for i in range(len(self.thead)):
                 self.table.rows[0].cells[i].text = self.thead[i]
@@ -184,7 +182,7 @@ class MyHTMLParser(HTMLParser):
         if data.isspace():
             return
         if self.h:
-            p = self.document.add_heading(data, self.h)
+            p = self.document.add_paragraph(data)
             p.style = self.document.styles['h{}'.format(self.h)]
             self.h = None
         elif self.hyperlink:
@@ -196,6 +194,13 @@ class MyHTMLParser(HTMLParser):
             print(self.table_col, self.table_row)
             self.table.rows[self.table_row].cells[self.table_col].text = data
         else:
+            if self.list_level > 0:
+                paragraph_format = self.paragraph.paragraph_format
+                paragraph_format.left_indent = Inches(STANDART_INCHES + STANDART_INCHES * (self.list_level - 1)) #+ 0.1 * self.list_level)
+                if self.need_dot_li:
+                    self.paragraph.add_run('• ')
+                    self.need_dot_li = False
+
             run = self.paragraph.add_run(data.strip('\n'))
             run.bold = self.bold
             run.italic = self.italic
@@ -220,7 +225,7 @@ def save_document(docx):
 def pre_header(document, settings):
     for i in range(6):
         custom_header_style = document.styles.add_style('h{}'.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
-        custom_header_style.base_style = document.styles['Heading {}'.format(i + 1)]
+        #custom_header_style.base_style = document.styles['Heading {}'.format(i + 1)]
         custom_header_style.font.rtl = True
         custom_header_style.font.name = settings[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
         custom_header_style.font.size = Pt(settings[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])

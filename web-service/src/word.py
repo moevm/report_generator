@@ -77,7 +77,7 @@ YEAR = 'year'
 
 ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
 #LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
-LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
+# LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
 
 STANDART_PT = 6
 STANDART_INCHES = 0.5
@@ -112,7 +112,6 @@ PR_COMMENTS = "Комментарии:"
 PR_DIFFS = "Изменения:"
 BAD_URL = "Bad url: {}"
 
-
 alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
                   'centre': WD_PARAGRAPH_ALIGNMENT.CENTER,
@@ -140,7 +139,6 @@ class Dword:
         else:
             self.document = Document()
         self.update_title_list()
-        #self.convert_format()
         if not md:
             self.add_text_from_wiki()
         else:
@@ -225,23 +223,24 @@ class Dword:
         else:
             mw = W_STUDENT
         content = {
-            MAN_OR_WOMAN: RichText(mw),
-            NUMBER: RichText(self.js_content[NUMBER]),
-            CATHEDRA: RichText(self.js_content[CATHEDRA]),
-            DISCIPLINE: RichText(self.js_content[DISCIPLINE]),
-            THEME: RichText(self.js_content[THEME]),
-            GROUP: RichText(self.js_content[GROUP]),
-            NAME_OF_STUDENT: RichText(self.js_content[NAME_OF_STUDENT]),
-            TEACHER: RichText(self.js_content[TEACHER]),
-            INIT_DATA: RichText(self.js_content[INIT_DATA]),
-            CONTEXT_OF_EXPLANATION: RichText(self.js_content[CONTEXT_OF_EXPLANATION]),
-            MIN_PAGES: RichText(self.js_content[MIN_PAGES]),
-            DATE_START: RichText(self.js_content[DATE_START]),
-            DATE_FINISH: RichText(self.js_content[DATE_FINISH]),
-            DATE_DEFEND: RichText(self.js_content[DATE_DEFEND]),
-            ANNOTATION: RichText(self.js_content[ANNOTATION]),
-            INTRODUCTION: RichText(self.js_content[INTRODUCTION]),
-            YEAR: RichText(datetime.datetime.now().year)
+            MAN_OR_WOMAN: mw,
+            NUMBER: self.js_content[NUMBER],
+            CATHEDRA: self.js_content[CATHEDRA],
+            DISCIPLINE: self.js_content[DISCIPLINE],
+            THEME: self.js_content[THEME],
+            GROUP: self.js_content[GROUP],
+            NAME_OF_STUDENT: self.js_content[NAME_OF_STUDENT],
+            TEACHER: self.js_content[TEACHER],
+            INIT_DATA: self.js_content[INIT_DATA],
+            CONTEXT_OF_EXPLANATION: self.js_content[CONTEXT_OF_EXPLANATION],
+
+            MIN_PAGES: self.js_content[MIN_PAGES],
+            DATE_START: self.js_content[DATE_START],
+            DATE_FINISH: self.js_content[DATE_FINISH],
+            DATE_DEFEND: self.js_content[DATE_DEFEND],
+            ANNOTATION: self.js_content[ANNOTATION],
+            INTRODUCTION: self.js_content[INTRODUCTION],
+            YEAR: datetime.datetime.now().year
         }
         doc.render(content)
         self.path = self.name
@@ -293,7 +292,7 @@ class Dword:
     @staticmethod
     def convert_to_pdf_native(path):
         try:
-            #print(ABS_PATH[:-3], ABS_PATH.format(path))
+            # print(ABS_PATH[:-3], ABS_PATH.format(path))
             print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP')
             print(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], path))
             subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], path).split())
@@ -346,7 +345,7 @@ class Dword:
         self.add_page_break()
         self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
         comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
-                         self.js_content[PR][NUMBER_OF_PR])
+                                    self.js_content[PR][NUMBER_OF_PR])
 
         for element in comments:
             self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
@@ -362,13 +361,15 @@ class Dword:
                 self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
 
     def add_text_from_md(self, md):
-        #try:
+        # try:
         pre_header(self.document, self.js_content)
         pre_blockquote(self.document)
         parser_html = MyHTMLParser(self.document, self.js_content)
         markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
         html = markdowner.convert(md)
+        print(html)
         parser_html.feed(html)
-        #except:
+        # except:
         #    print(ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(NAME_REPORT))
+# •
