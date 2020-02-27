@@ -134,8 +134,7 @@ class Dword:
         self.download_settings()
         self.choose_path_template()
         self.make_title()
-        self.name_report = '{}_{}.docx'.format(self.js_content['group'],
-                                               self.js_content['student'].replace(' ', '_').replace('.', '_'))
+        self.name_report = '{}_report.docx'.format(self.js_content['group'])
 
         if self.path:
             self.document = Document(os.path.abspath(self.path))
@@ -372,7 +371,6 @@ class Dword:
             parser_html.feed(html)
         except:
             print(ERROR_STYLE_IN_MD)
-        self.document.save(ABS_PATH.format(NAME_REPORT))
         self.document.save(ABS_PATH.format(self.name_report))
 
 # •
