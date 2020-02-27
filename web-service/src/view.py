@@ -148,6 +148,8 @@ def download_to_main_page():
 
 @app.route('/dw_report')
 def dw_report():
-    return send_from_directory(ABS_PATH[:-3], 'report.pdf',  cache_timeout=0)
+    #filename = 'report.pdf' if app.config['is_pdf'] else 'report.docx'
+    filename = app.config['filename_report']
+    return send_from_directory(ABS_PATH[:-3], filename, as_attachment=True, cache_timeout=0)
 
 

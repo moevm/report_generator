@@ -20,41 +20,7 @@ Home Page
         <br>
         <div id="markdown-place-editor">
             <textarea name="md" id="md" cols="30" rows="10">
-## An h2 header
-
-Paragraphs are separated by a blank line.
-
-2nd paragraph. *Italic*, **bold**. Itemized lists
-look like:
-
-* this one
-* that one
-* the other one
-
-> Block quotes are
-> written like so.
->
-> They can span multiple paragraphs,
-> if you like.
-
-
-```php
-  <?php
-$myvar = 'Here is my code';
-echo $myvar;
-?>
-```
-
-### An h3 header
-
-Paragraphs are separated by a blank line.
-
-* this one
-* that one
-* the other one
-
-> Block quotes are
-> written like so.
+## You can write your markdown text here, or choose github mode
 </textarea>
         </div>
 
@@ -116,10 +82,32 @@ Paragraphs are separated by a blank line.
             </div>
 
 
+            <p>
+                <label>
+                    <input type="checkbox" value="" id="is_send_to_github">
+                    Отправить отчет на Github
+                </label>
+            </p>
+            <div class="row col-md-7 mb-3" id="buttons_field">
+                <input type="submit" class="btn btn-danger btn-lg" value="Сформировать отчет" id="btn_submit">
+                &nbsp;&nbsp;&nbsp;&nbsp;
 
+                {% if link %}
+                <a href={{link}} id="total_link" class="btn btn-success">Ссылка на отчет</a>
+
+                <script type="text/javascript">
+                    openGithub('{{ link }}');
+                </script>
+                {% endif %}
+
+            </div>
+            <br>
+            <h2><i>Дополнительная настройка</i></h2>
+            <br>
             <div class="row">
+
                 <div class="col-md-3 mb-3">
-                    <input type="button" class="btn btn-primary" id="style_setter" value="Настройка стилей">
+                    <input type="button" class="btn btn-dark" id="style_setter" value="Настройка стилей">
                 </div>
 
                 <div class="dropdown col-md-4 mb-3" role="group">
@@ -229,25 +217,7 @@ Paragraphs are separated by a blank line.
 
 
             <hr>
-            <p>
-                <label>
-                    <input type="checkbox" value="" id="is_send_to_github">
-                    Отправить отчет на Github
-                </label>
-            </p>
-            <div class="row col-md-6 mb-3" id="buttons_field">
-                <input type="submit" class="btn btn-primary" value="Сформировать отчет" id="btn_submit">
-                &nbsp;&nbsp;&nbsp;&nbsp;
 
-                {% if link %}
-                <a href={{link}} id="total_link" class="btn btn-success">Ссылка на отчет</a>
-
-                <script type="text/javascript">
-                    openGithub('{{ link }}');
-                </script>
-                {% endif %}
-
-            </div>
             <br>
             <div class="row col-md-6 mb-3">
                 {% if not google %}

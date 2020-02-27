@@ -11,7 +11,7 @@ from docx import Document
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt, Inches
-from docxtpl import DocxTemplate, RichText
+from docxtpl import DocxTemplate
 from markdown2 import Markdown
 
 from app import ABS_PATH
@@ -134,6 +134,9 @@ class Dword:
         self.download_settings()
         self.choose_path_template()
         self.make_title()
+        self.name_report = '{}_{}.docx'.format(self.js_content['group'],
+                                               self.js_content['student'].replace(' ', '_').replace('.', '_'))
+
         if self.path:
             self.document = Document(os.path.abspath(self.path))
         else:
@@ -214,7 +217,7 @@ class Dword:
             parser_html.feed(html)
         except:
             print(ERROR_STYLE_IN_MD)
-        self.document.save(ABS_PATH.format(NAME_REPORT))
+        self.document.save(ABS_PATH.format(self.name_report))
 
     def make_title(self):
         doc = DocxTemplate(self.path)
@@ -292,8 +295,6 @@ class Dword:
     @staticmethod
     def convert_to_pdf_native(path):
         try:
-            # print(ABS_PATH[:-3], ABS_PATH.format(path))
-            print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP')
             print(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], path))
             subprocess.call(LIBREOFFICE_CONVERT_DOCX_TO_PDF.format(ABS_PATH[:-3], path).split())
         except subprocess.CalledProcessError as e:
@@ -361,15 +362,17 @@ class Dword:
                 self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
 
     def add_text_from_md(self, md):
-        # try:
-        pre_header(self.document, self.js_content)
-        pre_blockquote(self.document)
-        parser_html = MyHTMLParser(self.document, self.js_content)
-        markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
-        html = markdowner.convert(md)
-        print(html)
-        parser_html.feed(html)
-        # except:
-        #    print(ERROR_STYLE_IN_MD)
+        try:
+            pre_header(self.document, self.js_content)
+            pre_blockquote(self.document)
+            parser_html = MyHTMLParser(self.document, self.js_content)
+            markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
+            html = markdowner.convert(md)
+            print(html)
+            parser_html.feed(html)
+        except:
+            print(ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(NAME_REPORT))
+        self.document.save(ABS_PATH.format(self.name_report))
+
 # •

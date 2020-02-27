@@ -5,7 +5,7 @@ import os
 import shutil
 from github_api import Gengit, LOCAL_REPO, LOCAL_WIKI
 from word import Dword
-from app import ABS_PATH
+from app import ABS_PATH, app
 
 
 TIME_REPORT = "ready_project.docx"
@@ -77,6 +77,8 @@ def main(type_of_input, need_push=True):
         path_doc = os.path.join(git.local_repo, TIME_REPORT)
         word.save(path_doc)
         print(path_doc)
+        app.config['is_pdf'] = word.js_content[PDF]
+        app.config['filename_report'] = word.name_report
         if word.js_content[PDF]:
             word.convert_to_pdf(docname=path_doc)
             print(path_doc, "{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
@@ -95,8 +97,11 @@ def main(type_of_input, need_push=True):
 
 def create_report_from_md(md):
     word = Dword('', md)
-    word.save(ABS_PATH.format(NAME_REPORT))
-    word.convert_to_pdf_native(ABS_PATH.format(NAME_REPORT))
+    app.config['is_pdf'] = word.js_content[PDF]
+    app.config['filename_report'] = word.name_report
+    word.save(ABS_PATH.format(word.name_report))
+    if word.js_content[PDF]:
+        word.convert_to_pdf_native(ABS_PATH.format(word.name_report))
 
 
 if __name__ == "__main__":
