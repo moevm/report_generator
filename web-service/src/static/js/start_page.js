@@ -32,11 +32,6 @@ function pull_settings() {
                 }
             }))
     }
-
-    //if ('start_dict' in localStorage)
-    //    defaultSettings = JSON.parse(localStorage['start_dict'])
-    //else
-    //    return
 }
 
 pull_settings()

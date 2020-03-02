@@ -11,7 +11,7 @@
     "sense of work": "<sense of work>",
     "download": [
     ],
-    "PDF": true,
+    "PDF": false,
     "text": "<text>",
     "init_data": "<init data>",
     "context_of_explanation": "<context of explanation>",

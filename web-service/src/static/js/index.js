@@ -5,8 +5,8 @@ $('#empty_doc').click(function () {
     pull_settings()
 });
 
-var requirements = '#requirements';
-$('#lab_doc').click(function () {
+
+function create_lab() {
     $('#btnGroupDrop1').text("Лабораторная работа");
     if ($('#requirements').is(':hidden') || $('*').is('#field_for_course')) {
         const for_lab = '#field_for_lab';
@@ -16,6 +16,10 @@ $('#lab_doc').click(function () {
         $(requirements).show("slow")
     }
     pull_settings()
+}
+var requirements = '#requirements';
+$('#lab_doc').click(function () {
+    create_lab()
 });
 
 $('.dropdown-toggle').dropdown()
@@ -64,7 +68,7 @@ $('#btn_submit').click(function () {
     if (checkImportantData()) {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
-        $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" role="status"></div>')
+        $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status"></div>')
     }
 })
 
@@ -110,14 +114,6 @@ function submitForm() {
                     window.open(window.location.origin + '/dw_report')
                     //location.reload()
                     console.log(window.location.origin + '/download_file')
-                    //$.ajax({
-                    //    type: 'GET',
-                    //    url: window.location.origin + '/download_file',
-                    //    target: true,
-                    //    success: function (data, status) {
-                    //        console.log(data)
-                    //    }
-                    //})
                     $('#spinner_for_answer').remove()
                 }
         })
@@ -235,3 +231,20 @@ function changeWiki(e) {
     $("#wiki_name").val(wiki_str);
     e.preventDefault();
 }
+
+function check_type() {
+    let query = decodeURI(window.location.search).split('?')[1];
+    let d = {}
+    if (query){
+        query.split('&').forEach((value) => {
+        let val = value.split('=')
+        d[val[0]] = val[1].replace(new RegExp("_",'g'), ' ')
+    })
+    }
+    if ('type' in d && d['type'].toLowerCase() === 'lr'){
+        create_lab()
+    }
+
+}
+
+check_type();
