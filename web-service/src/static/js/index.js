@@ -6,6 +6,20 @@ $('#empty_doc').click(function () {
 });
 
 
+//$('#btn_main_settings').submit(function (event) {
+//    event.preventDefault();
+//})
+
+function main_settings() {
+    console.log('MAIN SETTINGS');
+    let settings = $('#main_settings');
+    if (settings.is(':hidden'))
+        settings.show('slow');
+    else
+        settings.hide('slow')
+    return false;
+}
+
 function create_lab() {
     $('#btnGroupDrop1').text("Лабораторная работа");
     if ($('#requirements').is(':hidden') || $('*').is('#field_for_course')) {
@@ -47,10 +61,13 @@ $('#course_doc').click(function () {
 function createLabsField(id) {
     $(id).append(createFieldForConfigurator('teacher', 'Преподаватель'));
     $(id).append(createFieldForConfigurator('student', 'Студент'));
-    $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '1111'));
+    $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '6392'));
     $(id).append(createFieldForConfigurator('theme', 'Тема работы'));
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета'));
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
+    $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц'))
+    $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'))
+    $(id).append(createFieldForConfigurator('branche', 'Название ветки'))
 
 }
 
@@ -68,7 +85,7 @@ $('#btn_submit').click(function () {
     if (checkImportantData()) {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
-        $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status"></div>')
+        $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 5rem; height: 5rem;" role="status"></div>')
     }
 })
 
@@ -90,8 +107,9 @@ function validate(event) {
 }
 
 function submitForm() {
-    let check_send = $('#is_send_to_github').prop('checked')
-    console.log(check_send)
+    let check_send = true; // TODO: add markdown editor
+    console.log('LOG DATA');
+    console.log(check_send);
     if (check_send)
         $.ajax({
             type: "POST",
@@ -209,12 +227,13 @@ function get_data_from_form() {
         var number_of_pr = $('#number_of_pr').val();
         result += `&number_of_pr=${number_of_pr}`;
     }
+    console.log(result)
     return result;
 }
 
 const _a = document.getElementById('repo_menu');
 
-_a.addEventListener('click', changeRepo);
+//_a.addEventListener('click', changeRepo);
 
 function changeRepo(e) {
     var ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git';
@@ -224,7 +243,7 @@ function changeRepo(e) {
 
 var _b = document.getElementById('wiki_menu');
 
-_b.addEventListener('click', changeWiki);
+//_b.addEventListener('click', changeWiki);
 
 function changeWiki(e) {
     const wiki_str = event.target.href + '.wiki.git';

@@ -7,7 +7,7 @@ function get_sv(name) {
 
 const SETTINGS_CONFIGURATION = ['general_font', 'general_size', 'code_font', 'code_size', 'for_h1', 'for_h1',
     'for_h2', 'for_h3', 'for_h4', 'for_h5', 'for_h6', 'teacher', 'student', 'number_group', 'theme', 'discipline', 'cathedra',
-    'min_pages', 'date_start', 'date_finish', 'date_defend', 'md']
+    'min_pages', 'date_start', 'date_finish', 'date_defend', 'wiki_name', 'repo_name', 'branch_name']
 
 
 function pull_settings() {
@@ -17,8 +17,11 @@ function pull_settings() {
     if (query){
         query.split('&').forEach((value) => {
         let val = value.split('=')
-        d[val[0]] = val[1].replace(new RegExp("_",'g'), ' ')
-    })
+            if (val[1].search('http') > 0 || val[1].search('git@') > 0)
+                d[val[0]] = val[1].replace(new RegExp("_",'g'), ' ');
+            else
+                d[val[0]] = val[1];
+        })
     }
 
     let defaultSettings = d
