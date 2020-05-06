@@ -17,7 +17,8 @@ function pull_settings() {
     if (query){
         query.split('&').forEach((value) => {
         let val = value.split('=')
-            if (val[1].search('http') > 0 || val[1].search('git@') > 0)
+            console.log(val[1], val[1].search('http'), val[1].search('git@'));
+            if (val[1].search('http') < 0 && val[1].search('git@') < 0)
                 d[val[0]] = val[1].replace(new RegExp("_",'g'), ' ');
             else
                 d[val[0]] = val[1];

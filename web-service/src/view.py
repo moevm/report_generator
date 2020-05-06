@@ -1,15 +1,11 @@
-import os
+from flask import render_template, redirect, url_for, request, jsonify, session, send_from_directory
 
-from app import app, ABS_PATH
-from main import main as create_word, create_report_from_md
-from json_api import JsonApi as update_settings
-from flask import render_template, redirect, url_for, request, flash, jsonify, session, send_from_directory, send_file
-from flask_security import current_user, login_required, login_user, logout_user
-from admin_security import get_datastore, create_admin
-from models import User, IS_NEW_USER
-from services.github_service import getGithub
 import google.google_api
+from app import app, ABS_PATH
+from json_api import JsonApi as update_settings
+from main import main as create_word
 
+IS_NEW_USER = 'was_new_user'
 app.config[IS_NEW_USER] = True
 MAIN_PAGE = 'index'
 SUCCESS = 'success'
@@ -42,7 +38,6 @@ FIRST_EMAIL_ADMIN = 'example@mail.ru'
 @app.route('/', methods=["GET", 'POST'])
 @app.route('/home', methods=["GET", 'POST'])
 def index():
-    github = getGithub()
     if request.method == POST:
         update_settings(dict(request.form))
         repo = request.form[REPO_NAME]
@@ -50,66 +45,8 @@ def index():
         branch = request.form[BRANCH_NAME]
         session['link'] = create_word([repo, wiki, branch])
         return redirect(url_for(MAIN_PAGE))
-    github_data = []
-    repos = []
 
-    if github.is_authorized:
-        github_data = github.get(USER)
-        repos = create_list_of_repo(github_data)
-
-    github.access_token = None
-
-    return render_template("home.html", link=session.get('link'), google=google.google_api.get_list(),
-                           github=github_data, repositories=repos)
-
-
-@app.route('/github_login')
-def github_login():
-    return getGithub().authorize()
-
-
-@app.route('/log_out')
-def logout():
-    if current_user.is_authenticated:
-        flash(SUCCESS_LOG_OUT, SUCCESS)
-        logout_user()
-    return redirect(url_for(MAIN_PAGE))
-
-
-@app.route('/info')
-def info():
-    return jsonify(User.objects)
-
-
-@app.before_first_request
-def first_request():
-    create_admin()
-    get_datastore().find_or_create_role(name=ADMIN)
-    get_datastore().find_or_create_role(name=NORMAL_USER)
-    if not get_datastore().get_user(FIRST_EMAIL_ADMIN):
-        app.config[IS_NEW_USER] = False
-        get_datastore().create_user(username=FIRST_ADMIN, email=FIRST_EMAIL_ADMIN)
-        app.config[IS_NEW_USER] = False
-    get_datastore().add_role_to_user(FIRST_EMAIL_ADMIN, ADMIN)
-
-
-@app.route('/login/github/authorized')
-def authorized():
-    github = getGithub()
-    github.set_code(request.args.get(CODE, None))
-    github.is_active = True
-    github_account = github.get(USER)
-    user = get_datastore().find_user(username=github_account[LOGIN])
-    if user:
-        flash(SUCCESS_LOG_IN.format(github_account[LOGIN]), SUCCESS)
-        if not user.avatar:
-            user.avatar = github_account[AVATAR]
-            app.config[IS_NEW_USER] = False
-            user.save()
-        login_user(user)
-    else:
-        flash(NO_ACCESS, DANGER)
-    return redirect(url_for(MAIN_PAGE))
+    return render_template("home.html", link=session.get('link'), google=google.google_api.get_list())
 
 
 @app.route('/send', methods=['GET'])
@@ -117,38 +54,23 @@ def send():
     return redirect(url_for('post_file_api_request'))
 
 
-def create_list_of_repo(repo_data):
-    if repo_data:
-        repos = getGithub().get(GET_REPOS.format(repo_data[LOGIN]))
-        list_of_repo = []
-        for repo in repos:
-            list_of_repo.append({URL: repo[HTML_URL], NAME: repo[FULL_NAME]})
-        return list_of_repo
-    return []
-
-
 @app.route('/download', methods=[GET, POST])
 def download_to_main_page():
     if request.method == POST:
         update_settings(dict(request.form))
-        print("IS MD EDITOR ON? ", request.form['is_md_editor'] == "true")
-        if request.form['is_md_editor'] == "true":
-            print('no no')
-            print(request.form)
-            create_report_from_md(request.form['md'])
-        else:
-            print('raz raz')
-            repo = request.form[REPO_NAME]
-            wiki = request.form[WIKI_NAME]
-            branch = request.form[BRANCH_NAME]
-            path_report = create_word([repo, wiki, branch], need_push=False)
-            print(path_report)
+        print('raz raz')
+        repo = request.form[REPO_NAME]
+        wiki = request.form[WIKI_NAME]
+        branch = request.form[BRANCH_NAME]
+        path_report = create_word([repo, wiki, branch], need_push=False)
+        print(path_report)
     return ''
 
 
 @app.route('/dw_report')
 def dw_report():
+    student = dict(request.args)['name'].replace(' ', '_')
     filename = app.config['filename_report']
-    return send_from_directory(ABS_PATH[:-3], filename, as_attachment=True, cache_timeout=0)
+    return send_from_directory(ABS_PATH[:-3], filename, as_attachment=True, cache_timeout=0, attachment_filename='{}.docx'.format(student))
 
 

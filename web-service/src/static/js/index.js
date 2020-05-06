@@ -67,7 +67,7 @@ function createLabsField(id) {
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
     $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц'))
     $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'))
-    $(id).append(createFieldForConfigurator('branche', 'Название ветки'))
+    $(id).append(createFieldForConfigurator('branche', 'Название ветки - только при наличии файлов для приложения'))
 
 }
 
@@ -107,7 +107,7 @@ function validate(event) {
 }
 
 function submitForm() {
-    let check_send = true; // TODO: add markdown editor
+    let check_send = false; // TODO: add markdown editor
     console.log('LOG DATA');
     console.log(check_send);
     if (check_send)
@@ -123,13 +123,23 @@ function submitForm() {
     else {
         console.log('to /download')
         console.log(window.location.origin + '/download')
+        let data = get_data_from_form();
+        let student;
+        if ($("*").is("#student")) {
+            student = $('#student').val();
+            if (student === '')
+                student = 'unknown';
+        }
+        else {
+            student = 'unknown';
+        }
         //window.open(window.location.origin + '/download')
         $.ajax({
                 type: "POST",
                 url: window.location.origin + '/download',
-                data: get_data_from_md(),
+                data: data,//get_data_from_md(),
                 success: function(data, status){
-                    window.open(window.location.origin + '/dw_report')
+                    window.open(window.location.origin + '/dw_report?name=' + student)
                     //location.reload()
                     console.log(window.location.origin + '/download_file')
                     $('#spinner_for_answer').remove()
@@ -182,12 +192,18 @@ function get_data_from_form() {
     result += `&pages=${pages}`;
     result += `&download=${source_files.replace(' ', '')}`;
 
+
+    let check_val = (value) => {
+        if (value === '')
+            return 'unknown';
+        return value;
+    }
     if ($("*").is("#teacher")) {
-        var teacher = $('#teacher').val();
+        var teacher = check_val($('#teacher').val());
         result += `&teacher=${teacher}`;
     }
     if ($("*").is("#student")) {
-        var student = $('#student').val();
+        var student = check_val($('#student').val());
         result += `&student=${student}`;
     }
     if ($("*").is("#number_group")) {
@@ -195,15 +211,15 @@ function get_data_from_form() {
         result += `&number_group=${number_group}`;
     }
     if ($("*").is("#theme")) {
-        var theme = $('#theme').val();
+        var theme = check_val($('#theme').val());
         result += `&theme=${theme}`;
     }
     if ($("*").is("#discipline")) {
-        var discipline = $('#discipline').val();
+        var discipline = check_val($('#discipline').val());
         result += `&discipline=${discipline}`;
     }
     if ($("*").is("#cathedra")) {
-        var cathedra = $('#cathedra').val();
+        var cathedra = check_val($('#cathedra').val());
         result += `&cathedra=${cathedra}`;
     }
     if ($("*").is("#min_pages")) {
@@ -222,7 +238,6 @@ function get_data_from_form() {
         var date_defend = $('#date_defend').val();
         result += `&date_defend=${date_defend}`;
     }
-    ;
     if ($("*").is("#number_of_pr")) {
         var number_of_pr = $('#number_of_pr').val();
         result += `&number_of_pr=${number_of_pr}`;
