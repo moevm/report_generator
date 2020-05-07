@@ -17,7 +17,7 @@ CLIENT_SECRETS_FILE = ABS_PATH.format("google/client_secrets.json")
 TITLE = 'name'
 NAME_OF_FILE = 'report.pdf'
 TYPE = 'mimeType'
-PDF = 'application/pdf'
+PDF = 'application/docx'
 MEDIA_TYPE = 'text/pdf'
 ID = 'id'
 OFFLINE = 'offline'
@@ -41,10 +41,11 @@ def post_file_api_request(id=None):
         API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
     if id is "0":
-        file_metadata = {TITLE: NAME_OF_FILE, TYPE: PDF}
+        file_metadata = {TITLE: app.config['filename_report'], TYPE: PDF}
     else:
-        file_metadata = {TITLE: NAME_OF_FILE, TYPE: PDF, PARENTS: [id]}
-    media = MediaFileUpload(ABS_PATH.format('report.pdf'),
+        file_metadata = {TITLE: app.config['filename_report'], TYPE: PDF, PARENTS: [id]}
+    print('GOOGLE DRIVE', app.config['filename_report'])
+    media = MediaFileUpload(ABS_PATH.format(app.config['filename_report']), #ABS_PATH.format('report.pdf'),
                             mimetype=MEDIA_TYPE)
     file = drive.files().create(body=file_metadata,
                                 media_body=media,

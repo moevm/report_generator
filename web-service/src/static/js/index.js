@@ -158,6 +158,19 @@ function get_data_from_md() {
     return info
 }
 
+function google_drive() {
+$.ajax({
+                type: "POST",
+                url: window.location.origin + '/download',
+                data: get_data_from_form(),
+                success: function(data, status){
+                    console.log('go google drive');
+                    window.location = window.location.origin + '/googleauthorize';
+                    //window.open(window.location.origin + '/dw_report?name=' + student)
+                }
+        })
+}
+
 function get_data_from_form() {
     const repo_name = $('#repo_name').val();
     const wiki_name = $('#wiki_name').val();
