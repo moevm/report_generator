@@ -62,12 +62,13 @@ function createLabsField(id) {
     $(id).append(createFieldForConfigurator('teacher', 'Преподаватель'));
     $(id).append(createFieldForConfigurator('student', 'Студент'));
     $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '6392'));
+    $(id).append(createFieldForConfigurator('number_of_report', 'Номер работы', '1'));
     $(id).append(createFieldForConfigurator('theme', 'Тема работы'));
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета'));
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
     $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц'))
     $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'))
-    $(id).append(createFieldForConfigurator('branche', 'Название ветки - только при наличии файлов для приложения'))
+    $(id).append(createFieldForConfigurator('branch_name', 'Название ветки - только при наличии файлов для приложения'))
 
 }
 
@@ -206,8 +207,14 @@ function get_data_from_form() {
         var student = check_val($('#student').val());
         result += `&student=${student}`;
     }
+     if ($("*").is("#number_of_report")) {
+        var number_of_report = check_val($('#number_of_report').val());
+        result += `&number=${number_of_report}`;
+    }
     if ($("*").is("#number_group")) {
         var number_group = $('#number_group').val();
+        if (number_group === '')
+            number_group = '0'
         result += `&number_group=${number_group}`;
     }
     if ($("*").is("#theme")) {

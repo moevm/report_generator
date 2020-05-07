@@ -5,8 +5,8 @@ from shutil import copyfile
 JSON_FILE = ABS_PATH.format('settings.json')
 DEFAULT_SETTINGS = ABS_PATH.format('default_settings.json')
 
-LEN_COURSE_DOC = 25
-LEN_LAB_DOC = 21
+LEN_COURSE_DOC = 26
+LEN_LAB_DOC = 22
 TYPE = "type"
 LR = "LR"
 KR = "KR"
@@ -92,6 +92,10 @@ class JsonApi:
         return pages.split(',')
 
     def general_content(self):
+        print(self.new_settings)
+        print('----------------')
+        if self.new_settings['number']: self.json_data['number'] = self.new_settings['number']
+
         if NUMBER_PR in self.new_settings and self.new_settings[NUMBER_PR]:
             self.json_data[PR][NUMBER_PR] = [int(self.new_settings[NUMBER_PR])]
             self.json_data[PR][OWNER] = self.info_repo[0]
@@ -117,6 +121,7 @@ class JsonApi:
         for i in range(NUMBER_FOR_H1, NUMBER_FOR_H6):
             if self.new_settings[HEADER.format(i)]:
                 self.json_data[FORMAT][HEADER.format(i)][SIZE] = self.get_size(int(self.new_settings[HEADER.format(i)]))
+        print(self.json_data)
 
     def get_size(self, size):
         if size < MAX_SIZE:

@@ -116,7 +116,8 @@ alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
                   'centre': WD_PARAGRAPH_ALIGNMENT.CENTER,
                   'right': WD_PARAGRAPH_ALIGNMENT.RIGHT,
-                  'left': WD_PARAGRAPH_ALIGNMENT.LEFT}
+                  'left': WD_PARAGRAPH_ALIGNMENT.LEFT
+                  }
 
 line_space_dict = {1: WD_LINE_SPACING.SINGLE,
                    2: WD_LINE_SPACING.DOUBLE,
@@ -145,10 +146,11 @@ class Dword:
             self.add_text_from_wiki()
         else:
             self.add_text_from_md(md)
-
+        print('I HAVE TO ADD FILES')
         self.add_final_part()
         self.add_comments()
-        self.save(self.name)
+        self.document.save(ABS_PATH.format(self.name_report))
+        #self.save(self.name)
 
     def convert_format(self):
         for paragraph in self.document.paragraphs:
@@ -264,6 +266,7 @@ class Dword:
         self.number_of_paragraph += 1
         style_name = STYLE.format(self.number_of_paragraph)
         paragraph = self.document.add_paragraph(line)
+        print('ADD LINE {}'.format(line))
         paragraph.style = self.document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         font = paragraph.style.font
         font.name = font_name
@@ -278,7 +281,9 @@ class Dword:
         paragraph_format.keep_together = keep_together
 
     def add_final_part(self):
-        if self.js_content[DICT_FILENAMES]:
+        print(self.js_content[DICT_FILENAMES])
+        if len(self.js_content[DICT_FILENAMES]) > 0:
+            print('ADDED')
             self.add_page_break()
             self.add_line(ATTACHMENT, set_bold=True, align=ALIGN_CENTRE)
             self.add_code()
@@ -313,10 +318,11 @@ class Dword:
         for filename in self.js_content[DICT_FILENAMES]:
             gen_path = Path(os.getcwd()).rglob(filename)
             for path in gen_path:
-                print(path)
+                print('END ', path)
                 code = NOT_VALID
                 with open(path) as file:
                     code = file.readlines()
+                print(code)
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
                 for number, line in enumerate(code, 1):
                     self.add_line(
