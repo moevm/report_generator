@@ -90,6 +90,10 @@ $('#btn_submit').click(function () {
     }
 })
 
+$('#google_drive_button').click(function () {
+    $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-primary" style="width: 5rem; height: 5rem;" role="status"></div>')
+})
+
 $('#style_setter').click(function () {
     if ($('#style_settings').is(':hidden')) {
         $('#style_settings').show("slow")

@@ -320,7 +320,7 @@ class Dword:
             for path in gen_path:
                 print('END ', path)
                 code = NOT_VALID
-                with open(path) as file:
+                with open(path, encoding='utf-8') as file:
                     code = file.readlines()
                 print(code)
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
