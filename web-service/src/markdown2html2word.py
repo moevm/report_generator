@@ -2,7 +2,7 @@ import requests
 from docx import Document
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT, WD_LINE_SPACING
-from docx.shared import Pt, RGBColor, Inches
+from docx.shared import Pt, RGBColor, Inches, Cm
 from docx.oxml.shared import OxmlElement, qn
 from docx.opc.constants import RELATIONSHIP_TYPE
 from html.parser import HTMLParser
@@ -88,7 +88,8 @@ class MyHTMLParser(HTMLParser):
             paragraph_format = self.paragraph.paragraph_format
             paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
             paragraph_format.space_after = Pt(STANDART_PT)
-            paragraph_format.first_line_indent = Inches(STANDART_INCHES)
+            paragraph_format.first_line_indent = Cm(1.5)#Inches(STANDART_INCHES + 0.3)
+            #   paragraph_format.left_indent = Inches(STANDART_INCHES)
             paragraph_format.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
             if self.isBlockQuote:  # it's here because in html <blockquote><p></p></blockquote>
                 paragraph_format.first_line_indent = Inches(0)
@@ -114,6 +115,13 @@ class MyHTMLParser(HTMLParser):
                 file.write(picture)
             try:
                 self.document.add_picture(ABS_PATH.format(PICTURE_NAME), width=Inches(4), height=Inches(3))
+                last_paragraph = self.document.paragraphs[-1]
+                last_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                last_paragraph.space_after = Pt(10)
+                last_paragraph.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
+                self.paragraph = self.document.add_paragraph()
+
+                #last_paragraph.keep_with_next = False
             except:
                 print('ERROR WITH IMAGE {}'.format(url))
         elif tag == A:
@@ -196,7 +204,7 @@ class MyHTMLParser(HTMLParser):
         else:
             if self.list_level > 0:
                 paragraph_format = self.paragraph.paragraph_format
-                paragraph_format.left_indent = Inches(STANDART_INCHES + STANDART_INCHES * (self.list_level - 1)) #+ 0.1 * self.list_level)
+                paragraph_format.left_indent = Inches(STANDART_INCHES + STANDART_INCHES * (self.list_level - 1))  # + 0.1 * self.list_level)
                 if self.need_dot_li:
                     self.paragraph.add_run('• ')
                     self.need_dot_li = False
@@ -225,7 +233,7 @@ def save_document(docx):
 def pre_header(document, settings):
     for i in range(6):
         custom_header_style = document.styles.add_style('h{}'.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
-        #custom_header_style.base_style = document.styles['Heading {}'.format(i + 1)]
+        # custom_header_style.base_style = document.styles['Heading {}'.format(i + 1)]
         custom_header_style.font.rtl = True
         custom_header_style.font.name = settings[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
         custom_header_style.font.size = Pt(settings[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
@@ -237,7 +245,9 @@ def pre_header(document, settings):
         paragraph_format = custom_header_style.paragraph_format
         paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
         paragraph_format.space_after = Pt(STANDART_PT_HEADER)
-        paragraph_format.first_line_indent = Inches(STANDART_INCHES)
+        # paragraph_format.space_before = Inches(0.10)
+        paragraph_format.left_indent = Cm(1.5)  # Inches(STANDART_INCHES + 0.1)
+        # paragraph_format.first_line_indent = Inches(STANDART_INCHES)
 
 
 def add_hyperlink(paragraph, url, text, font="Times New Roman", size=14, color='0000FF', underline=True):

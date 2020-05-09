@@ -31,14 +31,8 @@ function create_lab() {
     }
     pull_settings()
 }
-var requirements = '#requirements';
-$('#lab_doc').click(function () {
-    create_lab()
-});
 
-$('.dropdown-toggle').dropdown()
-
-$('#course_doc').click(function () {
+function create_course_work() {
     $('#btnGroupDrop1').text("Курсовая работа");
 
     if ($(requirements).is(':hidden') || $('*').is('#field_for_lab')) {
@@ -56,6 +50,18 @@ $('#course_doc').click(function () {
         $(requirements).show('show');
     }
         pull_settings()
+}
+
+var requirements = '#requirements';
+$('#lab_doc').click(function () {
+    create_lab()
+});
+
+$('.dropdown-toggle').dropdown()
+
+
+$('#course_doc').click(function () {
+    create_course_work();
 });
 
 function createLabsField(id) {
@@ -69,6 +75,7 @@ function createLabsField(id) {
     $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц'))
     $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'))
     $(id).append(createFieldForConfigurator('branch_name', 'Название ветки - только при наличии файлов для приложения'))
+    $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста'))
 
 }
 
@@ -300,7 +307,10 @@ function check_type() {
     })
     }
     if ('type' in d && d['type'].toLowerCase() === 'lr'){
-        create_lab()
+        create_lab();
+    }
+    else if ('type' in d && d['type'].toLowerCase() === 'kr'){
+        create_course_work();
     }
 
 }

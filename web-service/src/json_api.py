@@ -5,8 +5,8 @@ from shutil import copyfile
 JSON_FILE = ABS_PATH.format('settings.json')
 DEFAULT_SETTINGS = ABS_PATH.format('default_settings.json')
 
-LEN_COURSE_DOC = 26
-LEN_LAB_DOC = 22
+LEN_COURSE_DOC = 27
+LEN_LAB_DOC = 23
 TYPE = "type"
 LR = "LR"
 KR = "KR"

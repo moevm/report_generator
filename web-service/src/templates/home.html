@@ -41,6 +41,25 @@ Home Page
             <br>
             <div class="row">
 
+
+
+
+                <div class="col-md-6 mb-3">
+                        <label for="repo_name">Ссылка на репозиторий(ssh)</label>
+                        <input type="text" class="form-control" id="repo_name" placeholder="">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="wiki-name">Ссылка на wiki-страницы</label>
+                        <input type="text" class="form-control" id="wiki_name" placeholder="" onkeypress="validate(event)">
+                    </div>
+
+
+
+
+
+
+
+
                 <div class="col-md-3 mb-3">
                     <input type="button" class="btn btn-dark" id="style_setter" value="Настройка стилей">
                 </div>
@@ -71,7 +90,7 @@ Home Page
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="general_size">Кегль</label>
-                        <input type="text" class="form-control" id="general_size" placeholder="14" onkeypress="validate(event)">
+                        <input type="text" class="form-control" id="general_size" placeholder="">
                     </div>
                 </div>
 
@@ -180,9 +199,6 @@ Home Page
 
 </div>
 
-<div id="repo_name" style="display: none"></div>
-<div id="wiki_name" style="display: none"></div>
-<div id="branch_name" style="display: none"></div>
 
 
 {% endblock %}

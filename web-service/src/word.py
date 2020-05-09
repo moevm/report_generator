@@ -43,7 +43,7 @@ ALIGN_CENTRE = "centre"
 ALIGN_JUSTIFY = "justify"
 ALIGN_LEFT = "left"
 UNDER_PICTURE = "Рисунок {}{}"
-ATTACHMENT = "Приложение"
+ATTACHMENT = "Приложение A"
 PICTURE = "picture"
 PAGES = "pages_of_wiki"
 STANDART_SIZE_PICTURE = 4
@@ -222,6 +222,11 @@ class Dword:
 
     def make_title(self):
         doc = DocxTemplate(self.path)
+        print('TEMPLATE OF WORD')
+        print(self.path)
+        print(self.js_content)
+        print(self.js_content[INIT_DATA])
+        print(self.js_content[CONTEXT_OF_EXPLANATION])
         if self.js_content[M_W] == MAN:
             mw = M_STUDENT
         else:
