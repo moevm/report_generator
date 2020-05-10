@@ -46,7 +46,9 @@ function create_course_work() {
         $(for_course).append(createFieldForConfigurator('date_start', 'Дата начала', '0.0.1970'));
         $(for_course).append(createFieldForConfigurator('date_finish', 'Дата сдачи', '0.0.1970'));
         $(for_course).append(createFieldForConfigurator('date_defend', 'Дата защиты', '0.0.1970'));
-
+        $(for_course).append(createFieldForConfigurator('init_data', 'Исходные данные', 'Исходные данные в задании курсовой работы'));
+        $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки'));
+        $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация'));
         $(requirements).show('show');
     }
         pull_settings()
@@ -272,6 +274,18 @@ function get_data_from_form() {
     if ($("*").is("#number_of_pr")) {
         var number_of_pr = $('#number_of_pr').val();
         result += `&number_of_pr=${number_of_pr}`;
+    }
+    if ($("*").is("#annotation")) {
+        var annotation = check_val($('#annotation').val());
+        result += `&annotation=${annotation}`;
+    }
+    if ($("*").is("#init_data")) {
+        var init_data = check_val($('#init_data').val());
+        result += `&init_data=${init_data}`;
+    }
+    if ($("*").is("#context_of_explanation")) {
+        var context_of_explanation = check_val($('#context_of_explanation').val());
+        result += `&context_of_explanation=${context_of_explanation}`;
     }
     console.log(result)
     return result;

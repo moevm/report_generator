@@ -88,7 +88,7 @@ class MyHTMLParser(HTMLParser):
             paragraph_format = self.paragraph.paragraph_format
             paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
             paragraph_format.space_after = Pt(STANDART_PT)
-            paragraph_format.first_line_indent = Cm(1.5)#Inches(STANDART_INCHES + 0.3)
+            paragraph_format.first_line_indent = Cm(1.5) # Inches(STANDART_INCHES + 0.3)
             #   paragraph_format.left_indent = Inches(STANDART_INCHES)
             paragraph_format.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
             if self.isBlockQuote:  # it's here because in html <blockquote><p></p></blockquote>
@@ -231,23 +231,29 @@ def save_document(docx):
 
 
 def pre_header(document, settings):
+    # TODO: need to fix templates lr and kr, now they have different styles
     for i in range(6):
-        custom_header_style = document.styles.add_style('h{}'.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
-        # custom_header_style.base_style = document.styles['Heading {}'.format(i + 1)]
-        custom_header_style.font.rtl = True
+        if settings['type'] != 'LR':
+            custom_header_style = document.styles['h{}'.format(i + 1)]
+
+        # this code will be need in future when u will generate new template for kr
+        else:
+            custom_header_style = document.styles.add_style('h{}'.format(i + 1), WD_STYLE_TYPE.PARAGRAPH)
+            custom_header_style.font.rtl = True
+            custom_header_style.font.name = settings[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
+            custom_header_style.font.size = Pt(settings[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
+            custom_header_style.font.bold = True
+            custom_header_style.font.italic = False
+            custom_header_style.font.underline = False
+            custom_header_style.font.color.rgb = RGBColor.from_string('000000')
+
+            paragraph_format = custom_header_style.paragraph_format
+            paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+            paragraph_format.space_after = Pt(STANDART_PT_HEADER)
+            paragraph_format.left_indent = Cm(1.5)  # Inches(STANDART_INCHES + 0.1)
+
         custom_header_style.font.name = settings[FORMAT][TYPE_OF_HEADER.format(i + 1)][FONT]
         custom_header_style.font.size = Pt(settings[FORMAT][TYPE_OF_HEADER.format(i + 1)][SIZE])
-        custom_header_style.font.bold = True
-        custom_header_style.font.italic = False
-        custom_header_style.font.underline = False
-        custom_header_style.font.color.rgb = RGBColor.from_string('000000')
-
-        paragraph_format = custom_header_style.paragraph_format
-        paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-        paragraph_format.space_after = Pt(STANDART_PT_HEADER)
-        # paragraph_format.space_before = Inches(0.10)
-        paragraph_format.left_indent = Cm(1.5)  # Inches(STANDART_INCHES + 0.1)
-        # paragraph_format.first_line_indent = Inches(STANDART_INCHES)
 
 
 def add_hyperlink(paragraph, url, text, font="Times New Roman", size=14, color='0000FF', underline=True):

@@ -146,7 +146,6 @@ class Dword:
             self.add_text_from_wiki()
         else:
             self.add_text_from_md(md)
-        print('I HAVE TO ADD FILES')
         self.add_final_part()
         self.add_comments()
         self.document.save(ABS_PATH.format(self.name_report))
@@ -222,11 +221,6 @@ class Dword:
 
     def make_title(self):
         doc = DocxTemplate(self.path)
-        print('TEMPLATE OF WORD')
-        print(self.path)
-        print(self.js_content)
-        print(self.js_content[INIT_DATA])
-        print(self.js_content[CONTEXT_OF_EXPLANATION])
         if self.js_content[M_W] == MAN:
             mw = M_STUDENT
         else:
@@ -350,30 +344,34 @@ class Dword:
             self.path = None
 
     def add_comments(self):
-        if not self.js_content[PR][NUMBER_OF_PR]:
-            return
-        git = Gengit(branch=self.branch)
-        self.add_page_break()
-        self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
-        comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
-                                    self.js_content[PR][NUMBER_OF_PR])
+        try:
+            if not self.js_content[PR][NUMBER_OF_PR]:
+                return
+            git = Gengit(branch=self.branch)
+            self.add_page_break()
+            self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
+            comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
+                                        self.js_content[PR][NUMBER_OF_PR])
 
-        for element in comments:
-            self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-            self.add_line(element.body_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-            self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-            for body_element in element.body_comments:
-                self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
-                              align=ALIGN_LEFT)
+            for element in comments:
+                self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+                self.add_line(element.body_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+                self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+                for body_element in element.body_comments:
+                    self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
+                                  align=ALIGN_LEFT)
 
-        self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-        for element in comments:
-            if element.diff:
-                self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+            self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            for element in comments:
+                if element.diff:
+                    self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+
+        except Exception as e:
+            print('Failed add comments')
 
     def add_text_from_md(self, md):
         try:
-            pre_header(self.document, self.js_content)
+            #pre_header(self.document, self.js_content)
             pre_blockquote(self.document)
             parser_html = MyHTMLParser(self.document, self.js_content)
             markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
