@@ -193,20 +193,19 @@ class Dword:
 
     def add_text_from_wiki(self):
         tmp = []
-
-        if self.js_content[PAGES]:
-            for path in self.js_content[PAGES]:
-                with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
-                    tmp.append(file.read())
-        else:
-            for filename in os.listdir(GIT_REPO):
-                if filename in NOT_MD_FILES:
-                    continue
-                try:
+        try:
+            if self.js_content[PAGES]:
+                for path in self.js_content[PAGES]:
+                    with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
+                        tmp.append(file.read())
+            else:
+                for filename in os.listdir(GIT_REPO):
+                    if filename in NOT_MD_FILES:
+                        continue
                     with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3]), encoding="utf-8") as file:
                         tmp.append(file.read())
-                except FileNotFoundError:
-                    print('File was not found')
+        except FileNotFoundError:
+            print('No such md file')
 
         try:
             pre_header(self.document, self.js_content)

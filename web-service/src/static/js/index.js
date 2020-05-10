@@ -67,32 +67,35 @@ $('#course_doc').click(function () {
 });
 
 function createLabsField(id) {
-    $(id).append(createFieldForConfigurator('teacher', 'Преподаватель'));
-    $(id).append(createFieldForConfigurator('student', 'Студент'));
+    $(id).append(createFieldForConfigurator('teacher', 'Преподаватель', '', true));
+    $(id).append(createFieldForConfigurator('student', 'Студент', '', true));
     $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '6392'));
     $(id).append(createFieldForConfigurator('number_of_report', 'Номер работы', '1'));
     $(id).append(createFieldForConfigurator('theme', 'Тема работы'));
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета'));
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
-    $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц'))
+    $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true))
     $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'))
     $(id).append(createFieldForConfigurator('branch_name', 'Название ветки - только при наличии файлов для приложения'))
     $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста'))
 
 }
 
-function createFieldForConfigurator(id, name, pl = '') {
+function createFieldForConfigurator(id, name, pl = '', isRequire=false) {
     if (!pl)
         pl = name;
-    return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>"
+    if (isRequire)
+        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value='' required></div>"
+    else
+        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>"
 }
 
 function checkImportantData() {
-    return $('#wiki_name').val() != '' && $('#repo_name').val() != '' && $('#branch').val() != ''
+    return $('#wiki_name').val() !== '' && $('#repo_name').val() !== ''
 }
 
 $('#btn_submit').click(function () {
-    if (checkImportantData()) {
+    if ($('#wiki_name').val() !== '' && $('#repo_name').val() !== '' && $('#branch').val() !== '') {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
         $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 5rem; height: 5rem;" role="status"></div>')
@@ -121,6 +124,11 @@ function validate(event) {
 }
 
 function submitForm() {
+    if (!checkImportantData())
+    {
+        alert('Проверьте, заполнили ли Вы все необходимые поля! Возможно, вы забыли указать ссылку на репозиторий или на вики, их надо указать в настройках')
+        return;
+    }
     let check_send = false; // TODO: add markdown editor
     console.log('LOG DATA');
     console.log(check_send);
@@ -157,6 +165,9 @@ function submitForm() {
                     //location.reload()
                     console.log(window.location.origin + '/download_file')
                     $('#spinner_for_answer').remove()
+                },
+                error: function (data) {
+                    alert('Упс, что-то пошло не так!')
                 }
         })
     }
