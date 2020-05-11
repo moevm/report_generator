@@ -77,6 +77,7 @@ def main(type_of_input, need_push=True):
         path_doc = os.path.join(git.local_repo, TIME_REPORT)
         word.save(path_doc)
         print(path_doc)
+        app.config['is_ok'] = True
         app.config['is_pdf'] = word.js_content[PDF]
         app.config['filename_report'] = word.name_report
         if word.js_content[PDF]:
@@ -99,6 +100,7 @@ def create_report_from_md(md):
     word = Dword('', md)
     app.config['is_pdf'] = word.js_content[PDF]
     app.config['filename_report'] = word.name_report
+
     word.save(ABS_PATH.format(word.name_report))
     if word.js_content[PDF]:
         word.convert_to_pdf_native(ABS_PATH.format(word.name_report))

@@ -83,6 +83,7 @@ class JsonApi:
             self.json_data[TYPE] = LR
             self.lab_content()
         else:
+            print(' EMPTY DOCUMENT')
             self.json_data[TYPE] = EMPTY_DOC
         self.general_content()
 

@@ -46,9 +46,9 @@ function create_course_work() {
         $(for_course).append(createFieldForConfigurator('date_start', 'Дата начала', '0.0.1970'));
         $(for_course).append(createFieldForConfigurator('date_finish', 'Дата сдачи', '0.0.1970'));
         $(for_course).append(createFieldForConfigurator('date_defend', 'Дата защиты', '0.0.1970'));
-        $(for_course).append(createFieldForConfigurator('init_data', 'Исходные данные', 'Исходные данные в задании курсовой работы'));
-        $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки'));
-        $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация'));
+        $(for_course).append(createFieldForConfigurator('init_data', 'Исходные данные', 'Исходные данные в задании курсовой работы', false, true));
+        $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки', '', false, true));
+        $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация', false, true));
         $(requirements).show('show');
     }
         pull_settings()
@@ -81,21 +81,23 @@ function createLabsField(id) {
 
 }
 
-function createFieldForConfigurator(id, name, pl = '', isRequire=false) {
+function createFieldForConfigurator(id, name, pl = '', isRequire=false, textArea=false) {
     if (!pl)
         pl = name;
     if (isRequire)
         return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value='' required></div>"
+    else if(textArea)
+        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><textarea class='form-control' id='" + id + "' placeholder='" + pl + "' aria-label='With textarea'></textarea></div>"
     else
         return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>"
 }
 
 function checkImportantData() {
-    return $('#wiki_name').val() !== '' && $('#repo_name').val() !== ''
+    return $('#wiki_name').val() !== '' && $('#repo_name').val() !== '' && $('#student').val() !== ''
 }
 
 $('#btn_submit').click(function () {
-    if ($('#wiki_name').val() !== '' && $('#repo_name').val() !== '' && $('#branch').val() !== '') {
+    if (checkImportantData()) {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
         $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 5rem; height: 5rem;" role="status"></div>')
@@ -159,11 +161,9 @@ function submitForm() {
         $.ajax({
                 type: "POST",
                 url: window.location.origin + '/download',
-                data: data,//get_data_from_md(),
+                data: data,
                 success: function(data, status){
                     window.open(window.location.origin + '/dw_report?name=' + student)
-                    //location.reload()
-                    console.log(window.location.origin + '/download_file')
                     $('#spinner_for_answer').remove()
                 },
                 error: function (data) {

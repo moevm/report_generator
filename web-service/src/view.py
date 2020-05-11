@@ -71,6 +71,9 @@ def download_to_main_page():
 def dw_report():
     student = dict(request.args)['name'].replace(' ', '_')
     filename = app.config['filename_report']
-    return send_from_directory(ABS_PATH[:-3], filename, as_attachment=True, cache_timeout=0, attachment_filename='{}.docx'.format(student))
+    if app.config['is_ok']:
+        app.config['is_ok'] = False
+        return send_from_directory(ABS_PATH[:-3], filename, as_attachment=True, cache_timeout=0, attachment_filename='{}.docx'.format(student))
+    return ''
 
 
