@@ -46,9 +46,9 @@ function create_course_work() {
         $(for_course).append(createFieldForConfigurator('date_start', 'Дата начала', '0.0.1970'));
         $(for_course).append(createFieldForConfigurator('date_finish', 'Дата сдачи', '0.0.1970'));
         $(for_course).append(createFieldForConfigurator('date_defend', 'Дата защиты', '0.0.1970'));
-        $(for_course).append(createFieldForConfigurator('init_data', 'Исходные данные', 'Исходные данные в задании курсовой работы'));
-        $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки'));
-        $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация'));
+        $(for_course).append(createFieldForConfigurator('init_data', 'Исходные данные', 'Исходные данные в задании курсовой работы', false, true));
+        $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки', '', false, true));
+        $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация', false, true));
         $(requirements).show('show');
     }
         pull_settings()
@@ -81,11 +81,13 @@ function createLabsField(id) {
 
 }
 
-function createFieldForConfigurator(id, name, pl = '', isRequire=false) {
+function createFieldForConfigurator(id, name, pl = '', isRequire=false, textArea=false) {
     if (!pl)
         pl = name;
     if (isRequire)
         return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value='' required></div>"
+    else if(textArea)
+        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><textarea class='form-control' id='" + id + "' placeholder='" + pl + "' aria-label='With textarea'></textarea></div>"
     else
         return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>"
 }
