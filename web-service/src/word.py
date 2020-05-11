@@ -128,27 +128,31 @@ line_space_dict = {1: WD_LINE_SPACING.SINGLE,
 class Dword:
 
     def __init__(self, branch, md=None):
-        self.branch = branch
-        self.num_of_pictures = 1
-        self.number_of_paragraph = 0
-        self.name = LOCAL_REPO
-        self.download_settings()
-        self.choose_path_template()
-        self.make_title()
-        self.name_report = '{}_report.docx'.format(self.js_content['group'])
+        try:
+            self.branch = branch
+            self.num_of_pictures = 1
+            self.number_of_paragraph = 0
+            self.name = LOCAL_REPO
+            self.download_settings()
+            self.choose_path_template()
+            self.make_title()
+            self.name_report = '{}_report.docx'.format(self.js_content['group'])
 
-        if self.path:
-            self.document = Document(os.path.abspath(self.path))
-        else:
-            self.document = Document()
-        self.update_title_list()
-        if not md:
-            self.add_text_from_wiki()
-        else:
-            self.add_text_from_md(md)
-        self.add_final_part()
-        self.add_comments()
-        self.document.save(ABS_PATH.format(self.name_report))
+            if self.path:
+                self.document = Document(os.path.abspath(self.path))
+            else:
+                self.document = Document()
+            self.update_title_list()
+            if not md:
+                self.add_text_from_wiki()
+            else:
+                self.add_text_from_md(md)
+            self.add_final_part()
+            self.add_comments()
+            self.document.save(ABS_PATH.format(self.name_report))
+        except Exception:
+            print('unknown error')  # TODO: need to fix this
+
         #self.save(self.name)
 
     def convert_format(self):
@@ -326,6 +330,7 @@ class Dword:
                     self.add_line(
                         DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
                         line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+                break
 
     def add_page_break(self):
         self.document.add_page_break()

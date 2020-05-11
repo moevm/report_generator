@@ -91,11 +91,11 @@ function createFieldForConfigurator(id, name, pl = '', isRequire=false) {
 }
 
 function checkImportantData() {
-    return $('#wiki_name').val() !== '' && $('#repo_name').val() !== ''
+    return $('#wiki_name').val() !== '' && $('#repo_name').val() !== '' && $('#student').val() !== ''
 }
 
 $('#btn_submit').click(function () {
-    if ($('#wiki_name').val() !== '' && $('#repo_name').val() !== '' && $('#branch').val() !== '') {
+    if (checkImportantData()) {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
         $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 5rem; height: 5rem;" role="status"></div>')
@@ -159,11 +159,9 @@ function submitForm() {
         $.ajax({
                 type: "POST",
                 url: window.location.origin + '/download',
-                data: data,//get_data_from_md(),
+                data: data,
                 success: function(data, status){
                     window.open(window.location.origin + '/dw_report?name=' + student)
-                    //location.reload()
-                    console.log(window.location.origin + '/download_file')
                     $('#spinner_for_answer').remove()
                 },
                 error: function (data) {
