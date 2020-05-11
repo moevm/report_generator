@@ -5,8 +5,8 @@ from shutil import copyfile
 JSON_FILE = ABS_PATH.format('settings.json')
 DEFAULT_SETTINGS = ABS_PATH.format('default_settings.json')
 
-LEN_COURSE_DOC = 26
-LEN_LAB_DOC = 24
+LEN_COURSE_DOC = 30
+LEN_LAB_DOC = 23
 TYPE = "type"
 LR = "LR"
 KR = "KR"
@@ -76,8 +76,6 @@ class JsonApi:
 
     def change_content(self):
         length_set = len(self.new_settings)
-        print(self.new_settings)
-        print(length_set)
         if length_set == LEN_COURSE_DOC:
             self.json_data[TYPE] = KR
             self.course_content()
@@ -92,6 +90,8 @@ class JsonApi:
         return pages.split(',')
 
     def general_content(self):
+        if self.new_settings['number']: self.json_data['number'] = self.new_settings['number']
+
         if NUMBER_PR in self.new_settings and self.new_settings[NUMBER_PR]:
             self.json_data[PR][NUMBER_PR] = [int(self.new_settings[NUMBER_PR])]
             self.json_data[PR][OWNER] = self.info_repo[0]
@@ -137,3 +137,7 @@ class JsonApi:
         if self.new_settings[DATE_START]: self.json_data[DATE_START] = self.new_settings[DATE_START]
         if self.new_settings[DATE_FINISH]: self.json_data[DATE_FINISH] = self.new_settings[DATE_FINISH]
         if self.new_settings[DATE_DEFEND]: self.json_data[DATE_DEFEND] = self.new_settings[DATE_DEFEND]
+        if self.new_settings['annotation']: self.json_data['annotation'] = self.new_settings['annotation']
+        if self.new_settings['context_of_explanation']: self.json_data['context_of_explanation'] = self.new_settings['context_of_explanation']
+        if self.new_settings['init_data']: self.json_data['init_data'] = self.new_settings['init_data']
+

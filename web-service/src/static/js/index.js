@@ -6,6 +6,20 @@ $('#empty_doc').click(function () {
 });
 
 
+//$('#btn_main_settings').submit(function (event) {
+//    event.preventDefault();
+//})
+
+function main_settings() {
+    console.log('MAIN SETTINGS');
+    let settings = $('#main_settings');
+    if (settings.is(':hidden'))
+        settings.show('slow');
+    else
+        settings.hide('slow')
+    return false;
+}
+
 function create_lab() {
     $('#btnGroupDrop1').text("Лабораторная работа");
     if ($('#requirements').is(':hidden') || $('*').is('#field_for_course')) {
@@ -17,14 +31,8 @@ function create_lab() {
     }
     pull_settings()
 }
-var requirements = '#requirements';
-$('#lab_doc').click(function () {
-    create_lab()
-});
 
-$('.dropdown-toggle').dropdown()
-
-$('#course_doc').click(function () {
+function create_course_work() {
     $('#btnGroupDrop1').text("Курсовая работа");
 
     if ($(requirements).is(':hidden') || $('*').is('#field_for_lab')) {
@@ -38,38 +46,64 @@ $('#course_doc').click(function () {
         $(for_course).append(createFieldForConfigurator('date_start', 'Дата начала', '0.0.1970'));
         $(for_course).append(createFieldForConfigurator('date_finish', 'Дата сдачи', '0.0.1970'));
         $(for_course).append(createFieldForConfigurator('date_defend', 'Дата защиты', '0.0.1970'));
-
+        $(for_course).append(createFieldForConfigurator('init_data', 'Исходные данные', 'Исходные данные в задании курсовой работы'));
+        $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки'));
+        $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация'));
         $(requirements).show('show');
     }
         pull_settings()
+}
+
+var requirements = '#requirements';
+$('#lab_doc').click(function () {
+    create_lab()
+});
+
+$('.dropdown-toggle').dropdown()
+
+
+$('#course_doc').click(function () {
+    create_course_work();
 });
 
 function createLabsField(id) {
-    $(id).append(createFieldForConfigurator('teacher', 'Преподаватель'));
-    $(id).append(createFieldForConfigurator('student', 'Студент'));
-    $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '1111'));
+    $(id).append(createFieldForConfigurator('teacher', 'Преподаватель', '', true));
+    $(id).append(createFieldForConfigurator('student', 'Студент', '', true));
+    $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '6392'));
+    $(id).append(createFieldForConfigurator('number_of_report', 'Номер работы', '1'));
     $(id).append(createFieldForConfigurator('theme', 'Тема работы'));
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета'));
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
+    $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true))
+    $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'))
+    $(id).append(createFieldForConfigurator('branch_name', 'Название ветки - только при наличии файлов для приложения'))
+    $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста'))
 
 }
 
-function createFieldForConfigurator(id, name, pl = '') {
+function createFieldForConfigurator(id, name, pl = '', isRequire=false) {
     if (!pl)
         pl = name;
-    return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>"
+    if (isRequire)
+        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value='' required></div>"
+    else
+        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>"
 }
 
 function checkImportantData() {
-    return $('#wiki_name').val() != '' && $('#repo_name').val() != '' && $('#branch').val() != ''
+    return $('#wiki_name').val() !== '' && $('#repo_name').val() !== ''
 }
 
 $('#btn_submit').click(function () {
-    if (checkImportantData()) {
+    if ($('#wiki_name').val() !== '' && $('#repo_name').val() !== '' && $('#branch').val() !== '') {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
-        $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status"></div>')
+        $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 5rem; height: 5rem;" role="status"></div>')
     }
+})
+
+$('#google_drive_button').click(function () {
+    $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-primary" style="width: 5rem; height: 5rem;" role="status"></div>')
 })
 
 $('#style_setter').click(function () {
@@ -90,8 +124,14 @@ function validate(event) {
 }
 
 function submitForm() {
-    let check_send = $('#is_send_to_github').prop('checked')
-    console.log(check_send)
+    if (!checkImportantData())
+    {
+        alert('Проверьте, заполнили ли Вы все необходимые поля! Возможно, вы забыли указать ссылку на репозиторий или на вики, их надо указать в настройках')
+        return;
+    }
+    let check_send = false; // TODO: add markdown editor
+    console.log('LOG DATA');
+    console.log(check_send);
     if (check_send)
         $.ajax({
             type: "POST",
@@ -105,16 +145,29 @@ function submitForm() {
     else {
         console.log('to /download')
         console.log(window.location.origin + '/download')
+        let data = get_data_from_form();
+        let student;
+        if ($("*").is("#student")) {
+            student = $('#student').val();
+            if (student === '')
+                student = 'unknown';
+        }
+        else {
+            student = 'unknown';
+        }
         //window.open(window.location.origin + '/download')
         $.ajax({
                 type: "POST",
                 url: window.location.origin + '/download',
-                data: get_data_from_md(),
+                data: data,//get_data_from_md(),
                 success: function(data, status){
-                    window.open(window.location.origin + '/dw_report')
+                    window.open(window.location.origin + '/dw_report?name=' + student)
                     //location.reload()
                     console.log(window.location.origin + '/download_file')
                     $('#spinner_for_answer').remove()
+                },
+                error: function (data) {
+                    alert('Упс, что-то пошло не так!')
                 }
         })
     }
@@ -127,6 +180,19 @@ function get_data_from_md() {
     info += `&md=${mdText}`
     info += `&is_md_editor=${localStorage['md-editor']}`
     return info
+}
+
+function google_drive() {
+$.ajax({
+                type: "POST",
+                url: window.location.origin + '/download',
+                data: get_data_from_form(),
+                success: function(data, status){
+                    console.log('go google drive');
+                    window.location = window.location.origin + '/googleauthorize';
+                    //window.open(window.location.origin + '/dw_report?name=' + student)
+                }
+        })
 }
 
 function get_data_from_form() {
@@ -164,28 +230,40 @@ function get_data_from_form() {
     result += `&pages=${pages}`;
     result += `&download=${source_files.replace(' ', '')}`;
 
+
+    let check_val = (value) => {
+        if (value === '')
+            return 'unknown';
+        return value;
+    }
     if ($("*").is("#teacher")) {
-        var teacher = $('#teacher').val();
+        var teacher = check_val($('#teacher').val());
         result += `&teacher=${teacher}`;
     }
     if ($("*").is("#student")) {
-        var student = $('#student').val();
+        var student = check_val($('#student').val());
         result += `&student=${student}`;
+    }
+     if ($("*").is("#number_of_report")) {
+        var number_of_report = check_val($('#number_of_report').val());
+        result += `&number=${number_of_report}`;
     }
     if ($("*").is("#number_group")) {
         var number_group = $('#number_group').val();
+        if (number_group === '')
+            number_group = '0'
         result += `&number_group=${number_group}`;
     }
     if ($("*").is("#theme")) {
-        var theme = $('#theme').val();
+        var theme = check_val($('#theme').val());
         result += `&theme=${theme}`;
     }
     if ($("*").is("#discipline")) {
-        var discipline = $('#discipline').val();
+        var discipline = check_val($('#discipline').val());
         result += `&discipline=${discipline}`;
     }
     if ($("*").is("#cathedra")) {
-        var cathedra = $('#cathedra').val();
+        var cathedra = check_val($('#cathedra').val());
         result += `&cathedra=${cathedra}`;
     }
     if ($("*").is("#min_pages")) {
@@ -204,17 +282,29 @@ function get_data_from_form() {
         var date_defend = $('#date_defend').val();
         result += `&date_defend=${date_defend}`;
     }
-    ;
     if ($("*").is("#number_of_pr")) {
         var number_of_pr = $('#number_of_pr').val();
         result += `&number_of_pr=${number_of_pr}`;
     }
+    if ($("*").is("#annotation")) {
+        var annotation = check_val($('#annotation').val());
+        result += `&annotation=${annotation}`;
+    }
+    if ($("*").is("#init_data")) {
+        var init_data = check_val($('#init_data').val());
+        result += `&init_data=${init_data}`;
+    }
+    if ($("*").is("#context_of_explanation")) {
+        var context_of_explanation = check_val($('#context_of_explanation').val());
+        result += `&context_of_explanation=${context_of_explanation}`;
+    }
+    console.log(result)
     return result;
 }
 
 const _a = document.getElementById('repo_menu');
 
-_a.addEventListener('click', changeRepo);
+//_a.addEventListener('click', changeRepo);
 
 function changeRepo(e) {
     var ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git';
@@ -224,7 +314,7 @@ function changeRepo(e) {
 
 var _b = document.getElementById('wiki_menu');
 
-_b.addEventListener('click', changeWiki);
+//_b.addEventListener('click', changeWiki);
 
 function changeWiki(e) {
     const wiki_str = event.target.href + '.wiki.git';
@@ -242,7 +332,10 @@ function check_type() {
     })
     }
     if ('type' in d && d['type'].toLowerCase() === 'lr'){
-        create_lab()
+        create_lab();
+    }
+    else if ('type' in d && d['type'].toLowerCase() === 'kr'){
+        create_course_work();
     }
 
 }

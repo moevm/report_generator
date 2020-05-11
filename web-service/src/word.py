@@ -43,7 +43,7 @@ ALIGN_CENTRE = "centre"
 ALIGN_JUSTIFY = "justify"
 ALIGN_LEFT = "left"
 UNDER_PICTURE = "Рисунок {}{}"
-ATTACHMENT = "Приложение"
+ATTACHMENT = "Приложение A"
 PICTURE = "picture"
 PAGES = "pages_of_wiki"
 STANDART_SIZE_PICTURE = 4
@@ -116,7 +116,8 @@ alignment_dict = {'justify': WD_PARAGRAPH_ALIGNMENT.JUSTIFY,
                   'center': WD_PARAGRAPH_ALIGNMENT.CENTER,
                   'centre': WD_PARAGRAPH_ALIGNMENT.CENTER,
                   'right': WD_PARAGRAPH_ALIGNMENT.RIGHT,
-                  'left': WD_PARAGRAPH_ALIGNMENT.LEFT}
+                  'left': WD_PARAGRAPH_ALIGNMENT.LEFT
+                  }
 
 line_space_dict = {1: WD_LINE_SPACING.SINGLE,
                    2: WD_LINE_SPACING.DOUBLE,
@@ -145,10 +146,10 @@ class Dword:
             self.add_text_from_wiki()
         else:
             self.add_text_from_md(md)
-
         self.add_final_part()
         self.add_comments()
-        self.save(self.name)
+        self.document.save(ABS_PATH.format(self.name_report))
+        #self.save(self.name)
 
     def convert_format(self):
         for paragraph in self.document.paragraphs:
@@ -192,20 +193,19 @@ class Dword:
 
     def add_text_from_wiki(self):
         tmp = []
-
-        if self.js_content[PAGES]:
-            for path in self.js_content[PAGES]:
-                with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
-                    tmp.append(file.read())
-        else:
-            for filename in os.listdir(GIT_REPO):
-                if filename in NOT_MD_FILES:
-                    continue
-                try:
+        try:
+            if self.js_content[PAGES]:
+                for path in self.js_content[PAGES]:
+                    with open(PATH_TO_WIKI.format(GIT_REPO, path.replace(EMPTY, DASH)), 'r', encoding="utf-8") as file:
+                        tmp.append(file.read())
+            else:
+                for filename in os.listdir(GIT_REPO):
+                    if filename in NOT_MD_FILES:
+                        continue
                     with open(PATH_TO_WIKI.format(GIT_REPO, filename[0:-3]), encoding="utf-8") as file:
                         tmp.append(file.read())
-                except FileNotFoundError:
-                    print('File was not found')
+        except FileNotFoundError:
+            print('No such md file')
 
         try:
             pre_header(self.document, self.js_content)
@@ -264,6 +264,7 @@ class Dword:
         self.number_of_paragraph += 1
         style_name = STYLE.format(self.number_of_paragraph)
         paragraph = self.document.add_paragraph(line)
+        print('ADD LINE {}'.format(line))
         paragraph.style = self.document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         font = paragraph.style.font
         font.name = font_name
@@ -278,7 +279,9 @@ class Dword:
         paragraph_format.keep_together = keep_together
 
     def add_final_part(self):
-        if self.js_content[DICT_FILENAMES]:
+        print(self.js_content[DICT_FILENAMES])
+        if len(self.js_content[DICT_FILENAMES]) > 0:
+            print('ADDED')
             self.add_page_break()
             self.add_line(ATTACHMENT, set_bold=True, align=ALIGN_CENTRE)
             self.add_code()
@@ -313,10 +316,11 @@ class Dword:
         for filename in self.js_content[DICT_FILENAMES]:
             gen_path = Path(os.getcwd()).rglob(filename)
             for path in gen_path:
-                print(path)
+                print('END ', path)
                 code = NOT_VALID
-                with open(path) as file:
+                with open(path, encoding='utf-8') as file:
                     code = file.readlines()
+                print(code)
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
                 for number, line in enumerate(code, 1):
                     self.add_line(
@@ -339,30 +343,34 @@ class Dword:
             self.path = None
 
     def add_comments(self):
-        if not self.js_content[PR][NUMBER_OF_PR]:
-            return
-        git = Gengit(branch=self.branch)
-        self.add_page_break()
-        self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
-        comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
-                                    self.js_content[PR][NUMBER_OF_PR])
+        try:
+            if not self.js_content[PR][NUMBER_OF_PR]:
+                return
+            git = Gengit(branch=self.branch)
+            self.add_page_break()
+            self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)
+            comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
+                                        self.js_content[PR][NUMBER_OF_PR])
 
-        for element in comments:
-            self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-            self.add_line(element.body_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-            self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-            for body_element in element.body_comments:
-                self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
-                              align=ALIGN_LEFT)
+            for element in comments:
+                self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+                self.add_line(element.body_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+                self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+                for body_element in element.body_comments:
+                    self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
+                                  align=ALIGN_LEFT)
 
-        self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-        for element in comments:
-            if element.diff:
-                self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+            self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            for element in comments:
+                if element.diff:
+                    self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+
+        except Exception as e:
+            print('Failed add comments')
 
     def add_text_from_md(self, md):
         try:
-            pre_header(self.document, self.js_content)
+            #pre_header(self.document, self.js_content)
             pre_blockquote(self.document)
             parser_html = MyHTMLParser(self.document, self.js_content)
             markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])

@@ -12,99 +12,43 @@ Home Page
     <div class="py-5 text-center">
         <h2>Генерация отчетов</h2>
     </div>
-    <div class="col-md-10">
-        <div class="btn-group" role="group">
-              <button type="button" id="md-editor-github" class="btn btn-secondary" onclick="toggle_top()">Markdown Editor</button>
-        </div>
-        <br>
-        <br>
+    <div>
+    <!--
         <div id="markdown-place-editor">
             <textarea name="md" id="md" cols="30" rows="10">
 ## You can write your markdown text here, or choose github mode
 </textarea>
         </div>
+    -->
 
         <form method="POST" class="needs-validation" action="javascript:void(null);" onsubmit="submitForm()">
 
-            <div id="github-manager" style="display: none">
-
-                <div class="mb-3">
-                <label for="wiki_name">Ссылка на вики:</label>
-
-                <div class="input-group">
-                    <input type="text" class="form-control" id="wiki_name" placeholder="https://github.com/<owner_repo>/<repo>.wiki.git">
-
-                        <div class="input-group-append">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Wiki
-                                </button>
-                            <div class="dropdown-menu" id="wiki_menu">
-
-                                {% for repo in repositories %}
-                                        <a href="{{ repo['url'] }}"  class="dropdown-item">{{ repo['name'] }}</a>
-                                {% endfor %}
-
-                            </div>
-                        </div>
+            <div class="row">
+                <div class="col offset-md-11">
+                        <button class="btn btn-lg btn-warning" id="btn_main_settings" onclick="main_settings(); return false;" style="background-color:transparent;">
+                            <i class="fa fa-gear"></i>
+                        </button>
                 </div>
             </div>
-
-            <div class="mb-3">
-                <label for="repo_name">Ссылка на репозиторий, куда будет отправлен отчет:</label>
-
-                <div class="input-group">
-                    <input type="text" class="form-control" id="repo_name" placeholder="git@github.com:<owner_repo>/<repo>.git">
-
-                    <div class="input-group-append">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Repositories
-                            </button>
-                        <div class="dropdown-menu" id="repo_menu">
-                            {% for repo in repositories %}
-                                    <a href="{{ repo['url'] }}"  class="dropdown-item">{{ repo['name'] }}</a>
-                            {% endfor %}
-
-                        </div>
-                    </div>
-
-
-                </div>
-            </div>
-
-
-            <div class="mb-3">
-                <label for="branch_name">Название ветки</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" id="branch_name" placeholder="master">
-                </div>
-            </div>
-
-            </div>
-
-
+            <p></p>
+                        <div id="requirements" style="display:none;"></div>
             <p>
-                <label>
-                    <input type="checkbox" value="" id="is_send_to_github">
-                    Отправить отчет на Github
-                </label>
             </p>
-            <div class="row col-md-7 mb-3" id="buttons_field">
-                <input type="submit" class="btn btn-danger btn-lg" value="Сформировать отчет" id="btn_submit">
-                &nbsp;&nbsp;&nbsp;&nbsp;
-
-                {% if link %}
-                <a href={{link}} id="total_link" class="btn btn-success">Ссылка на отчет</a>
-
-                <script type="text/javascript">
-                    openGithub('{{ link }}');
-                </script>
-                {% endif %}
-
-            </div>
             <br>
-            <h2><i>Дополнительная настройка</i></h2>
+
+            <div id="main_settings" style="display: none">
+                <h2><i>Дополнительная настройка</i></h2>
             <br>
             <div class="row">
+
+                <div class="col-md-6 mb-3">
+                        <label for="repo_name">Ссылка на репозиторий(ssh)</label>
+                        <input type="text" class="form-control" id="repo_name" placeholder="">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="wiki-name">Ссылка на wiki-страницы</label>
+                        <input type="text" class="form-control" id="wiki_name" placeholder="">
+                    </div>
 
                 <div class="col-md-3 mb-3">
                     <input type="button" class="btn btn-dark" id="style_setter" value="Настройка стилей">
@@ -117,12 +61,12 @@ Home Page
                         Вид работы
                     </button>
                     <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                        <a class="dropdown-item" id="empty_doc">-</a>
                         <a class="dropdown-item" id="lab_doc">Лабораторная работа</a>
-                        <!--<a class="dropdown-item" id="course_doc" disabled="true">Курсовая работа</a>
-                        -->
+                        <a class="dropdown-item" id="course_doc" disabled="true">Курсовая работа</a>
                     </div>
                 </div>
+
+            </div>
 
             </div>
 
@@ -135,7 +79,7 @@ Home Page
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="general_size">Кегль</label>
-                        <input type="text" class="form-control" id="general_size" placeholder="14" onkeypress="validate(event)">
+                        <input type="text" class="form-control" id="general_size" placeholder="">
                     </div>
                 </div>
 
@@ -176,75 +120,43 @@ Home Page
                         <input type="text" class="form-control" id="for_h6" placeholder="Заголовок 6 уровня" onkeypress="validate(event)">
                     </div>
                 </div>
-
-                <div class="row">
-
-                    <div class="col-md-6 mb-3">
-                        <label for="md_pages">Перечень wiki-страниц</label>
-                        <input type="text" class="form-control" id="md_pages" placeholder="Без расширения .md">
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="for_h6">Файлы для приложения</label>
-                        <input type="text" class="form-control" id="source_files" placeholder="Ex. ./src/main.c">
-                    </div>
-
-                </div>
-
-
             </div>
             <p></p>
 
-            <div id="requirements" style="display:none;"></div>
-            <hr>
-            <div class="dropdown">
 
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Доп. возможности</button>
+        <div class="row col-md-7 mb-3" id="buttons_field">
+                 <button class="btn btn-success btn-lg" style="font-size: 2.25rem" id="btn_submit">
+                            <i class="fa fa-file-pdf-o"></i> Cкачать отчет
+                </button>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                {% if link %}
+                <a href={{link}} id="total_link" class="btn btn-success" style="font-size: 2.25rem">Ссылка на отчет</a>
 
-            <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                    <button class="dropdown-item" id="comments_pr" type="button">Комментарии из пулл-реквестов</button>
+                <script type="text/javascript">
+                    openGithub('{{ link }}');
+                </script>
+                {% endif %}
             </div>
 
-            </div>
-
-            <div id="opportunity" style="display: none;">
-                <div class='col-md-6 mb-3 row' id='window_of_opportunity'><label for='number_of_pr'>Номер пулл реквеста</label><input type='text' class='form-control' id='number_of_pr'> </div>
-            </div>
-
-
-
-
-
-            <hr>
 
             <br>
+            <!--
             <div class="row col-md-6 mb-3">
                 {% if not google %}
-                    <a href="/googleauthorize" class="btn btn-info">Сохранить на google drive</a>
+                    <button class="btn btn-info" id="google_drive_button" style="font-size: 2rem" onclick="google_drive(); return false;"> <i class="fa fa-file-pdf-o"></i> Сохранить на google drive</button>
                     {% else %}
-                       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong">
-                        Выбрать место на google drive
+                       <button type="button" class="btn btn-danger"  style="font-size: 2.0rem" data-toggle="modal" data-target="#exampleModalLong">
+                         <i class="fa fa-file-pdf-o"></i>
+                           Выбрать место на google drive
                        </button>
+                    <script>
+                        document.getElementById('btn_submit').remove();
+                    </script>
             {% endif %}
             </div>
+            -->
+
         </form>
-
-        <br>
-        <div class="well">
-            <h4>Инструкция по использованию</h4>
-            <ul class="list-group">
-                <li class="list-group-item">Добавить в collaborators бота Prsender с правами <i>Write</i>, в репозиторий, который:</li>
-                <ul class="list-group">
-                    <li class="list-group-item"><strong>1.</strong>  Хранит вики, по которой будет создан отчет</li>
-                    <li class="list-group-item"><strong>2.</strong>  Репозиторий, куда надо отправить отчет</li>
-                </ul>
-            </ul>
-
-
-        </div>
-
-
 <!-- Modal -->
 <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -277,6 +189,7 @@ Home Page
 </div>
 
 </div>
+
 
 
 {% endblock %}
