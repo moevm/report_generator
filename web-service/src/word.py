@@ -150,7 +150,8 @@ class Dword:
             self.add_final_part()
             self.add_comments()
             self.document.save(ABS_PATH.format(self.name_report))
-        except Exception:
+        except Exception as e:
+            print(e)
             print('unknown error')  # TODO: need to fix this
 
         #self.save(self.name)
@@ -351,6 +352,7 @@ class Dword:
         try:
             if not self.js_content[PR][NUMBER_OF_PR]:
                 return
+            print(self.js_content[PR][NUMBER_OF_PR])
             git = Gengit(branch=self.branch)
             self.add_page_break()
             self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True)

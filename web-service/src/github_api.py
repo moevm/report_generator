@@ -101,7 +101,7 @@ class Gengit:
 
     def get_response(self, url):
         params = {"sort": "updated"}
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, headers=get_header())
         return response
 
     def comporator(self, object):
@@ -118,6 +118,8 @@ class Gengit:
 
     def create_comments_for_word(self, my_json):
         mylist = []
+        print(my_json)
+
         my_json = sorted(my_json, key=self.comporator)
         for comment in my_json:
             mylist.append([comment[POSITION], comment[USER][LOGIN], comment[BODY],
