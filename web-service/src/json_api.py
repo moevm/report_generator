@@ -106,7 +106,7 @@ class JsonApi:
         if self.new_settings[NEW_CODE_SIZE]: self.json_data[CODE_TEXT][SIZE] = self.get_size(
                                                                                 int(self.new_settings[NEW_CODE_SIZE]))
         if self.new_settings[PAGES]:
-            self.json_data[PAGES_OF_WIKI] = [self.new_settings[PAGES]]
+            self.json_data[PAGES_OF_WIKI] = self.new_settings[PAGES].split(',')
         else:
             self.json_data[PAGES_OF_WIKI] = []
 

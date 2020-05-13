@@ -176,10 +176,11 @@ class Gengit:
     def get_diffs(self):
         diffs = []
         string = ''
-        with open(FILENAME_DIFF, 'r') as file:
+        with open(FILENAME_DIFF, 'r', encoding='utf-8') as file:
             lines = file.readlines()
             for i in lines:
-
+                if i.find('diff --git a/README.md'):
+                    return diffs
                 if i[0] in [PLUS, MINUS] and not i.startswith(PLUS * 3) and not i.startswith(MINUS * 3):
                     string = '%s%s' % (string, i)
                     continue
