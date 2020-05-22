@@ -319,7 +319,16 @@ class Dword:
     def add_code(self):
         print(self.js_content[DICT_FILENAMES])
         for filename in self.js_content[DICT_FILENAMES]:
-            gen_path = Path(os.getcwd()).rglob(filename)
+            if filename[0] == '.':
+                filename = filename[1:]
+            dir_path = '/'.join(filename.split('/')[:-1])
+            if dir_path == '.':
+                dir_path = ''
+            real_filename = filename.split('/')[-1]
+            if dir_path[0] != '/':
+                dir_path = '/' + dir_path
+            full_path = ABS_PATH.format('/repo_for_report'+dir_path)
+            gen_path = Path(full_path).rglob(real_filename)
             for path in gen_path:
                 print('END ', path)
                 code = NOT_VALID
