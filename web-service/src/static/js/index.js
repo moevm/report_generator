@@ -227,8 +227,8 @@ function get_data_from_form() {
     result += `&h4=${for_h4}`;
     result += `&h5=${for_h5}`;
     result += `&h6=${for_h6}`;
-    result += `&pages=${pages.replace(' ', '')}`;
-    result += `&download=${source_files.replace(' ', '')}`;
+    result += `&pages=${pages.replace(new RegExp(' ', 'g'), '')}`;
+    result += `&download=${source_files.replace(new RegExp(' ', 'g'), '')}`;
 
 
     let check_val = (value) => {
