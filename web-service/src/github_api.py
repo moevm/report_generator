@@ -118,7 +118,7 @@ class Gengit:
 
     def create_comments_for_word(self, my_json):
         mylist = []
-        print(my_json)
+        #print(my_json)
 
         my_json = sorted(my_json, key=self.comporator)
         for comment in my_json:
@@ -161,7 +161,6 @@ class Gengit:
         end_commit = self.find_next_commit(original_commit)
         self.create_dif(self.local_repo, self.branch, original_commit, end_commit)
         diffs = self.get_diffs()
-
         for index in range(len(comments)):
             if index < len(diffs):
                 comments[index].diff = diffs[index]
@@ -179,9 +178,11 @@ class Gengit:
         with open(FILENAME_DIFF, 'r', encoding='utf-8') as file:
             lines = file.readlines()
             for i in lines:
-                if i.find('diff --git a/README.md'):
+                if i.find('diff --git a/README.md') != -1:
                     return diffs
-                if i[0] in [PLUS, MINUS] and not i.startswith(PLUS * 3) and not i.startswith(MINUS * 3):
+                if i.startswith(PLUS * 3) or i.startswith(MINUS * 3):
+                    continue
+                if i[0] in [PLUS, MINUS]:
                     string = '%s%s' % (string, i)
                     continue
                 if string:
