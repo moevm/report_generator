@@ -269,7 +269,7 @@ class Dword:
         self.number_of_paragraph += 1
         style_name = STYLE.format(self.number_of_paragraph)
         paragraph = self.document.add_paragraph(line)
-        print('ADD LINE {}'.format(line))
+        #print('ADD LINE {}'.format(line))
         paragraph.style = self.document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         font = paragraph.style.font
         font.name = font_name
@@ -319,7 +319,16 @@ class Dword:
     def add_code(self):
         print(self.js_content[DICT_FILENAMES])
         for filename in self.js_content[DICT_FILENAMES]:
-            gen_path = Path(os.getcwd()).rglob(filename)
+            if filename[0] == '.':
+                filename = filename[1:]
+            dir_path = '/'.join(filename.split('/')[:-1])
+            if dir_path == '.':
+                dir_path = ''
+            real_filename = filename.split('/')[-1]
+            if dir_path[0] != '/':
+                dir_path = '/' + dir_path
+            full_path = ABS_PATH.format('/repo_for_report'+dir_path)
+            gen_path = Path(full_path).rglob(real_filename)
             for path in gen_path:
                 print('END ', path)
                 code = NOT_VALID
@@ -359,9 +368,15 @@ class Dword:
             comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
                                         self.js_content[PR][NUMBER_OF_PR])
 
+            print('ELEMENTS')
             for element in comments:
+                source_code = element.body_code.split('\n')
+                length = 4
+                if len(source_code) > 4:
+                    length = len(source_code) // 4
+                source_code = '\n'.join(source_code[:length])
                 self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-                self.add_line(element.body_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+                self.add_line(source_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
                 self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
                 for body_element in element.body_comments:
                     self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
@@ -377,7 +392,6 @@ class Dword:
 
     def add_text_from_md(self, md):
         try:
-            #pre_header(self.document, self.js_content)
             pre_blockquote(self.document)
             parser_html = MyHTMLParser(self.document, self.js_content)
             markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
