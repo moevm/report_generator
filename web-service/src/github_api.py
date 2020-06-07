@@ -191,7 +191,7 @@ class Gengit:
             return diffs
 
     def get_list_of_commit(self):
-        with open(FILENAME_LOG, 'r') as file:
+        with open(FILENAME_LOG, 'r', encoding='utf-8') as file:
             commits = [i.split()[0] for i in file.readlines()]
             return commits
 
