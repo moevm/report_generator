@@ -16,7 +16,7 @@ function main_settings() {
     if (settings.is(':hidden'))
         settings.show('slow');
     else
-        settings.hide('slow')
+        settings.hide('slow');
     return false;
 }
 
@@ -27,7 +27,7 @@ function create_lab() {
         $(requirements).empty();
         $(requirements).append('<div class="row" id="field_for_lab"</div>');
         createLabsField(for_lab);
-        $(requirements).show("slow")
+        $(requirements).show("slow");
     }
     pull_settings()
 }
@@ -49,14 +49,15 @@ function create_course_work() {
         $(for_course).append(createFieldForConfigurator('init_data', 'Исходные данные', 'Исходные данные в задании курсовой работы', false, true));
         $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки', '', false, true));
         $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация', false, true));
+        $(for_course).append(createFieldForConfigurator('annotation_en', 'Аннотация на английском', 'Аннотация на английском', false, true));
         $(requirements).show('show');
     }
-        pull_settings()
+        pull_settings();
 }
 
 var requirements = '#requirements';
 $('#lab_doc').click(function () {
-    create_lab()
+    create_lab();
 });
 
 $('.dropdown-toggle').dropdown()
@@ -73,12 +74,11 @@ function createLabsField(id) {
     $(id).append(createFieldForConfigurator('number_of_report', 'Номер работы', '1'));
     $(id).append(createFieldForConfigurator('theme', 'Тема работы'));
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета'));
-    $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'))
-    $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true))
-    $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'))
-    $(id).append(createFieldForConfigurator('branch_name', 'Название ветки - только при наличии файлов для приложения'))
-    $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста'))
-
+    $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'));
+    $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true));
+    $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'));
+    $(id).append(createFieldForConfigurator('branch_name', 'Название ветки - только при наличии файлов для приложения'));
+    $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста'));
 }
 
 function createFieldForConfigurator(id, name, pl = '', isRequire=false, textArea=false) {
@@ -110,10 +110,10 @@ $('#google_drive_button').click(function () {
 
 $('#style_setter').click(function () {
     if ($('#style_settings').is(':hidden')) {
-        $('#style_settings').show("slow")
+        $('#style_settings').show("slow");
         $("#style_setter").css("background", "#FF2400");
     } else {
-        $('#style_settings').hide("slow")
+        $('#style_settings').hide("slow");
         $("#style_setter").css("background", "#007bff");
     }
 });
@@ -128,7 +128,7 @@ function validate(event) {
 function submitForm() {
     if (!checkImportantData())
     {
-        alert('Проверьте, заполнили ли Вы все необходимые поля! Возможно, вы забыли указать ссылку на репозиторий или на вики, их надо указать в настройках')
+        alert('Проверьте, заполнили ли Вы все необходимые поля! Возможно, вы забыли указать ссылку на репозиторий или на вики, их надо указать в настройках');
         return;
     }
     let check_send = false; // TODO: add markdown editor
