@@ -322,8 +322,8 @@ class Dword:
             if filename[0] == '.':
                 filename = filename[1:]
             dir_path = '/'.join(filename.split('/')[:-1])
-            if dir_path == '.':
-                dir_path = ''
+            if dir_path == '':
+                dir_path = '/'
             real_filename = filename.split('/')[-1]
             if dir_path[0] != '/':
                 dir_path = '/' + dir_path
@@ -367,7 +367,6 @@ class Dword:
             self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True, keep_with_next=True)
             comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
                                         self.js_content[PR][NUMBER_OF_PR])
-
             print('ELEMENTS')
             for element in comments:
                 source_code = element.body_code.split('\n')
@@ -388,6 +387,7 @@ class Dword:
                     self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
 
         except Exception as e:
+            print(e)
             print('Failed add comments')
 
     def add_text_from_md(self, md):

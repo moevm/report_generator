@@ -118,8 +118,6 @@ class Gengit:
 
     def create_comments_for_word(self, my_json):
         mylist = []
-        # print(my_json)
-
         my_json = sorted(my_json, key=self.comporator)
         for comment in my_json:
             mylist.append([comment[POSITION], comment[USER][LOGIN], comment[BODY],
@@ -154,6 +152,8 @@ class Gengit:
             response = self.get_response(url)
             comments += self.create_comments_for_word(response.json())
         main_comments = self.optimization_comments(comments)
+        print(comments)
+        print(main_comments)
         return self.add_diff(main_comments, main_comments[0].commit)
 
     def add_diff(self, comments, original_commit):
