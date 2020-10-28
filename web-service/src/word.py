@@ -154,7 +154,7 @@ class Dword:
             print(e)
             print('unknown error')  # TODO: need to fix this
 
-        #self.save(self.name)
+        # self.save(self.name)
 
     def convert_format(self):
         for paragraph in self.document.paragraphs:

@@ -167,7 +167,7 @@ function submitForm() {
                     $('#spinner_for_answer').remove()
                 },
                 error: function (data) {
-                    alert('Упс, что-то пошло не так!')
+                    alert(data.responseText)
                 }
         })
     }

@@ -58,11 +58,13 @@ def send():
 def download_to_main_page():
     if request.method == POST:
         update_settings(dict(request.form))
-        print('raz raz')
         repo = request.form[REPO_NAME]
         wiki = request.form[WIKI_NAME]
         branch = request.form[BRANCH_NAME]
-        path_report = create_word([repo, wiki, branch], need_push=False)
+        try:
+            path_report = create_word([repo, wiki, branch], need_push=False)
+        except ValueError as e:
+            return str(e), 402
         print(path_report)
     return ''
 
@@ -71,9 +73,7 @@ def download_to_main_page():
 def dw_report():
     student = dict(request.args)['name'].replace(' ', '_')
     filename = app.config['filename_report']
-    if app.config['is_ok']:
-        app.config['is_ok'] = False
-        return send_from_directory(ABS_PATH[:-3], filename, as_attachment=True, cache_timeout=0, attachment_filename='{}.docx'.format(student))
-    return ''
-
-
+    # if app.config['is_ok']:
+    #     app.config['is_ok'] = False
+    return send_from_directory(ABS_PATH[:-3], filename, as_attachment=True, cache_timeout=0, attachment_filename='{}.docx'.format(student))
+    # return ''
