@@ -124,7 +124,6 @@ $('#btn_submit').click(function () {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
         $("")
-        $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 5rem; height: 5rem;" role="status"></div>')
     }
 })
 
@@ -158,6 +157,8 @@ function submitForm() {
     let check_send = false; // TODO: add markdown editor
     console.log('LOG DATA');
     console.log(check_send);
+
+    $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 5rem; height: 5rem;" role="status"></div>')
     if (check_send) {
         $.ajax({
             type: "POST",
@@ -192,6 +193,7 @@ function submitForm() {
             },
             error: function (data) {
                 alert(data.responseText)
+                $('#spinner_for_answer').remove()
             }
         })
     }
