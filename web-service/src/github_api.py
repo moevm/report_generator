@@ -61,6 +61,7 @@ class Gengit:
             print(e.command)
             print(ERROR_REPO)
             raise ValueError(ERROR_REPO)
+
         try:
             self.repo.git.checkout(self.branch)
         except git.GitCommandError as e:
