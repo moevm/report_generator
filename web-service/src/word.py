@@ -365,7 +365,7 @@ class Dword:
             self.add_page_break()
             self.add_line(COMMENTS_PR, align=ALIGN_CENTRE, set_bold=True, keep_with_next=True)
             comments = git.get_comments(self.js_content[PR][OWNER_OF_PR], self.js_content[PR][REPO_OF_PR],
-                                        self.js_content[PR][NUMBER_OF_PR][0])
+                                        self.js_content[PR][NUMBER_OF_PR])
             print('ELEMENTS')
             for element in comments:
                 source_code = element.body_code.split('\n')
