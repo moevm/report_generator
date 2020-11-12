@@ -70,9 +70,11 @@ class Gengit:
             raise ValueError(ERROR_BRANCH)
 
     def download_git_wiki(self):
-        git_url = BEGIN_SSH.format(self.url[SIZE_OF_SSH_ADDRESS:])
+        # git_url = BEGIN_SSH.format(self.url[SIZE_OF_SSH_ADDRESS:])
+        # git_url = self.url[:-3]+'wiki.git'
+        print(self.url)
         try:
-            self.repo = git.Repo.clone_from(git_url, self.local_wiki)
+            self.repo = git.Repo.clone_from(self.url, self.local_wiki)
         except git.GitCommandError as e:
             print(e.command)
             print(ERROR_WIKI)

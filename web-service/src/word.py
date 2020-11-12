@@ -334,7 +334,6 @@ class Dword:
                 code = NOT_VALID
                 with open(path, encoding='utf-8') as file:
                     code = file.readlines()
-                print(code)
                 self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
                 for number, line in enumerate(code, 1):
                     self.add_line(
