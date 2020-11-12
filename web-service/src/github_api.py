@@ -15,9 +15,9 @@ SIZE_OF_SSH_ADDRESS = 19
 COMMIT_MESSAGE = 'add report'
 ORIGIN = 'origin'
 STANDART_BRANCH = 'master'
-ERROR_WIKI = "Wrong link to wiki!"
-ERROR_REPO = "Wrong link to repository!"
-ERROR_BRANCH = "Branch doesnt exist!"
+ERROR_WIKI = "Не удалось получить доступ к wiki, проверьте ссылку"
+ERROR_REPO = "Не удалось получить доступ к репозиторию, проверьте ссылку"
+ERROR_BRANCH = "Не удалось найти ветку с таким названием"
 ERROR_PUSH = 'this file has been in repository yet'
 NEW_FILENAME = '{}{}.pdf'
 LEN_PDF = 4
@@ -58,24 +58,27 @@ class Gengit:
         try:
             self.repo = git.Repo.clone_from(self.url, self.local_repo)
         except git.GitCommandError as e:
-            print(ERROR_REPO)
             print(e.command)
-            return False
+            print(ERROR_REPO)
+            raise ValueError(ERROR_REPO)
+
         try:
             self.repo.git.checkout(self.branch)
         except git.GitCommandError as e:
-            print(ERROR_BRANCH)
             print(e.command)
-            return False
+            print(ERROR_BRANCH)
+            raise ValueError(ERROR_BRANCH)
 
     def download_git_wiki(self):
-        git_url = BEGIN_SSH.format(self.url[SIZE_OF_SSH_ADDRESS:])
+        # git_url = BEGIN_SSH.format(self.url[SIZE_OF_SSH_ADDRESS:])
+        # git_url = self.url[:-3]+'wiki.git'
+        print(self.url)
         try:
-            self.repo = git.Repo.clone_from(git_url, self.local_wiki)
+            self.repo = git.Repo.clone_from(self.url, self.local_wiki)
         except git.GitCommandError as e:
             print(e.command)
             print(ERROR_WIKI)
-            return False
+            raise ValueError(ERROR_WIKI)
 
     def add(self, filename):
         try:
@@ -94,8 +97,8 @@ class Gengit:
         try:
             repo.create_file(filename, COMMIT_MESSAGE, content, branch=self.branch)
         except GithubException:
-             contentfile = repo.get_contents(filename, ref=self.branch)
-             repo.update_file(contentfile.path, COMMIT_MESSAGE, content, contentfile.sha, branch=self.branch)
+            contentfile = repo.get_contents(filename, ref=self.branch)
+            repo.update_file(contentfile.path, COMMIT_MESSAGE, content, contentfile.sha, branch=self.branch)
 
         return filename
 
@@ -118,8 +121,6 @@ class Gengit:
 
     def create_comments_for_word(self, my_json):
         mylist = []
-        #print(my_json)
-
         my_json = sorted(my_json, key=self.comporator)
         for comment in my_json:
             mylist.append([comment[POSITION], comment[USER][LOGIN], comment[BODY],
@@ -154,6 +155,8 @@ class Gengit:
             response = self.get_response(url)
             comments += self.create_comments_for_word(response.json())
         main_comments = self.optimization_comments(comments)
+        print(comments)
+        print(main_comments)
         return self.add_diff(main_comments, main_comments[0].commit)
 
     def add_diff(self, comments, original_commit):
