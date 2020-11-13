@@ -1,13 +1,10 @@
+correctFields = new Map()
+
 $('#empty_doc').click(function () {
     $('#btnGroupDrop1').text("Пустой документ");
     $('#requirements').hide('slow').empty();
     pull_settings()
 });
-
-
-//$('#btn_main_settings').submit(function (event) {
-//    event.preventDefault();
-//})
 
 function main_settings() {
     console.log('MAIN SETTINGS');
@@ -66,8 +63,8 @@ $('#course_doc').click(function () {
     create_course_work();
 });
 
-function setCheck(id, regex = RegExp(""), title = '', text = '', ) {
-    $(this).isCorrect = false;
+function setCheck(id, regex = RegExp(""), title = '', text = '') {
+    correctFields[id] = false
     $(id)
         .focus(function () {
             $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
@@ -76,6 +73,7 @@ function setCheck(id, regex = RegExp(""), title = '', text = '', ) {
             let value = $(this).val()
             if (value === "") {
                 $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+                correctFields[id] = false
                 return;
             }
 
@@ -86,7 +84,9 @@ function setCheck(id, regex = RegExp(""), title = '', text = '', ) {
                     $('#AlertBox').fadeOut(300)
                 }, 5000);
                 $(this).attr("style", "box-shadow: 0px 0px 2px 0 red;")
+                correctFields[id] = false
             } else {
+                correctFields[id] = true
                 $(this).val(value.trim())
                 $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
             }
@@ -142,8 +142,8 @@ function createFieldForConfigurator(id, name, pl = '', isRequire=false, textArea
 }
 
 function isCorrectImportantData() {
-    return $('#teacher').isCorrect && $('#student').isCorrect && $('#number_group').isCorrect &&
-        $('#number_of_report').isCorrect && $('#number_of_pr').isCorrect
+    return correctFields['#teacher'] && correctFields['#student'] && correctFields['#number_group'] &&
+        correctFields['#number_of_report'] && correctFields['#number_of_pr']
 }
 //oninvalid="this.setCustomValidity('Please Enter valid email')"
 $('#btn_submit').click(function () {
@@ -180,6 +180,15 @@ function submitForm() {
         window.setTimeout(function () {
             $('#AlertBox').fadeOut(300)
         }, 5000);
+
+        for (id in correctFields) {
+            if (correctFields.hasOwnProperty(id)) {
+                if (!correctFields[id]) {
+                    $(id).attr("style", "box-shadow: 0px 0px 2px 0 red;")
+                }
+            }
+        }
+
         return;
     }
 
