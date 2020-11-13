@@ -1,7 +1,6 @@
 $('#empty_doc').click(function () {
     $('#btnGroupDrop1').text("Пустой документ");
-    $('#requirements').hide('slow');
-    $('#requirements').empty();
+    $('#requirements').hide('slow').empty();
     pull_settings()
 });
 
@@ -67,40 +66,90 @@ $('#course_doc').click(function () {
     create_course_work();
 });
 
+function setCheck(id, regex = RegExp(""), title = '', text = '', ) {
+    $(this).isCorrect = false;
+    $(id)
+        .focus(function () {
+            $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+        })
+        .focusout(function() {
+            let value = $(this).val()
+            if (value === "") {
+                $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+                return;
+            }
+
+            if (value.search(regex) !== 0) {
+                $('#AlertBox').html(title + "<br>" +
+                    "<div style = 'font-size: small'>" + text + "</div>").fadeIn()
+                window.setTimeout(function () {
+                    $('#AlertBox').fadeOut(300)
+                }, 5000);
+                $(this).attr("style", "box-shadow: 0px 0px 2px 0 red;")
+            } else {
+                $(this).val(value.trim())
+                $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+            }
+    })
+}
+
 function createLabsField(id) {
-    $(id).append(createFieldForConfigurator('teacher', 'Преподаватель', '', true));
-    $(id).append(createFieldForConfigurator('student', 'Студент', '', true));
-    $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '6392'));
-    $(id).append(createFieldForConfigurator('number_of_report', 'Номер работы', '1'));
-    $(id).append(createFieldForConfigurator('theme', 'Тема работы'));
-    $(id).append(createFieldForConfigurator('discipline', 'Название предмета'));
-    $(id).append(createFieldForConfigurator('cathedra', 'Кафедра'));
+    $(id).append(createFieldForConfigurator('teacher', 'Преподаватель', 'Иванов И.И.', true))
+    setCheck('#teacher', /[А-Я][а-я]+\s[А-Я].[А-Я].\s*$/,
+        "Некорректное имя преподавателя",
+        "Hint: имя преподавателя должно состоять из кириллицы и начинаться с заглавной буквы")
+
+    $(id).append(createFieldForConfigurator('student', 'Студент', 'Иванов И.И.', true))
+    setCheck('#student', /[А-Я][а-я]+\s[А-Я].[А-Я].\s*$/,
+        "Некорректное имя студента",
+        "Hint: имя студента должно состоять из кириллицы и начинаться с заглавной буквы")
+
+
+    $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '6392', true));
+    setCheck('#number_group', /\d\d\d\d\s*$/,
+        "Некорректный номер группы",
+        "Hint: номер группы должен состоять из 4 цифр")
+
+    $(id).append(createFieldForConfigurator('number_of_report', 'Номер работы', '1', true));
+    setCheck('#number_of_report', /([1-9]|[1-9]\d)\s*$/,
+        "Некорректный номер работы",
+        "Hint: номер работы лежит в диапазоне 1-99")
+
+    $(id).append(createFieldForConfigurator('theme', 'Тема работы', '', true));
+    $(id).append(createFieldForConfigurator('discipline', 'Название предмета', '',true));
+    $(id).append(createFieldForConfigurator('cathedra', 'Кафедра', '', true));
     $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true));
     $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'));
     $(id).append(createFieldForConfigurator('branch_name', 'Название ветки - только при наличии файлов для приложения'));
-    $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста'));
+    $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста', true));
+    setCheck('#number_of_pr', /([1-9]|[1-9]\d*)\s*$/,
+        "Некорректный номер пулл реквеста",
+        "Hint: номер пулл реквеста принимает значения > 1")
 }
 
 function createFieldForConfigurator(id, name, pl = '', isRequire=false, textArea=false) {
     if (!pl)
         pl = name;
-    if (isRequire)
-        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value='' required></div>"
-    else if(textArea)
+    if (isRequire) {
+        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label>" +
+            "<input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>";
+
+    } else if (textArea) {
         return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><textarea class='form-control' id='" + id + "' placeholder='" + pl + "' aria-label='With textarea'></textarea></div>"
-    else
+    } else {
         return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>"
+    }
 }
 
-function checkImportantData() {
-    return $('#wiki_name').val() !== '' && $('#repo_name').val() !== '' && $('#student').val() !== ''
+function isCorrectImportantData() {
+    return $('#teacher').isCorrect && $('#student').isCorrect && $('#number_group').isCorrect &&
+        $('#number_of_report').isCorrect && $('#number_of_pr').isCorrect
 }
-
+//oninvalid="this.setCustomValidity('Please Enter valid email')"
 $('#btn_submit').click(function () {
-    if (checkImportantData()) {
+    if (isCorrectImportantData()) {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
-        $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 5rem; height: 5rem;" role="status"></div>')
     }
 })
 
@@ -126,15 +175,20 @@ function validate(event) {
 }
 
 function submitForm() {
-    if (!checkImportantData())
-    {
-        alert('Проверьте, заполнили ли Вы все необходимые поля! Возможно, вы забыли указать ссылку на репозиторий или на вики, их надо указать в настройках');
+    if (!isCorrectImportantData()) {
+        $('#AlertBox').html("Данные заполнены некорректно!").fadeIn()
+        window.setTimeout(function () {
+            $('#AlertBox').fadeOut(300)
+        }, 5000);
         return;
     }
+
     let check_send = false; // TODO: add markdown editor
     console.log('LOG DATA');
     console.log(check_send);
-    if (check_send)
+
+    $('#buttons_field').append('<div id="spinner_for_answer" class="spinner-border text-success" style="width: 5rem; height: 5rem;" role="status"></div>')
+    if (check_send) {
         $.ajax({
             type: "POST",
             crossDomain: true,
@@ -144,31 +198,32 @@ function submitForm() {
                 location.reload();
             },
         })
-    else {
+    } else {
         console.log('to /download')
         console.log(window.location.origin + '/download')
         let data = get_data_from_form();
         let student;
+
         if ($("*").is("#student")) {
             student = $('#student').val();
             if (student === '')
                 student = 'unknown';
-        }
-        else {
+        } else {
             student = 'unknown';
         }
         //window.open(window.location.origin + '/download')
         $.ajax({
-                type: "POST",
-                url: window.location.origin + '/download',
-                data: data,
-                success: function(data, status){
-                    window.open(window.location.origin + '/dw_report?name=' + student)
-                    $('#spinner_for_answer').remove()
-                },
-                error: function (data) {
-                    alert('Упс, что-то пошло не так!')
-                }
+            type: "POST",
+            url: window.location.origin + '/download',
+            data: data,
+            success: function(data, status){
+                window.open(window.location.origin + '/dw_report?name=' + student)
+                $('#spinner_for_answer').remove()
+            },
+            error: function (data) {
+                alert(data.responseText)
+                $('#spinner_for_answer').remove()
+            }
         })
     }
 }
@@ -183,7 +238,7 @@ function get_data_from_md() {
 }
 
 function google_drive() {
-$.ajax({
+    $.ajax({
                 type: "POST",
                 url: window.location.origin + '/download',
                 data: get_data_from_form(),
@@ -192,13 +247,13 @@ $.ajax({
                     window.location = window.location.origin + '/googleauthorize';
                     //window.open(window.location.origin + '/dw_report?name=' + student)
                 }
-        })
+    })
 }
 
 function get_data_from_form() {
     const repo_name = $('#repo_name').val();
     const wiki_name = $('#wiki_name').val();
-    var branch_name = $('#branch_name').val();
+    let branch_name = $('#branch_name').val();
     if (branch_name === '')
         branch_name = 'master';
     const general_font = $('#general_font').val();
@@ -214,7 +269,7 @@ function get_data_from_form() {
     const pages = $('#md_pages').val();
     const source_files = $('#source_files').val();
 
-    var result = `repo_name=${repo_name}`;
+    let result = `repo_name=${repo_name}`;
     result += `&wiki_name=${wiki_name}`;
     result += `&branch_name=${branch_name}`;
     result += `&general_font=${general_font}`;
@@ -307,7 +362,7 @@ const _a = document.getElementById('repo_menu');
 //_a.addEventListener('click', changeRepo);
 
 function changeRepo(e) {
-    var ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git';
+    const ssh_str = 'git@github.com:' + event.target.href.substring(19) + '.git';
     $("#repo_name").val(ssh_str);
     e.preventDefault();
 }
@@ -325,12 +380,14 @@ function changeWiki(e) {
 function check_type() {
     let query = decodeURI(window.location.search).split('?')[1];
     let d = {}
-    if (query){
+
+    if (query) {
         query.split('&').forEach((value) => {
-        let val = value.split('=')
-        d[val[0]] = val[1].replace(new RegExp("_",'g'), ' ')
-    })
+            let val = value.split('=')
+            d[val[0]] = val[1].replace(new RegExp("_",'g'), ' ')
+        })
     }
+
     if ('type' in d && d['type'].toLowerCase() === 'lr'){
         create_lab();
     }
