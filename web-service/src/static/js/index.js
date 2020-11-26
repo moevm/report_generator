@@ -105,6 +105,7 @@ function setCheck(id, regex = RegExp(""), title = '', text = '') {
 }
 
 function createLabsField(id) {
+
     $(id).append(createFieldForConfigurator('teacher', 'Преподаватель', 'Иванов И.И.', true))
     setCheck('#teacher', /[А-Я][а-я]+\s[А-Я].[А-Я].\s*$/,
         "Некорректное имя преподавателя",
@@ -131,11 +132,13 @@ function createLabsField(id) {
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра', '', true));
     $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true));
     $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'));
+
     $(id).append(createFieldForConfigurator('branch_name', 'Название ветки', 'master'));
     $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста', true));
     setCheck('#number_of_pr', /([1-9]|[1-9]\d*)\s*$/,
         "Некорректный номер пулл реквеста",
         "Hint: номер пулл реквеста принимает значения > 1")
+
 }
 
 function createFieldForConfigurator(id, name, pl = '', isRequire=false, textArea=false) {
@@ -161,6 +164,7 @@ $('#btn_submit').click(function () {
     if (isCorrectImportantData()) {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
+
     }
 })
 
@@ -251,6 +255,7 @@ function submitForm() {
                 }, 5000);
                 $('#repo_name').attr("style", "box-shadow: 0px 0px 2px 0 red;")
                 $('#wiki_name').attr("style", "box-shadow: 0px 0px 2px 0 red;")
+
                 $('#spinner_for_answer').remove()
             }
         })

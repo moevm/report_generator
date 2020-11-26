@@ -101,10 +101,10 @@ class JsonApi:
             self.json_data[PR][NUMBER_PR] = []
         if self.new_settings[NEW_MAIN_FONT]: self.json_data[MAIN_TEXT][FONT] = self.new_settings[NEW_MAIN_FONT]
         if self.new_settings[NEW_MAIN_SIZE]: self.json_data[MAIN_TEXT][SIZE] = self.get_size(
-                                                                                int(self.new_settings[NEW_MAIN_SIZE]))
+            int(self.new_settings[NEW_MAIN_SIZE]))
         if self.new_settings[NEW_CODE_FONT]: self.json_data[CODE_TEXT][FONT] = self.new_settings[NEW_CODE_FONT]
         if self.new_settings[NEW_CODE_SIZE]: self.json_data[CODE_TEXT][SIZE] = self.get_size(
-                                                                                int(self.new_settings[NEW_CODE_SIZE]))
+            int(self.new_settings[NEW_CODE_SIZE]))
         if self.new_settings[PAGES]:
             self.json_data[PAGES_OF_WIKI] = self.new_settings[PAGES].split(',')
         else:
@@ -139,6 +139,6 @@ class JsonApi:
         if self.new_settings[DATE_FINISH]: self.json_data[DATE_FINISH] = self.new_settings[DATE_FINISH]
         if self.new_settings[DATE_DEFEND]: self.json_data[DATE_DEFEND] = self.new_settings[DATE_DEFEND]
         if self.new_settings['annotation']: self.json_data['annotation'] = self.new_settings['annotation']
-        if self.new_settings['context_of_explanation']: self.json_data['context_of_explanation'] = self.new_settings['context_of_explanation']
+        if self.new_settings['context_of_explanation']: self.json_data['context_of_explanation'] = self.new_settings[
+            'context_of_explanation']
         if self.new_settings['init_data']: self.json_data['init_data'] = self.new_settings['init_data']
-
