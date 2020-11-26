@@ -1,17 +1,7 @@
-# Инструкция 
+# Инструкция по запуску
 
 **Создать гитхаб бота**
 
-1. в папке src создать файл `oauth.txt` с токеном для гитхаба
-1. в папке src создать файл `github_data.txt`
-```
-<client_ID>
-<client_secret>
-```
-3. `./build_and_run_docker.sh`
-4. Зайти в докер: `docker exec -it report_generator_doc bash`
-5. Вставить в файл `/var/www/.ssh/id_rsa` ssh ключ
-6. `bash /report_generator/scripts/init.sh` + согласиться на добавление know_hosts
-Дальше можно не делать, сайт будет на 127.0.0.1:8077
-7. Уже на вашей машине в `/etc/hosts` прописать `127.0.0.1      report-generator`
-8. Перейти на `report-generator:8077`
+1. В папке src создать файл `oauth.txt` с токеном для гитхаба и `id_rsa` с ssh ключом
+2. Если необходимо изменить порт, в `build_and_run_docker.sh` замените 8077 на желаемый 
+3. Запустить `./build_and_run_docker.sh`
