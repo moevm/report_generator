@@ -14,5 +14,8 @@ touch /var/www/.ssh/id_rsa
 chown www-data:www-data /var/www/.ssh/id_rsa
 chmod 600 /var/www/.ssh/id_rsa
 
+
 chown -R www-data:www-data /var/www/.ssh
 chown -R www-data:www-data /var/www
+cp ./src/id_rsa /var/www/.ssh/id_rsa
+
