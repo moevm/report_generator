@@ -326,7 +326,6 @@ class Dword:
         oauth = f.read()
         f.close()
         oauth = oauth.strip()
-        oauth = '62c2c42b42ca280571313a2e78970f322acecb42'
         for filename in self.js_content[DICT_FILENAMES]:
             dir_path = '/'.join(filename.split('/')[:-1])  # Путь до файла
             if dir_path == '':

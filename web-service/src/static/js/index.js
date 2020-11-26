@@ -249,7 +249,7 @@ function submitForm() {
             },
             error: function (data) {
                 $('#AlertBox').html(
-                    "<div style = 'font-size: small'>" + "Проверьте ссылки на репозиторий и wiki!" + "</div>").fadeIn()
+                    "<div style = 'font-size: small'>" + data.responseText + "</div>").fadeIn()
                 window.setTimeout(function () {
                     $('#AlertBox').fadeOut(300)
                 }, 5000);
