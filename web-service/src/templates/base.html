@@ -11,14 +11,23 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/open.js')}}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/default_value_from_search.js')}}"></script>
 
+
     <title>
         {% block title %}
 
         {% endblock %}
     </title>
-
+    <div id="AlertBox" class="alert alert-danger" data-alert="alert">Now Update your Search</div>
     <style>
-
+        #AlertBox{
+            position:fixed;
+            z-index:1400;
+            top:2%;
+            right:4%;
+            margin:0 auto;
+            text-align:left;
+            display:none;
+        }
     </style>
 </head>
 

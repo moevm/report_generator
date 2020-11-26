@@ -1,14 +1,10 @@
+correctFields = new Map()
+
 $('#empty_doc').click(function () {
     $('#btnGroupDrop1').text("Пустой документ");
-    $('#requirements').hide('slow');
-    $('#requirements').empty();
+    $('#requirements').hide('slow').empty();
     pull_settings()
 });
-
-
-//$('#btn_main_settings').submit(function (event) {
-//    event.preventDefault();
-//})
 
 function main_settings() {
     console.log('MAIN SETTINGS');
@@ -52,10 +48,21 @@ function create_course_work() {
         $(for_course).append(createFieldForConfigurator('annotation_en', 'Аннотация на английском', 'Аннотация на английском', false, true));
         $(requirements).show('show');
     }
-        pull_settings();
+
+    pull_settings();
 }
 
 var requirements = '#requirements';
+$('#repo_name').focus(function () {
+    $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+    $('#wiki_name').attr("style", "box-shadow: 0px 0px 0px 0 red;")
+})
+
+$('#wiki_name').focus(function () {
+    $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+    $('repo_name').attr("style", "box-shadow: 0px 0px 0px 0 red;")
+})
+
 $('#lab_doc').click(function () {
     create_lab();
 });
@@ -67,46 +74,79 @@ $('#course_doc').click(function () {
     create_course_work();
 });
 
+function setCheck(id, regex = RegExp(""), title = '', text = '') {
+    correctFields[id] = false
+    $(id)
+        .focus(function () {
+            $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+        })
+        .focusout(function() {
+            let value = $(this).val()
+            if (value === "") {
+                $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+                correctFields[id] = false
+                return;
+            }
+
+            if (value.search(regex) !== 0) {
+                $('#AlertBox').html(title + "<br>" +
+                    "<div style = 'font-size: small'>" + text + "</div>").fadeIn()
+                window.setTimeout(function () {
+                    $('#AlertBox').fadeOut(300)
+                }, 5000);
+                $(this).attr("style", "box-shadow: 0px 0px 2px 0 red;")
+                correctFields[id] = false
+            } else {
+                correctFields[id] = true
+                $(this).val(value.trim())
+                $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+            }
+    })
+}
+
 function createLabsField(id) {
-    $(id).append(createFieldForConfigurator('teacher', 'Преподаватель', '', true));
-    $(id).append(createFieldForConfigurator('student', 'Студент', '', true));
+
+    $(id).append(createFieldForConfigurator('teacher', 'Преподаватель', 'Иванов И.И.', true))
+    setCheck('#teacher', /[А-Я][а-я]+\s[А-Я].[А-Я].\s*$/,
+        "Некорректное имя преподавателя",
+        "Hint: имя преподавателя должно состоять из кириллицы и начинаться с заглавной буквы")
+
+    $(id).append(createFieldForConfigurator('student', 'Студент', 'Иванов И.И.', true))
+    setCheck('#student', /[А-Я][а-я]+\s[А-Я].[А-Я].\s*$/,
+        "Некорректное имя студента",
+        "Hint: имя студента должно состоять из кириллицы и начинаться с заглавной буквы")
+
+
     $(id).append(createFieldForConfigurator('number_group', 'Номер группы', '6392', true));
+    setCheck('#number_group', /\d\d\d\d\s*$/,
+        "Некорректный номер группы",
+        "Hint: номер группы должен состоять из 4 цифр")
+
     $(id).append(createFieldForConfigurator('number_of_report', 'Номер работы', '1', true));
+    setCheck('#number_of_report', /([1-9]|[1-9]\d)\s*$/,
+        "Некорректный номер работы",
+        "Hint: номер работы лежит в диапазоне 1-99")
+
     $(id).append(createFieldForConfigurator('theme', 'Тема работы', '', true));
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета', '',true));
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра', '', true));
     $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true));
     $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'));
-    $(id).append(createFieldForConfigurator('branch_name', 'Название ветки - только при наличии файлов для приложения'));
+
+    $(id).append(createFieldForConfigurator('branch_name', 'Название ветки', 'master'));
     $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста', true));
+    setCheck('#number_of_pr', /([1-9]|[1-9]\d*)\s*$/,
+        "Некорректный номер пулл реквеста",
+        "Hint: номер пулл реквеста принимает значения > 1")
+
 }
 
 function createFieldForConfigurator(id, name, pl = '', isRequire=false, textArea=false) {
     if (!pl)
         pl = name;
     if (isRequire) {
-        if ((id === 'teacher' || id === 'student')) {
-            return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' " +
-                "pattern=\"^[А-Я][а-я]+\\s[А-Я].\\s[А-Я].$\" placeholder='" + pl + "' title = 'Некорректный ввод' value='' required></div>";
-        }
-
-        if (id === 'number_group') {
-            return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' " +
-                "pattern=\"^\\d\\d\\d\\d$\" placeholder='" + pl + "' title = 'Некорректный ввод' value='' required></div>";
-        }
-
-        if (id === 'number_of_report') {
-            return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' " +
-                "pattern=\"^[0-9]|[1-9][0-9]$\" placeholder='" + pl + "' title = 'Некорректный ввод' value='' required></div>";
-        }
-
-        if (id === 'number_of_pr') {
-            return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' " +
-                "pattern=\"^[0-9]*$\" placeholder='" + pl + "' title = 'Некорректный ввод' value=''></div>";
-        }
-
-        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><input type='text' class='form-control' id='" + id + "' " +
-                "placeholder='" + pl + "' title = 'Некорректный ввод' value='' required></div>";
+        return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label>" +
+            "<input type='text' class='form-control' id='" + id + "' placeholder='" + pl + "' value=''></div>";
 
     } else if (textArea) {
         return "<div class='col-md-6 mb-3'><label for='" + id + "'>" + name + "</label><textarea class='form-control' id='" + id + "' placeholder='" + pl + "' aria-label='With textarea'></textarea></div>"
@@ -115,15 +155,16 @@ function createFieldForConfigurator(id, name, pl = '', isRequire=false, textArea
     }
 }
 
-function checkImportantData() {
-    return $('#wiki_name').val() !== '' && $('#repo_name').val() !== '' && $('#student').val() !== ''
+function isCorrectImportantData() {
+    return correctFields['#teacher'] && correctFields['#student'] && correctFields['#number_group'] &&
+        correctFields['#number_of_report'] && correctFields['#number_of_pr']
 }
 //oninvalid="this.setCustomValidity('Please Enter valid email')"
 $('#btn_submit').click(function () {
-    if (checkImportantData()) {
+    if (isCorrectImportantData()) {
         $("div").remove("#spinner_for_answer");
         $("a").remove("#total_link");
-        $("")
+
     }
 })
 
@@ -149,8 +190,20 @@ function validate(event) {
 }
 
 function submitForm() {
-    if (!checkImportantData()) {
-        alert('Проверьте, заполнили ли Вы все необходимые поля! Возможно, вы забыли указать ссылку на репозиторий или на вики, их надо указать в настройках');
+    if (!isCorrectImportantData()) {
+        $('#AlertBox').html("Данные заполнены некорректно!").fadeIn()
+        window.setTimeout(function () {
+            $('#AlertBox').fadeOut(300)
+        }, 5000);
+
+        for (id in correctFields) {
+            if (correctFields.hasOwnProperty(id)) {
+                if (!correctFields[id]) {
+                    $(id).attr("style", "box-shadow: 0px 0px 2px 0 red;")
+                }
+            }
+        }
+
         return;
     }
 
@@ -189,10 +242,20 @@ function submitForm() {
             data: data,
             success: function(data, status){
                 window.open(window.location.origin + '/dw_report?name=' + student)
+
+                $('#wiki_name').attr("style", "box-shadow: 0px 0px 0px 0 red;")
+                $('#repo_name').attr("style", "box-shadow: 0px 0px 0px 0 red;")
                 $('#spinner_for_answer').remove()
             },
             error: function (data) {
-                alert(data.responseText)
+                $('#AlertBox').html(
+                    "<div style = 'font-size: small'>" + "Проверьте ссылки на репозиторий и wiki!" + "</div>").fadeIn()
+                window.setTimeout(function () {
+                    $('#AlertBox').fadeOut(300)
+                }, 5000);
+                $('#repo_name').attr("style", "box-shadow: 0px 0px 2px 0 red;")
+                $('#wiki_name').attr("style", "box-shadow: 0px 0px 2px 0 red;")
+
                 $('#spinner_for_answer').remove()
             }
         })
