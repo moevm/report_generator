@@ -7,11 +7,19 @@ ENV LANG ru_RU.UTF-8
 ENV LC_ALL ru_RU.UTF-8
 RUN locale-gen ru_RU.UTF-8 && dpkg-reconfigure locales
 
-RUN apt-get update
-RUN apt-get -y install git
+RUN apt-get update && apt-get install -y \
+	git \
+	apache2 \
+	apache2-dev \
+	python3.6 \
+	python3-dev \
+	python3-pip \
+	python3-flask \
+	vim  \
+	nano \
+	curl \
+	&& rm -rf /var/lib/apr/lists/*
 
-RUN apt-get -y install apache2  apache2-dev  mongodb
-RUN apt-get -y install python3.6  python3-dev  python3-pip  python3-flask  vim  nano curl
 RUN pip3 install --upgrade pip
 
 ADD ./ /report_generator
