@@ -326,40 +326,34 @@ class Dword:
         oauth = f.read()
         f.close()
         oauth = oauth.strip()
-
+        oauth = '62c2c42b42ca280571313a2e78970f322acecb42'
         for filename in self.js_content[DICT_FILENAMES]:
-            real_filename = filename.split('/')[-1]  # Имя файла
             dir_path = '/'.join(filename.split('/')[:-1])  # Путь до файла
             if dir_path == '':
                 dir_path = '/'
+            if dir_path[0] == '.':
+                dir_path = dir_path[1:]
 
-            shell_command = "cd {path} && ( curl -O {download_url}; cd -; )"
-            download_url = "https://{oauth}@raw.githubusercontent.com/{owner}/{repo}/{branch}{path}"
-
-            download_url = download_url.format(oauth=oauth, owner=self.js_content[PR][OWNER_OF_PR],
+            auth = 'Authorization'
+            token = 'token {token}'.format(token=oauth)
+            download_url = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}{path}"
+            download_url = download_url.format(owner=self.js_content[PR][OWNER_OF_PR],
                                                repo=self.js_content[PR][REPO_OF_PR], branch=self.branch, path=filename)
 
-            store_path = ABS_PATH.format('repo_for_report/')
+            response = requests.get(download_url, headers={auth: token})
+            if response.status_code == '404':
+                raise ValueError('Не удалось получить файл с кодом, проверте название ветки и файла')
 
-            shell_command = shell_command.format(path=store_path, download_url=download_url)
-            shell_command = shell_command.replace('(', '{')
-            shell_command = shell_command.replace(')', '}')
-            print(shell_command)
+            code = response.content.decode('utf-8')
+            code.strip()
+            self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
+            number = 0
+            for line in code.split('\n'):
+                number += 1
+                self.add_line(
+                    DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
+                    line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
-            os.system(shell_command)
-
-            gen_path = Path(store_path).rglob(real_filename)
-            for path in gen_path:
-                print('END ', path)
-                code = NOT_VALID
-                with open(path, encoding='utf-8') as file:
-                    code = file.readlines()
-                self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
-                for number, line in enumerate(code, 1):
-                    self.add_line(
-                        DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
-                        line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
-                break
 
     def add_page_break(self):
         self.document.add_page_break()

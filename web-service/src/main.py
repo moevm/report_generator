@@ -68,7 +68,8 @@ def main(type_of_input, need_push=True):
     git = Gengit(url, branch)
     git_wiki = Gengit(wiki_url)
 
-    if git.download_git() is False or git_wiki.download_git_wiki() is False:
+    os.system(f"mkdir {git.local_repo}")
+    if git_wiki.download_git_wiki() is False:
         delete_dirs_and_files()
         all_ok = False
     report = TIME_REPORT

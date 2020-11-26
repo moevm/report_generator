@@ -55,22 +55,23 @@ class Gengit:
             self.branch = STANDART_BRANCH
         self.repo = None
 
-    def download_git(self):
-        os.system(f"mkdir {self.local_repo}")
-        return True
-        # try:
-        #     self.repo = git.Repo.clone_from(self.url, self.local_repo)
-        # except git.GitCommandError as e:
-        #     print(e.command)
-        #     print(ERROR_REPO)
-        #     raise ValueError(ERROR_REPO)
-        #
-        # try:
-        #     self.repo.git.checkout(self.branch)
-        # except git.GitCommandError as e:
-        #     print(e.command)
-        #     print(ERROR_BRANCH)
-        #     raise ValueError(ERROR_BRANCH)
+    # DOWNLOAD_GIT
+    # def download_git(self):
+    #     os.system(f"mkdir {self.local_repo}")
+    #     return True
+    #     try:
+    #         self.repo = git.Repo.clone_from(self.url, self.local_repo)
+    #     except git.GitCommandError as e:
+    #         print(e.command)
+    #         print(ERROR_REPO)
+    #         raise ValueError(ERROR_REPO)
+    #
+    #     try:
+    #         self.repo.git.checkout(self.branch)
+    #     except git.GitCommandError as e:
+    #         print(e.command)
+    #         print(ERROR_BRANCH)
+    #         raise ValueError(ERROR_BRANCH)
 
     def download_git_wiki(self):
         # git_url = BEGIN_SSH.format(self.url[SIZE_OF_SSH_ADDRESS:])
