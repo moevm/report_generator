@@ -64,6 +64,7 @@ def main(type_of_input, need_push=True):
     delete_dirs_and_files()
     all_ok = True
     url, wiki_url, branch = type_of_input[0], type_of_input[1], type_of_input[2]
+
     git = Gengit(url, branch)
     git_wiki = Gengit(wiki_url)
 

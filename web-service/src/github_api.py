@@ -2,6 +2,7 @@
 import subprocess
 import git
 import requests
+import os
 
 from app import ABS_PATH
 from github import Github
@@ -55,19 +56,21 @@ class Gengit:
         self.repo = None
 
     def download_git(self):
-        try:
-            self.repo = git.Repo.clone_from(self.url, self.local_repo)
-        except git.GitCommandError as e:
-            print(e.command)
-            print(ERROR_REPO)
-            raise ValueError(ERROR_REPO)
-
-        try:
-            self.repo.git.checkout(self.branch)
-        except git.GitCommandError as e:
-            print(e.command)
-            print(ERROR_BRANCH)
-            raise ValueError(ERROR_BRANCH)
+        os.system(f"mkdir {self.local_repo}")
+        return True
+        # try:
+        #     self.repo = git.Repo.clone_from(self.url, self.local_repo)
+        # except git.GitCommandError as e:
+        #     print(e.command)
+        #     print(ERROR_REPO)
+        #     raise ValueError(ERROR_REPO)
+        #
+        # try:
+        #     self.repo.git.checkout(self.branch)
+        # except git.GitCommandError as e:
+        #     print(e.command)
+        #     print(ERROR_BRANCH)
+        #     raise ValueError(ERROR_BRANCH)
 
     def download_git_wiki(self):
         # git_url = BEGIN_SSH.format(self.url[SIZE_OF_SSH_ADDRESS:])

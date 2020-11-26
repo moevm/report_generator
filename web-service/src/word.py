@@ -18,6 +18,9 @@ from app import ABS_PATH
 from github_api import Gengit, LOCAL_REPO as github_local
 from markdown2html2word import MyHTMLParser, pre_header, pre_blockquote
 
+OAUTH_PART = "/var/www/report_generator/oauth.txt"
+SHELL_COMMAND = "cd {ABS_PATH} && { curl -O {download_url}; cd -; }"
+
 GIT_REPO = ABS_PATH.format("wiki_dir")
 PATH_TO_WIKI = "{}/{}.md"
 NAME_REPORT = "report.docx"
@@ -76,7 +79,7 @@ INTRODUCTION = "introduction"
 YEAR = 'year'
 
 ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
-#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
+# LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
 LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
 
 STANDART_PT = 6
@@ -269,7 +272,7 @@ class Dword:
         self.number_of_paragraph += 1
         style_name = STYLE.format(self.number_of_paragraph)
         paragraph = self.document.add_paragraph(line)
-        #print('ADD LINE {}'.format(line))
+        # print('ADD LINE {}'.format(line))
         paragraph.style = self.document.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
         font = paragraph.style.font
         font.name = font_name
@@ -318,17 +321,34 @@ class Dword:
 
     def add_code(self):
         print(self.js_content[DICT_FILENAMES])
+
+        f = open(OAUTH_PART, 'r')
+        oauth = f.read()
+        f.close()
+        oauth = oauth.strip()
+
         for filename in self.js_content[DICT_FILENAMES]:
-            if filename[0] == '.':
-                filename = filename[1:]
-            dir_path = '/'.join(filename.split('/')[:-1])
+            real_filename = filename.split('/')[-1]  # Имя файла
+            dir_path = '/'.join(filename.split('/')[:-1])  # Путь до файла
             if dir_path == '':
                 dir_path = '/'
-            real_filename = filename.split('/')[-1]
-            if dir_path[0] != '/':
-                dir_path = '/' + dir_path
-            full_path = ABS_PATH.format('/repo_for_report'+dir_path)
-            gen_path = Path(full_path).rglob(real_filename)
+
+            shell_command = "cd {path} && ( curl -O {download_url}; cd -; )"
+            download_url = "https://{oauth}@raw.githubusercontent.com/{owner}/{repo}/{branch}{path}"
+
+            download_url = download_url.format(oauth=oauth, owner=self.js_content[PR][OWNER_OF_PR],
+                                               repo=self.js_content[PR][REPO_OF_PR], branch=self.branch, path=filename)
+
+            store_path = ABS_PATH.format('repo_for_report/')
+
+            shell_command = shell_command.format(path=store_path, download_url=download_url)
+            shell_command = shell_command.replace('(', '{')
+            shell_command = shell_command.replace(')', '}')
+            print(shell_command)
+
+            os.system(shell_command)
+
+            gen_path = Path(store_path).rglob(real_filename)
             for path in gen_path:
                 print('END ', path)
                 code = NOT_VALID
