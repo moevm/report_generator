@@ -48,10 +48,21 @@ function create_course_work() {
         $(for_course).append(createFieldForConfigurator('annotation_en', 'Аннотация на английском', 'Аннотация на английском', false, true));
         $(requirements).show('show');
     }
-        pull_settings();
+
+    pull_settings();
 }
 
 var requirements = '#requirements';
+$('#repo_name').focus(function () {
+    $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+    $('#wiki_name').attr("style", "box-shadow: 0px 0px 0px 0 red;")
+})
+
+$('#wiki_name').focus(function () {
+    $(this).attr("style", "box-shadow: 0px 0px 0px 0 red;")
+    $('repo_name').attr("style", "box-shadow: 0px 0px 0px 0 red;")
+})
+
 $('#lab_doc').click(function () {
     create_lab();
 });
@@ -120,7 +131,7 @@ function createLabsField(id) {
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра', '', true));
     $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true));
     $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'));
-    $(id).append(createFieldForConfigurator('branch_name', 'Название ветки - только при наличии файлов для приложения'));
+    $(id).append(createFieldForConfigurator('branch_name', 'Название ветки', 'master'));
     $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста', true));
     setCheck('#number_of_pr', /([1-9]|[1-9]\d*)\s*$/,
         "Некорректный номер пулл реквеста",
@@ -227,10 +238,19 @@ function submitForm() {
             data: data,
             success: function(data, status){
                 window.open(window.location.origin + '/dw_report?name=' + student)
+
+                $('#wiki_name').attr("style", "box-shadow: 0px 0px 0px 0 red;")
+                $('#repo_name').attr("style", "box-shadow: 0px 0px 0px 0 red;")
                 $('#spinner_for_answer').remove()
             },
             error: function (data) {
-                alert(data.responseText)
+                $('#AlertBox').html(
+                    "<div style = 'font-size: small'>" + "Проверьте ссылки на репозиторий и wiki!" + "</div>").fadeIn()
+                window.setTimeout(function () {
+                    $('#AlertBox').fadeOut(300)
+                }, 5000);
+                $('#repo_name').attr("style", "box-shadow: 0px 0px 2px 0 red;")
+                $('#wiki_name').attr("style", "box-shadow: 0px 0px 2px 0 red;")
                 $('#spinner_for_answer').remove()
             }
         })
