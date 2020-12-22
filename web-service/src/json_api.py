@@ -44,7 +44,7 @@ MAX_SIZE = 100
 PAGES = 'pages'
 PAGES_OF_WIKI = 'pages_of_wiki'
 REPO = "repo_name"
-GIT_HTTPS = 19
+GIT_SSH = 15
 END_GIT = -4
 NUMBER_PR = 'number_of_pr'
 PR = 'pull_request'
@@ -57,7 +57,7 @@ class JsonApi:
     def __init__(self, new_dict):
         self.set_default()
         self.read_json_file()
-        self.info_repo = new_dict[REPO][GIT_HTTPS:END_GIT].split('/')
+        self.info_repo = new_dict[REPO][GIT_SSH:END_GIT].split('/')
         self.new_settings = new_dict
         self.change_content()
         self.write_json_file()

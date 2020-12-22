@@ -153,6 +153,8 @@ class Dword:
             self.add_final_part()
             self.add_comments()
             self.document.save(ABS_PATH.format(self.name_report))
+        except ValueError as e:
+            raise e
         except Exception as e:
             print(e)
             print('unknown error')  # TODO: need to fix this
@@ -338,9 +340,9 @@ class Dword:
             download_url = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}{path}"
             download_url = download_url.format(owner=self.js_content[PR][OWNER_OF_PR],
                                                repo=self.js_content[PR][REPO_OF_PR], branch=self.branch, path=filename)
-
+            print(download_url)
             response = requests.get(download_url, headers={auth: token})
-            if response.status_code == '404':
+            if response.status_code == 404:
                 raise ValueError('Не удалось получить файл с кодом, проверте название ветки и файла')
 
             code = response.content.decode('utf-8')
