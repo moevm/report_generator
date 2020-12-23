@@ -114,21 +114,16 @@ class Gengit:
     def comporator(self, object):
         return object[POSITION]
 
-    def new_hunk(self, diff_string):
-        lines_of_diff = diff_string.split('\n')
-        length = len(lines_of_diff) - 1
-        new_str = []
-        while lines_of_diff[length][0] == PLUS:
-            new_str.append("{}{}".format(lines_of_diff[length][1:], '\n'))
-            length -= 1
-        return ''.join(new_str)
+    def new_hunk(self, diff_string, start_line):
+        new_str = diff_string.split('\n')[start_line:]
+        return '\n'.join(new_str)
 
     def create_comments_for_word(self, my_json):
         mylist = []
         my_json = sorted(my_json, key=self.comporator)
         for comment in my_json:
             mylist.append([comment[POSITION], comment[USER][LOGIN], comment[BODY],
-                           self.new_hunk(comment[DIFF_HUNK]), comment[COMMIT][0:7]])
+                           self.new_hunk(comment[DIFF_HUNK], comment["start_line"]), comment[COMMIT][0:7]])
         return mylist
 
     class comment:
@@ -159,8 +154,6 @@ class Gengit:
             response = self.get_response(url)
             comments += self.create_comments_for_word(response.json())
         main_comments = self.optimization_comments(comments)
-        print(comments)
-        print(main_comments)
         return self.add_diff(main_comments, main_comments[0].commit)
 
     def add_diff(self, comments, original_commit):

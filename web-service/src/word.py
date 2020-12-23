@@ -383,11 +383,7 @@ class Dword:
                                         self.js_content[PR][NUMBER_OF_PR])
             print('ELEMENTS')
             for element in comments:
-                source_code = element.body_code.split('\n')
-                length = 4
-                if len(source_code) > 4:
-                    length = len(source_code) // 4
-                source_code = '\n'.join(source_code[:length])
+                source_code = element.body_code
                 self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
                 self.add_line(source_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
                 self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
