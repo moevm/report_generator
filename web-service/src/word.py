@@ -334,7 +334,6 @@ class Dword:
                 dir_path = '/'
             if dir_path[0] == '.':
                 dir_path = dir_path[1:]
-
             auth = 'Authorization'
             token = 'token {token}'.format(token=oauth)
             download_url = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}{path}"
@@ -392,9 +391,34 @@ class Dword:
                                   align=ALIGN_LEFT)
 
             self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+
+            f = open(OAUTH_PART, 'r')
+            oauth = f.read()
+            f.close()
+            oauth = oauth.strip()
+            diffArr = []
             for element in comments:
-                if element.diff:
-                    self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+                auth = 'Authorization'
+                token = 'token {token}'.format(token=oauth)
+                download_url = "https://api.github.com/repos/{owner}/{repo}/commits/{commit}"
+                req = download_url.format(owner=self.js_content[PR][OWNER_OF_PR],
+                                                   repo=self.js_content[PR][REPO_OF_PR],
+                                                   commit=self.branch)
+                response = requests.get(req, headers={auth: token})
+                response = response.json()
+                while (len(response["parents"]) != 0) and (response["sha"] != element.commit):
+                    for file in response["files"]:
+                        if file["filename"] == element.filename:
+                            diffArr.append(file["patch"])
+                    req = download_url.format(owner=self.js_content[PR][OWNER_OF_PR],
+                                              repo=self.js_content[PR][REPO_OF_PR],
+                                              commit=response["parents"][0]["sha"])
+                    response = requests.get(req, headers={auth: token})
+                    response = response.json()
+                for diff in reversed(diffArr):
+                    self.add_line(diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+                # if element.diff:
+                #     self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
 
         except Exception as e:
             print(e)
