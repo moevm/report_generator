@@ -1,28 +1,31 @@
 {
-    "type": "LR",
+    "type": "KR",
     "M/W": "M",
-    "cathedra": "<cathedra>",
-    "discipline": "<discipline>",
-    "theme": "<theme>",
-    "number": "1",
-    "group": "<group>",
-    "student": "<student>",
-    "teacher": "<teacher>",
-    "sense of work": "<sense of work>",
-    "download": [],
+    "cathedra": "МОЭВМ",
+    "discipline": "Ааааааа",
+    "theme": "Ааааа",
+    "number": "5",
+    "group": "1234",
+    "student": "Аааааа А.А.",
+    "teacher": "Ааааааа А.А.",
+    "sense_of_work": "sense of work",
+    "download": [
+        "/aistrd_3.cpp"
+    ],
     "PDF": true,
-    "text": "<text>",
-    "init_data": "<init data>",
-    "context_of_explanation": "<context of explanation>",
-    "min_pages": "-",
-    "date_start": "-",
-    "date_finish": "-",
-    "date_defend": "-",
-    "annotation": "<annotation>",
-    "en_annotation": "<en_annotation>",
-    "introduction": "<introduction>",
+    "text": "text",
+    "init_data": "фыфвфываыва",
+    "context_of_explanation": "фывафыва",
+    "min_pages": "21",
+    "date_start": "1.1.2121",
+    "date_finish": "1.1.2112",
+    "date_defend": "1.1.2122",
+    "list_of_source": "Иванов И. И. Книга одного-трех авторов. М.: Издательство, 2010. 000 с.\nКнига четырех авторов / И. И. Иванов, П. П. Петров, С. С. Сидоров, В. В. Васильев. СПб.: Издательство, 2010. 000 с.\nКнига пяти и более авторов / И. И. Иванов, П. П. Петров, С. С. Сидоров и др.. СПб.: Издательство, 2010. 000 с.",
+    "annotation": "ыфвафыва",
+    "en_annotation": "ыфвафыва",
+    "introduction": "introduction",
     "pages_of_wiki": [
-        "Data Model"
+        "Home"
     ],
     "format": {
         "h1": {
@@ -59,8 +62,10 @@
         "font": "Consolas"
     },
     "pull_request": {
-        "owner": "light5551",
-        "repo": "test_gen",
-        "number_of_pr": []
+        "owner": "mensch25",
+        "repo": "reportGenTest",
+        "number_of_pr": [
+            2
+        ]
     }
 }

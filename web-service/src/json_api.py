@@ -5,7 +5,7 @@ from shutil import copyfile
 JSON_FILE = ABS_PATH.format('settings.json')
 DEFAULT_SETTINGS = ABS_PATH.format('default_settings.json')
 
-LEN_COURSE_DOC = 32
+LEN_COURSE_DOC = 33
 LEN_LAB_DOC = 24
 TYPE = "type"
 LR = "LR"
@@ -144,6 +144,7 @@ class JsonApi:
         if self.new_settings[DATE_DEFEND]: self.json_data[DATE_DEFEND] = self.new_settings[DATE_DEFEND]
         if self.new_settings['annotation']: self.json_data['annotation'] = self.new_settings['annotation']
         if self.new_settings['en_annotation']: self.json_data['en_annotation'] = self.new_settings['en_annotation']
+        if self.new_settings['list_of_source'] : self.json_data['list_of_source'] = self.new_settings['list_of_source']
         if self.new_settings['context_of_explanation']: self.json_data['context_of_explanation'] = self.new_settings[
             'context_of_explanation']
         if self.new_settings['init_data']: self.json_data['init_data'] = self.new_settings['init_data']

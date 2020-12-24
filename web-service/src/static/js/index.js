@@ -46,6 +46,10 @@ function create_course_work() {
         $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки', '', false, true));
         $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация', false, true));
         $(for_course).append(createFieldForConfigurator('en_annotation', 'Аннотация на английском', 'Аннотация на английском', false, true));
+        $(for_course).append(createFieldForConfigurator('list_of_source', 'Список источников',
+            'Иванов И. И. Книга одного-трех авторов. М.: Издательство, 2010. 000 с.\n' +
+               'Книга четырех авторов / И. И. Иванов, П. П. Петров, С. С. Сидоров, В. В. Васильев. СПб.: Издательство, 2010. 000 с.\n' +
+               'Книга пяти и более авторов / И. И. Иванов, П. П. Петров, С. С. Сидоров и др.. СПб.: Издательство, 2010. 000 с.', false, true));
         $(requirements).show('show');
     }
 
@@ -374,6 +378,10 @@ function get_data_from_form() {
     if ($("*").is("#annotation")) {
         var annotation = check_val($('#annotation').val());
         result += `&annotation=${annotation}`;
+    }
+    if ($("*").is("#list_of_source")) {
+        var list_of_source = check_val($('#list_of_source').val());
+        result += `&list_of_source=${list_of_source}`;
     }
     if ($("*").is("#en_annotation")) {
         var en_annotation = check_val($('#en_annotation').val());

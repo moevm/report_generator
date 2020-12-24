@@ -47,6 +47,7 @@ ALIGN_JUSTIFY = "justify"
 ALIGN_LEFT = "left"
 UNDER_PICTURE = "Рисунок {}{}"
 ATTACHMENT = "Приложение A"
+ARTICLE_SOURCE = "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"
 PICTURE = "picture"
 PAGES = "pages_of_wiki"
 STANDART_SIZE_PICTURE = 4
@@ -76,6 +77,7 @@ DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
 EN_ANNOTATION = "en_annotation"
+LIST_OF_SOURCE = 'list_of_source'
 INTRODUCTION = "introduction"
 YEAR = 'year'
 
@@ -151,8 +153,11 @@ class Dword:
                 self.add_text_from_wiki()
             else:
                 self.add_text_from_md(md)
+            if self.js_content[LIST_OF_SOURCE] != "":
+                self.add_list_of_source()
             self.add_final_part()
             self.add_comments()
+
             self.document.save(ABS_PATH.format(self.name_report))
         except ValueError as e:
             raise e
@@ -290,6 +295,19 @@ class Dword:
         paragraph_format.line_spacing_rule = line_space_dict.get(line_spacing)
         paragraph_format.keep_together = keep_together
 
+    def add_list_of_source(self):
+        #LIST_OF_SOURCE: self.js_content[LIST_OF_SOURCE],
+        self.add_page_break()
+        self.add_line(ARTICLE_SOURCE, set_bold=True, align=ALIGN_CENTRE)
+        list_source = self.js_content[LIST_OF_SOURCE]
+        index = 1
+        source = '{num}. {src}'
+        for elem in list_source.split('\n'):
+            elem = source.format(num=index, src=elem)
+            self.add_line(elem, line_spacing=1.5, align=ALIGN_LEFT)
+            index += 1
+
+
     def add_final_part(self):
         print(self.js_content[DICT_FILENAMES])
         if len(self.js_content[DICT_FILENAMES]) > 0:
@@ -372,6 +390,7 @@ class Dword:
             self.path = PATH_TO_TEMPLATE.format(LAB_WORK)
         else:
             self.path = None
+
 
     def add_comments(self):
         try:
