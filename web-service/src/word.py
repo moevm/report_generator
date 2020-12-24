@@ -153,7 +153,7 @@ class Dword:
                 self.add_text_from_wiki()
             else:
                 self.add_text_from_md(md)
-            if self.js_content[LIST_OF_SOURCE] != "":
+            if self.js_content[LIST_OF_SOURCE] != "list_of_source":
                 self.add_list_of_source()
             self.add_final_part()
             self.add_comments()
@@ -190,11 +190,15 @@ class Dword:
         return h, w
 
     def add_picture(self, path):
-        paragraph = self.document.add_paragraph()
-        paragraph.paragraph_format.alignment = alignment_dict.get(ALIGN_CENTRE)
+        try:
+            paragraph = self.document.add_paragraph()
+            paragraph.paragraph_format.alignment = alignment_dict.get(ALIGN_CENTRE)
 
-        h, w = self.h_w(Image.open(path).size)
-        paragraph.add_run().add_picture(path, width=Inches(h), height=Inches(w))
+            h, w = self.h_w(Image.open(path).size)
+            paragraph.add_run().add_picture(path, width=Inches(h), height=Inches(w))
+        except Exception as e:
+            print(e)
+            print("Add pict")
 
     def add_image_by_url(self, url):
         try:

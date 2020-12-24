@@ -39,6 +39,7 @@ SIZE = "size"
 TYPE_OF_HEADER = "h{}"
 MAIN_TEXT = "main_text"
 CODE_TEXT = "code_text"
+OAUTH_PART = "/var/www/report_generator/oauth.txt"
 
 ERROR = "error in HTMLParser. text: {}"
 PICTURE_NAME = "picture"
@@ -110,7 +111,9 @@ class MyHTMLParser(HTMLParser):
             self.size = self.normal_size
         elif tag == IMG:
             url = attrs[0][1]
-            picture = requests.get(url).content
+
+            response = requests.get(url)
+            picture = response.content
             with open(ABS_PATH.format(PICTURE_NAME), 'wb') as file:
                 file.write(picture)
             try:
@@ -122,7 +125,8 @@ class MyHTMLParser(HTMLParser):
                 self.paragraph = self.document.add_paragraph()
 
                 #last_paragraph.keep_with_next = False
-            except:
+            except Exception as e:
+                print(e)
                 print('ERROR WITH IMAGE {}'.format(url))
         elif tag == A:
             self.hyperlink = attrs[0][1]
