@@ -332,7 +332,7 @@ class Dword:
             dir_path = '/'.join(filename.split('/')[:-1])  # Путь до файла
             if dir_path == '':
                 dir_path = '/'
-            if dir_path[0] == '.':
+            if filename[0] == '.':
                 dir_path = dir_path[1:]
             auth = 'Authorization'
             token = 'token {token}'.format(token=oauth)
@@ -348,10 +348,11 @@ class Dword:
             code.strip()
             self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
             number = 0
-            for line in code.split('\n'):
+            lineArr = code.split('\n')
+            for line in lineArr:
                 number += 1
                 self.add_line(
-                    DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
+                    DISTANCE_NUMBER_CODE.join((self.number_position(number, len(lineArr)), line.strip('\n').strip('\r'))),
                     line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
 
@@ -383,21 +384,29 @@ class Dword:
             print('ELEMENTS')
             for element in comments:
                 source_code = element.body_code
-                self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-                self.add_line(source_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-                self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+                self.add_line('\n{}'.format(PR_SOURCE_CODE), align=ALIGN_LEFT, set_bold=True, line_spacing=1, keep_with_next=True)
+                self.add_line(element.filename, align=ALIGN_LEFT, set_bold=True, line_spacing=1, keep_with_next=True)
+                self.add_line(source_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True,
+                              font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+                self.add_line(PR_COMMENTS, align=ALIGN_LEFT, set_bold=True, line_spacing=1, keep_with_next=True)
                 for body_element in element.body_comments:
                     self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
                                   align=ALIGN_LEFT)
 
-            self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, set_bold=True, line_spacing=1, keep_with_next=True)
 
             f = open(OAUTH_PART, 'r')
             oauth = f.read()
             f.close()
             oauth = oauth.strip()
-            diffArr = []
+            filenames = []
             for element in comments:
+                alreadyAddedDiff = False
+                for filename in filenames:
+                    if filename == element.filename:
+                        alreadyAddedDiff = True
+                if alreadyAddedDiff == True:
+                    continue
                 auth = 'Authorization'
                 token = 'token {token}'.format(token=oauth)
                 download_url = "https://api.github.com/repos/{owner}/{repo}/commits/{commit}"
@@ -406,9 +415,11 @@ class Dword:
                                                    commit=self.branch)
                 response = requests.get(req, headers={auth: token})
                 response = response.json()
+                diffArr = []
                 while (len(response["parents"]) != 0) and (response["sha"] != element.commit):
                     for file in response["files"]:
                         if file["filename"] == element.filename:
+                            filenames.append(element.filename)
                             diffArr.append(file["patch"])
                     req = download_url.format(owner=self.js_content[PR][OWNER_OF_PR],
                                               repo=self.js_content[PR][REPO_OF_PR],
@@ -416,7 +427,8 @@ class Dword:
                     response = requests.get(req, headers={auth: token})
                     response = response.json()
                 for diff in reversed(diffArr):
-                    self.add_line(diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+                    self.add_line(diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True,
+                                  font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
                 # if element.diff:
                 #     self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
 

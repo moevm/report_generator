@@ -164,39 +164,39 @@ class Gengit:
         main_comments = self.optimization_comments(comments)
         return main_comments
 
-    def add_diff(self, comments, original_commit):
-        self.create_log(self.local_repo)
-        end_commit = self.find_next_commit(original_commit)
-        self.create_dif(self.local_repo, self.branch, original_commit, end_commit)
-        diffs = self.get_diffs()
-        for index in range(len(comments)):
-            if index < len(diffs):
-                comments[index].diff = diffs[index]
-        return comments
+    # def add_diff(self, comments, original_commit):
+    #     self.create_log(self.local_repo)
+    #     end_commit = self.find_next_commit(original_commit)
+    #     self.create_dif(self.local_repo, self.branch, original_commit, end_commit)
+    #     diffs = self.get_diffs()
+    #     for index in range(len(comments)):
+    #         if index < len(diffs):
+    #             comments[index].diff = diffs[index]
+    #     return comments
 
     def create_log(self, repo):
         subprocess.call(LOG_SH.format(repo), shell=True, stdout=subprocess.PIPE)
 
-    def create_dif(self, repo, branch, begin_commit, end_commit):
-        subprocess.call(DIFF_SH.format(repo, begin_commit, end_commit), shell=True, stdout=subprocess.PIPE)
-
-    def get_diffs(self):
-        diffs = []
-        string = ''
-        with open(FILENAME_DIFF, 'r', encoding='utf-8') as file:
-            lines = file.readlines()
-            for i in lines:
-                if i.find('diff --git a/README.md') != -1:
-                    return diffs
-                if i.startswith(PLUS * 3) or i.startswith(MINUS * 3):
-                    continue
-                if i[0] in [PLUS, MINUS]:
-                    string = '%s%s' % (string, i)
-                    continue
-                if string:
-                    diffs.append(string)
-                string = ''
-            return diffs
+    # def create_dif(self, repo, branch, begin_commit, end_commit):
+    #     subprocess.call(DIFF_SH.format(repo, begin_commit, end_commit), shell=True, stdout=subprocess.PIPE)
+    #
+    # def get_diffs(self):
+    #     diffs = []
+    #     string = ''
+    #     with open(FILENAME_DIFF, 'r', encoding='utf-8') as file:
+    #         lines = file.readlines()
+    #         for i in lines:
+    #             if i.find('diff --git a/README.md') != -1:
+    #                 return diffs
+    #             if i.startswith(PLUS * 3) or i.startswith(MINUS * 3):
+    #                 continue
+    #             if i[0] in [PLUS, MINUS]:
+    #                 string = '%s%s' % (string, i)
+    #                 continue
+    #             if string:
+    #                 diffs.append(string)
+    #             string = ''
+    #         return diffs
 
     def get_list_of_commit(self):
         with open(FILENAME_LOG, 'r') as file:
