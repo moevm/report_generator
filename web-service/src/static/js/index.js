@@ -226,14 +226,10 @@ function submitForm() {
         console.log('to /download')
         console.log(window.location.origin + '/download')
         let data = get_data_from_form();
-        let student;
+        let student, pdf;
 
         if ($("*").is("#student")) {
             student = $('#student').val();
-            if (student === '')
-                student = 'unknown';
-        } else {
-            student = 'unknown';
         }
         //window.open(window.location.origin + '/download')
         $.ajax({
@@ -390,6 +386,10 @@ function get_data_from_form() {
     if ($("*").is("#context_of_explanation")) {
         var context_of_explanation = check_val($('#context_of_explanation').val());
         result += `&context_of_explanation=${context_of_explanation}`;
+    }
+    if ($("*").is('#is_pdf')) {
+        var pdf = check_val($('#is_pdf').is(':checked'));
+        result += `&PDF=${pdf ? "True" : "False"}`;
     }
     console.log(result)
     return result;

@@ -78,16 +78,16 @@ def main(type_of_input, need_push=True):
         word = Dword(branch=branch)
         path_doc = os.path.join(git.local_repo, TIME_REPORT)
         word.save(path_doc)
-        print(path_doc)
         app.config['is_ok'] = True
         app.config['is_pdf'] = word.js_content[PDF]
         app.config['filename_report'] = word.name_report
         if word.js_content[PDF]:
+            app.config['pdf_report'] = "report.pdf"
             word.convert_to_pdf(docname=path_doc)
-            print(path_doc, "{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
+            # print(path_doc, "{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
             shutil.copyfile("{}{}".format(path_doc[:-LEN_PDF], PDF.lower()), REPORT)
             report = PDF_EXTENSION.format(TIME_REPORT[:-LEN_WORD_EXTENSION])
-            print(report)
+            # print(report)
         if not branch:
             branch = MASTER
         print('NEED PUSH ', need_push)

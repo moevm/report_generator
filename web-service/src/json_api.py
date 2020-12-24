@@ -5,8 +5,8 @@ from shutil import copyfile
 JSON_FILE = ABS_PATH.format('settings.json')
 DEFAULT_SETTINGS = ABS_PATH.format('default_settings.json')
 
-LEN_COURSE_DOC = 31
-LEN_LAB_DOC = 23
+LEN_COURSE_DOC = 32
+LEN_LAB_DOC = 24
 TYPE = "type"
 LR = "LR"
 KR = "KR"
@@ -37,6 +37,7 @@ DATE_START = "date_start"
 DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 DOWNLOAD = "download"
+PDF = "PDF"
 COMMA = ","
 COLON = ": "
 STANDART_SIZE = 14
@@ -132,6 +133,8 @@ class JsonApi:
         if self.new_settings[THEME]: self.json_data[THEME] = self.new_settings[THEME]
         if self.new_settings[CATHEDRA]: self.json_data[CATHEDRA] = self.new_settings[CATHEDRA]
         if self.new_settings[DISCIPLINE]: self.json_data[DISCIPLINE] = self.new_settings[DISCIPLINE]
+        if self.new_settings[PDF]:
+            self.json_data[PDF] = True if self.new_settings[PDF] == "True" else False
 
     def course_content(self):
         self.lab_content()
