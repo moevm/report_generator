@@ -45,7 +45,7 @@ function create_course_work() {
         $(for_course).append(createFieldForConfigurator('init_data', 'Исходные данные', 'Исходные данные в задании курсовой работы', false, true));
         $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки', '', false, true));
         $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация', false, true));
-        $(for_course).append(createFieldForConfigurator('annotation_en', 'Аннотация на английском', 'Аннотация на английском', false, true));
+        $(for_course).append(createFieldForConfigurator('en_annotation', 'Аннотация на английском', 'Аннотация на английском', false, true));
         $(requirements).show('show');
     }
 
@@ -131,7 +131,7 @@ function createLabsField(id) {
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета', '',true));
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра', '', true));
     $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true));
-    $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'));
+    $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', '/src/example.c'));
 
     $(id).append(createFieldForConfigurator('branch_name', 'Название ветки', 'master'));
     $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста', true));
@@ -378,6 +378,10 @@ function get_data_from_form() {
     if ($("*").is("#annotation")) {
         var annotation = check_val($('#annotation').val());
         result += `&annotation=${annotation}`;
+    }
+    if ($("*").is("#en_annotation")) {
+        var en_annotation = check_val($('#en_annotation').val());
+        result += `&en_annotation=${en_annotation}`;
     }
     if ($("*").is("#init_data")) {
         var init_data = check_val($('#init_data').val());
