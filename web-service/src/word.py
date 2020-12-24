@@ -75,6 +75,7 @@ DATE_START = "date_start"
 DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
+EN_ANNOTATION = "en_annotation"
 INTRODUCTION = "introduction"
 YEAR = 'year'
 
@@ -251,6 +252,7 @@ class Dword:
             DATE_FINISH: self.js_content[DATE_FINISH],
             DATE_DEFEND: self.js_content[DATE_DEFEND],
             ANNOTATION: self.js_content[ANNOTATION],
+            EN_ANNOTATION: self.js_content[EN_ANNOTATION],
             INTRODUCTION: self.js_content[INTRODUCTION],
             YEAR: datetime.datetime.now().year
         }
