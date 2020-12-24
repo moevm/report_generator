@@ -335,7 +335,7 @@ class Dword:
             if dir_path == '':
                 dir_path = '/'
             if filename[0] == '.':
-                dir_path = dir_path[1:]
+                filename = filename[1:]
             auth = 'Authorization'
             token = 'token {token}'.format(token=oauth)
             download_url = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}{path}"
@@ -422,7 +422,18 @@ class Dword:
                     for file in response["files"]:
                         if file["filename"] == element.filename:
                             filenames.append(element.filename)
-                            diffArr.append(file["patch"])
+                            diff_string = response["commit"]["committer"]["date"] + '\n'
+                            line_arr = file["patch"].split('\n')
+                            print(line_arr)
+                            prev_skipped = False
+                            for line in range(len(line_arr)):
+                                if (line_arr[line][0] == '+') or (line != 0 and line_arr[line-1][0] == '+') or (line != len(line_arr)-1 and line_arr[line+1][0] == '+') or (line_arr[line][0] == '-') or (line != 0 and line_arr[line-1][0] == '-') or (line != len(line_arr)-1 and line_arr[line+1][0] == '-'):
+                                    prev_skipped = False
+                                    diff_string += line_arr[line] + '\n'
+                                elif not prev_skipped:
+                                    diff_string += ".......\n"
+                                    prev_skipped = True
+                            diffArr.append(diff_string)
                     req = download_url.format(owner=self.js_content[PR][OWNER_OF_PR],
                                               repo=self.js_content[PR][REPO_OF_PR],
                                               commit=response["parents"][0]["sha"])
