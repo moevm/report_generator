@@ -5,6 +5,7 @@ import os
 import subprocess
 from pathlib import Path
 
+import markdown2
 import requests
 from PIL import Image
 from docx import Document
@@ -226,16 +227,26 @@ class Dword:
                         tmp.append(file.read())
         except FileNotFoundError:
             print('No such md file')
-
+        # "* "
         try:
             pre_header(self.document, self.js_content)
             pre_blockquote(self.document)
             parser_html = MyHTMLParser(self.document, self.js_content)
-            markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
+            markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants", "code-friendly"])
+            tmp = tmp[0].split('\n')
+
+            for i in range(len(tmp)):
+                curr = tmp[i]
+                if len(curr) > 2 and curr[0] == '*' and curr[1] == ' ':
+                    curr = curr.replace('* ', '    ', curr.count('* ') - 1)
+                tmp[i] = curr
+
+            # print(tmp)
             html = markdowner.convert('\n'.join(tmp))
+            # print(html)
             parser_html.feed(html)
-        except:
-            print(ERROR_STYLE_IN_MD)
+        except Exception as e:
+            print(e, ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(self.name_report))
 
     def make_title(self):
