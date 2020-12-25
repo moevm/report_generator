@@ -8,6 +8,7 @@ from docx.opc.constants import RELATIONSHIP_TYPE
 from html.parser import HTMLParser
 from markdown2 import Markdown
 from app import ABS_PATH
+import markdown2
 
 EM = "em"
 STRONG = "strong"
@@ -206,8 +207,10 @@ class MyHTMLParser(HTMLParser):
                 paragraph_format = self.paragraph.paragraph_format
                 paragraph_format.left_indent = Inches(STANDART_INCHES + STANDART_INCHES * (self.list_level - 1))  # + 0.1 * self.list_level)
                 if self.need_dot_li:
+                    for i in range(self.list_level - 1):
+                        self.paragraph.add_run(' ')
                     self.paragraph.add_run('• ')
-                    self.need_dot_li = False
+                    # self.need_dot_li = False
 
             run = self.paragraph.add_run(data.strip('\n'))
             run.bold = self.bold
@@ -219,7 +222,7 @@ class MyHTMLParser(HTMLParser):
 def get_html():
     with open('./test.md') as file:
         md = file.read()
-    markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
+    markdowner = Markdown(extras=["strike"])
     html = markdowner.convert(md)
     with open('file.html', 'w') as file:
        file.write(html)
