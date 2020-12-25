@@ -5,8 +5,8 @@ from shutil import copyfile
 JSON_FILE = ABS_PATH.format('settings.json')
 DEFAULT_SETTINGS = ABS_PATH.format('default_settings.json')
 
-LEN_COURSE_DOC = 30
-LEN_LAB_DOC = 23
+LEN_COURSE_DOC = 33
+LEN_LAB_DOC = 24
 TYPE = "type"
 LR = "LR"
 KR = "KR"
@@ -37,6 +37,7 @@ DATE_START = "date_start"
 DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 DOWNLOAD = "download"
+PDF = "PDF"
 COMMA = ","
 COLON = ": "
 STANDART_SIZE = 14
@@ -76,6 +77,7 @@ class JsonApi:
 
     def change_content(self):
         length_set = len(self.new_settings)
+        print(length_set)
         if length_set == LEN_COURSE_DOC:
             self.json_data[TYPE] = KR
             self.course_content()
@@ -83,7 +85,7 @@ class JsonApi:
             self.json_data[TYPE] = LR
             self.lab_content()
         else:
-            print(' EMPTY DOCUMENT')
+            print('EMPTY DOCUMENT')
             self.json_data[TYPE] = EMPTY_DOC
         self.general_content()
 
@@ -131,6 +133,8 @@ class JsonApi:
         if self.new_settings[THEME]: self.json_data[THEME] = self.new_settings[THEME]
         if self.new_settings[CATHEDRA]: self.json_data[CATHEDRA] = self.new_settings[CATHEDRA]
         if self.new_settings[DISCIPLINE]: self.json_data[DISCIPLINE] = self.new_settings[DISCIPLINE]
+        if self.new_settings[PDF]:
+            self.json_data[PDF] = True if self.new_settings[PDF] == "True" else False
 
     def course_content(self):
         self.lab_content()
@@ -139,6 +143,8 @@ class JsonApi:
         if self.new_settings[DATE_FINISH]: self.json_data[DATE_FINISH] = self.new_settings[DATE_FINISH]
         if self.new_settings[DATE_DEFEND]: self.json_data[DATE_DEFEND] = self.new_settings[DATE_DEFEND]
         if self.new_settings['annotation']: self.json_data['annotation'] = self.new_settings['annotation']
+        if self.new_settings['en_annotation']: self.json_data['en_annotation'] = self.new_settings['en_annotation']
+        if self.new_settings['list_of_source'] : self.json_data['list_of_source'] = self.new_settings['list_of_source']
         if self.new_settings['context_of_explanation']: self.json_data['context_of_explanation'] = self.new_settings[
             'context_of_explanation']
         if self.new_settings['init_data']: self.json_data['init_data'] = self.new_settings['init_data']

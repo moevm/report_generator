@@ -5,6 +5,7 @@ import os
 import subprocess
 from pathlib import Path
 
+import markdown2
 import requests
 from PIL import Image
 from docx import Document
@@ -47,6 +48,7 @@ ALIGN_JUSTIFY = "justify"
 ALIGN_LEFT = "left"
 UNDER_PICTURE = "Рисунок {}{}"
 ATTACHMENT = "Приложение A"
+ARTICLE_SOURCE = "СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ"
 PICTURE = "picture"
 PAGES = "pages_of_wiki"
 STANDART_SIZE_PICTURE = 4
@@ -75,12 +77,14 @@ DATE_START = "date_start"
 DATE_FINISH = "date_finish"
 DATE_DEFEND = "date_defend"
 ANNOTATION = "annotation"
+EN_ANNOTATION = "en_annotation"
+LIST_OF_SOURCE = 'list_of_source'
 INTRODUCTION = "introduction"
 YEAR = 'year'
 
 ERROR_MESSAGE_CONVERT_TO_PDF = "ERROR PDF "
-# LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
-LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
+LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice --headless --convert-to pdf --outdir {} {}"
+#LIBREOFFICE_CONVERT_DOCX_TO_PDF = "libreoffice5.1 --headless --convert-to pdf --outdir {} {}"
 
 STANDART_PT = 6
 STANDART_INCHES = 0.5
@@ -150,8 +154,11 @@ class Dword:
                 self.add_text_from_wiki()
             else:
                 self.add_text_from_md(md)
+            if self.js_content[LIST_OF_SOURCE] != "list_of_source":
+                self.add_list_of_source()
             self.add_final_part()
             self.add_comments()
+
             self.document.save(ABS_PATH.format(self.name_report))
         except ValueError as e:
             raise e
@@ -184,11 +191,15 @@ class Dword:
         return h, w
 
     def add_picture(self, path):
-        paragraph = self.document.add_paragraph()
-        paragraph.paragraph_format.alignment = alignment_dict.get(ALIGN_CENTRE)
+        try:
+            paragraph = self.document.add_paragraph()
+            paragraph.paragraph_format.alignment = alignment_dict.get(ALIGN_CENTRE)
 
-        h, w = self.h_w(Image.open(path).size)
-        paragraph.add_run().add_picture(path, width=Inches(h), height=Inches(w))
+            h, w = self.h_w(Image.open(path).size)
+            paragraph.add_run().add_picture(path, width=Inches(h), height=Inches(w))
+        except Exception as e:
+            print(e)
+            print("Add pict")
 
     def add_image_by_url(self, url):
         try:
@@ -216,16 +227,26 @@ class Dword:
                         tmp.append(file.read())
         except FileNotFoundError:
             print('No such md file')
-
+        # "* "
         try:
             pre_header(self.document, self.js_content)
             pre_blockquote(self.document)
             parser_html = MyHTMLParser(self.document, self.js_content)
-            markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
+            markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants", "code-friendly"])
+            tmp = tmp[0].split('\n')
+
+            for i in range(len(tmp)):
+                curr = tmp[i]
+                if len(curr) > 2 and curr[0] == '*' and curr[1] == ' ':
+                    curr = curr.replace('* ', '    ', curr.count('* ') - 1)
+                tmp[i] = curr
+
+            # print(tmp)
             html = markdowner.convert('\n'.join(tmp))
+            # print(html)
             parser_html.feed(html)
-        except:
-            print(ERROR_STYLE_IN_MD)
+        except Exception as e:
+            print(e, ERROR_STYLE_IN_MD)
         self.document.save(ABS_PATH.format(self.name_report))
 
     def make_title(self):
@@ -251,6 +272,7 @@ class Dword:
             DATE_FINISH: self.js_content[DATE_FINISH],
             DATE_DEFEND: self.js_content[DATE_DEFEND],
             ANNOTATION: self.js_content[ANNOTATION],
+            EN_ANNOTATION: self.js_content[EN_ANNOTATION],
             INTRODUCTION: self.js_content[INTRODUCTION],
             YEAR: datetime.datetime.now().year
         }
@@ -287,6 +309,19 @@ class Dword:
         paragraph_format.keep_with_next = keep_with_next
         paragraph_format.line_spacing_rule = line_space_dict.get(line_spacing)
         paragraph_format.keep_together = keep_together
+
+    def add_list_of_source(self):
+        #LIST_OF_SOURCE: self.js_content[LIST_OF_SOURCE],
+        self.add_page_break()
+        self.add_line(ARTICLE_SOURCE, set_bold=True, align=ALIGN_CENTRE)
+        list_source = self.js_content[LIST_OF_SOURCE]
+        index = 1
+        source = '{num}. {src}'
+        for elem in list_source.split('\n'):
+            elem = source.format(num=index, src=elem)
+            self.add_line(elem, line_spacing=1.5, align=ALIGN_LEFT)
+            index += 1
+
 
     def add_final_part(self):
         print(self.js_content[DICT_FILENAMES])
@@ -332,9 +367,8 @@ class Dword:
             dir_path = '/'.join(filename.split('/')[:-1])  # Путь до файла
             if dir_path == '':
                 dir_path = '/'
-            if dir_path[0] == '.':
-                dir_path = dir_path[1:]
-
+            if filename[0] == '.':
+                filename = filename[1:]
             auth = 'Authorization'
             token = 'token {token}'.format(token=oauth)
             download_url = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}{path}"
@@ -349,10 +383,11 @@ class Dword:
             code.strip()
             self.add_line(filename, set_bold=True, align=ALIGN_LEFT)
             number = 0
-            for line in code.split('\n'):
+            lineArr = code.split('\n')
+            for line in lineArr:
                 number += 1
                 self.add_line(
-                    DISTANCE_NUMBER_CODE.join((self.number_position(number, len(code)), line.strip('\n'))),
+                    DISTANCE_NUMBER_CODE.join((self.number_position(number, len(lineArr)), line.strip('\n').strip('\r'))),
                     line_spacing=1, align=ALIGN_LEFT, font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
 
 
@@ -371,6 +406,7 @@ class Dword:
         else:
             self.path = None
 
+
     def add_comments(self):
         try:
             if not self.js_content[PR][NUMBER_OF_PR]:
@@ -383,22 +419,65 @@ class Dword:
                                         self.js_content[PR][NUMBER_OF_PR])
             print('ELEMENTS')
             for element in comments:
-                source_code = element.body_code.split('\n')
-                length = 4
-                if len(source_code) > 4:
-                    length = len(source_code) // 4
-                source_code = '\n'.join(source_code[:length])
-                self.add_line(PR_SOURCE_CODE, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-                self.add_line(source_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
-                self.add_line(PR_COMMENTS, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+                source_code = element.body_code
+                self.add_line('\n{}'.format(PR_SOURCE_CODE), align=ALIGN_LEFT, set_bold=True, line_spacing=1, keep_with_next=True)
+                self.add_line(element.filename, align=ALIGN_LEFT, set_bold=True, line_spacing=1, keep_with_next=True)
+                self.add_line(source_code, align=ALIGN_LEFT, line_spacing=1, keep_with_next=True,
+                              font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+                self.add_line(PR_COMMENTS, align=ALIGN_LEFT, set_bold=True, line_spacing=1, keep_with_next=True)
                 for body_element in element.body_comments:
                     self.add_line("{}:{}".format(body_element[0], body_element[1]), line_spacing=1, keep_with_next=True,
                                   align=ALIGN_LEFT)
 
-            self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, line_spacing=1, keep_with_next=True)
+            self.add_line('\n{}'.format(PR_DIFFS), align=ALIGN_LEFT, set_bold=True, line_spacing=1, keep_with_next=True)
+
+            f = open(OAUTH_PART, 'r')
+            oauth = f.read()
+            f.close()
+            oauth = oauth.strip()
+            filenames = []
             for element in comments:
-                if element.diff:
-                    self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
+                alreadyAddedDiff = False
+                for filename in filenames:
+                    if filename == element.filename:
+                        alreadyAddedDiff = True
+                if alreadyAddedDiff == True:
+                    continue
+                auth = 'Authorization'
+                token = 'token {token}'.format(token=oauth)
+                download_url = "https://api.github.com/repos/{owner}/{repo}/commits/{commit}"
+                req = download_url.format(owner=self.js_content[PR][OWNER_OF_PR],
+                                                   repo=self.js_content[PR][REPO_OF_PR],
+                                                   commit=self.branch)
+                response = requests.get(req, headers={auth: token})
+                response = response.json()
+                diffArr = []
+                while (len(response["parents"]) != 0) and (response["sha"] != element.commit):
+                    for file in response["files"]:
+                        if file["filename"] == element.filename:
+                            filenames.append(element.filename)
+                            diff_string = response["commit"]["committer"]["date"] + '\n'
+                            line_arr = file["patch"].split('\n')
+                            print(line_arr)
+                            prev_skipped = False
+                            for line in range(len(line_arr)):
+                                if (line_arr[line][0] == '+') or (line != 0 and line_arr[line-1][0] == '+') or (line != len(line_arr)-1 and line_arr[line+1][0] == '+') or (line_arr[line][0] == '-') or (line != 0 and line_arr[line-1][0] == '-') or (line != len(line_arr)-1 and line_arr[line+1][0] == '-'):
+                                    prev_skipped = False
+                                    diff_string += line_arr[line] + '\n'
+                                elif not prev_skipped:
+                                    diff_string += ".......\n"
+                                    prev_skipped = True
+                            diffArr.append(diff_string)
+                    req = download_url.format(owner=self.js_content[PR][OWNER_OF_PR],
+                                              repo=self.js_content[PR][REPO_OF_PR],
+                                              commit=response["parents"][0]["sha"])
+                    response = requests.get(req, headers={auth: token})
+                    response = response.json()
+                for diff in reversed(diffArr):
+                    self.add_line(diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True,
+                                  font_name=FONT_CODE, font_size=FONT_SIZE_CODE)
+                # if element.diff:
+                #     self.add_line(element.diff, line_spacing=1, align=ALIGN_LEFT, keep_with_next=True)
 
         except Exception as e:
             print(e)

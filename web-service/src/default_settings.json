@@ -19,7 +19,9 @@
     "date_start": "-",
     "date_finish": "-",
     "date_defend": "-",
+    "list_of_source" : "list_of_source",
     "annotation": "annotation",
+    "en_annotation": "en_annotation",
     "introduction": "introduction",
     "pages_of_wiki": [
         "Home"

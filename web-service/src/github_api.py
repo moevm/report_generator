@@ -35,6 +35,7 @@ LOGIN = "login"
 BODY = "body"
 COMMIT = "original_commit_id"
 DIFF_HUNK = "diff_hunk"
+COMMENT_FILENAME = "path"
 FILENAME_DIFF = ABS_PATH.format("diff_file.txt")
 FILENAME_LOG = ABS_PATH.format("log_file.txt")
 LOG_SH = ABS_PATH.format("do_git_log.sh {}")
@@ -114,21 +115,21 @@ class Gengit:
     def comporator(self, object):
         return object[POSITION]
 
-    def new_hunk(self, diff_string):
-        lines_of_diff = diff_string.split('\n')
-        length = len(lines_of_diff) - 1
-        new_str = []
-        while lines_of_diff[length][0] == PLUS:
-            new_str.append("{}{}".format(lines_of_diff[length][1:], '\n'))
-            length -= 1
-        return ''.join(new_str)
+    def new_hunk(self, diff_string, start_line):
+        new_str = diff_string.split('\n')[start_line:]
+        return '\n'.join(new_str)
 
     def create_comments_for_word(self, my_json):
         mylist = []
         my_json = sorted(my_json, key=self.comporator)
         for comment in my_json:
+            if comment["start_line"] is None:
+                start_line = comment["original_start_line"]
+            else:
+                start_line = comment["start_line"]
             mylist.append([comment[POSITION], comment[USER][LOGIN], comment[BODY],
-                           self.new_hunk(comment[DIFF_HUNK]), comment[COMMIT][0:7]])
+                           self.new_hunk(comment[DIFF_HUNK], start_line), comment[COMMIT],
+                           comment[COMMENT_FILENAME]])
         return mylist
 
     class comment:
@@ -138,6 +139,7 @@ class Gengit:
             self.body_code = ""
             self.commit = ""
             self.diff = ""
+            self.filename = ""
 
     def optimization_comments(self, comments):
         total_comments = []
@@ -149,6 +151,7 @@ class Gengit:
             my_comment.body_comments.append([element[1], element[2]])
             my_comment.body_code = element[3]
             my_comment.commit = element[4]
+            my_comment.filename = element[5]
             total_comments.append(my_comment)
         return total_comments
 
@@ -159,43 +162,41 @@ class Gengit:
             response = self.get_response(url)
             comments += self.create_comments_for_word(response.json())
         main_comments = self.optimization_comments(comments)
-        print(comments)
-        print(main_comments)
-        return self.add_diff(main_comments, main_comments[0].commit)
+        return main_comments
 
-    def add_diff(self, comments, original_commit):
-        self.create_log(self.local_repo)
-        end_commit = self.find_next_commit(original_commit)
-        self.create_dif(self.local_repo, self.branch, original_commit, end_commit)
-        diffs = self.get_diffs()
-        for index in range(len(comments)):
-            if index < len(diffs):
-                comments[index].diff = diffs[index]
-        return comments
+    # def add_diff(self, comments, original_commit):
+    #     self.create_log(self.local_repo)
+    #     end_commit = self.find_next_commit(original_commit)
+    #     self.create_dif(self.local_repo, self.branch, original_commit, end_commit)
+    #     diffs = self.get_diffs()
+    #     for index in range(len(comments)):
+    #         if index < len(diffs):
+    #             comments[index].diff = diffs[index]
+    #     return comments
 
     def create_log(self, repo):
         subprocess.call(LOG_SH.format(repo), shell=True, stdout=subprocess.PIPE)
 
-    def create_dif(self, repo, branch, begin_commit, end_commit):
-        subprocess.call(DIFF_SH.format(repo, begin_commit, end_commit), shell=True, stdout=subprocess.PIPE)
-
-    def get_diffs(self):
-        diffs = []
-        string = ''
-        with open(FILENAME_DIFF, 'r', encoding='utf-8') as file:
-            lines = file.readlines()
-            for i in lines:
-                if i.find('diff --git a/README.md') != -1:
-                    return diffs
-                if i.startswith(PLUS * 3) or i.startswith(MINUS * 3):
-                    continue
-                if i[0] in [PLUS, MINUS]:
-                    string = '%s%s' % (string, i)
-                    continue
-                if string:
-                    diffs.append(string)
-                string = ''
-            return diffs
+    # def create_dif(self, repo, branch, begin_commit, end_commit):
+    #     subprocess.call(DIFF_SH.format(repo, begin_commit, end_commit), shell=True, stdout=subprocess.PIPE)
+    #
+    # def get_diffs(self):
+    #     diffs = []
+    #     string = ''
+    #     with open(FILENAME_DIFF, 'r', encoding='utf-8') as file:
+    #         lines = file.readlines()
+    #         for i in lines:
+    #             if i.find('diff --git a/README.md') != -1:
+    #                 return diffs
+    #             if i.startswith(PLUS * 3) or i.startswith(MINUS * 3):
+    #                 continue
+    #             if i[0] in [PLUS, MINUS]:
+    #                 string = '%s%s' % (string, i)
+    #                 continue
+    #             if string:
+    #                 diffs.append(string)
+    #             string = ''
+    #         return diffs
 
     def get_list_of_commit(self):
         with open(FILENAME_LOG, 'r') as file:

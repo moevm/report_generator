@@ -1,5 +1,7 @@
 FROM tknerr/baseimage-ubuntu:18.04
 
+HEALTHCHECK --interval=60s --timeout=5s CMD curl --fail http://localhost:80/ || exit 1
+
 RUN apt-get -y install locales
 RUN apt-get install -y language-pack-ru
 ENV LANGUAGE ru_RU.UTF-8

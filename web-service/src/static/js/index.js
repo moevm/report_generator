@@ -45,7 +45,11 @@ function create_course_work() {
         $(for_course).append(createFieldForConfigurator('init_data', 'Исходные данные', 'Исходные данные в задании курсовой работы', false, true));
         $(for_course).append(createFieldForConfigurator('context_of_explanation', 'Содержание пояснительной записки', '', false, true));
         $(for_course).append(createFieldForConfigurator('annotation', 'Аннотация', 'Аннотация', false, true));
-        $(for_course).append(createFieldForConfigurator('annotation_en', 'Аннотация на английском', 'Аннотация на английском', false, true));
+        $(for_course).append(createFieldForConfigurator('en_annotation', 'Аннотация на английском', 'Аннотация на английском', false, true));
+        $(for_course).append(createFieldForConfigurator('list_of_source', 'Список источников',
+            'Иванов И. И. Книга одного-трех авторов. М.: Издательство, 2010. 000 с.\n' +
+               'Книга четырех авторов / И. И. Иванов, П. П. Петров, С. С. Сидоров, В. В. Васильев. СПб.: Издательство, 2010. 000 с.\n' +
+               'Книга пяти и более авторов / И. И. Иванов, П. П. Петров, С. С. Сидоров и др.. СПб.: Издательство, 2010. 000 с.', false, true));
         $(requirements).show('show');
     }
 
@@ -131,7 +135,7 @@ function createLabsField(id) {
     $(id).append(createFieldForConfigurator('discipline', 'Название предмета', '',true));
     $(id).append(createFieldForConfigurator('cathedra', 'Кафедра', '', true));
     $(id).append(createFieldForConfigurator('md_pages', 'Список wiki страниц', 'без расширения .md', true));
-    $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', './src/example.c'));
+    $(id).append(createFieldForConfigurator('source_files', 'Файлы для приложения', '/src/example.c'));
 
     $(id).append(createFieldForConfigurator('branch_name', 'Название ветки', 'master'));
     $(id).append(createFieldForConfigurator('number_of_pr', 'Комментарии из пулл реквеста', 'Нужно вести номер пулл реквеста', true));
@@ -226,14 +230,10 @@ function submitForm() {
         console.log('to /download')
         console.log(window.location.origin + '/download')
         let data = get_data_from_form();
-        let student;
+        let student, pdf;
 
         if ($("*").is("#student")) {
             student = $('#student').val();
-            if (student === '')
-                student = 'unknown';
-        } else {
-            student = 'unknown';
         }
         //window.open(window.location.origin + '/download')
         $.ajax({
@@ -379,6 +379,14 @@ function get_data_from_form() {
         var annotation = check_val($('#annotation').val());
         result += `&annotation=${annotation}`;
     }
+    if ($("*").is("#list_of_source")) {
+        var list_of_source = check_val($('#list_of_source').val());
+        result += `&list_of_source=${list_of_source}`;
+    }
+    if ($("*").is("#en_annotation")) {
+        var en_annotation = check_val($('#en_annotation').val());
+        result += `&en_annotation=${en_annotation}`;
+    }
     if ($("*").is("#init_data")) {
         var init_data = check_val($('#init_data').val());
         result += `&init_data=${init_data}`;
@@ -386,6 +394,10 @@ function get_data_from_form() {
     if ($("*").is("#context_of_explanation")) {
         var context_of_explanation = check_val($('#context_of_explanation').val());
         result += `&context_of_explanation=${context_of_explanation}`;
+    }
+    if ($("*").is('#is_pdf')) {
+        var pdf = check_val($('#is_pdf').is(':checked'));
+        result += `&PDF=${pdf ? "True" : "False"}`;
     }
     console.log(result)
     return result;

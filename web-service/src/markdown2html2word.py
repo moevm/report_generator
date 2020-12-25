@@ -8,6 +8,7 @@ from docx.opc.constants import RELATIONSHIP_TYPE
 from html.parser import HTMLParser
 from markdown2 import Markdown
 from app import ABS_PATH
+import markdown2
 
 EM = "em"
 STRONG = "strong"
@@ -39,6 +40,7 @@ SIZE = "size"
 TYPE_OF_HEADER = "h{}"
 MAIN_TEXT = "main_text"
 CODE_TEXT = "code_text"
+OAUTH_PART = "/var/www/report_generator/oauth.txt"
 
 ERROR = "error in HTMLParser. text: {}"
 PICTURE_NAME = "picture"
@@ -110,7 +112,9 @@ class MyHTMLParser(HTMLParser):
             self.size = self.normal_size
         elif tag == IMG:
             url = attrs[0][1]
-            picture = requests.get(url).content
+
+            response = requests.get(url)
+            picture = response.content
             with open(ABS_PATH.format(PICTURE_NAME), 'wb') as file:
                 file.write(picture)
             try:
@@ -122,7 +126,8 @@ class MyHTMLParser(HTMLParser):
                 self.paragraph = self.document.add_paragraph()
 
                 #last_paragraph.keep_with_next = False
-            except:
+            except Exception as e:
+                print(e)
                 print('ERROR WITH IMAGE {}'.format(url))
         elif tag == A:
             self.hyperlink = attrs[0][1]
@@ -206,8 +211,10 @@ class MyHTMLParser(HTMLParser):
                 paragraph_format = self.paragraph.paragraph_format
                 paragraph_format.left_indent = Inches(STANDART_INCHES + STANDART_INCHES * (self.list_level - 1))  # + 0.1 * self.list_level)
                 if self.need_dot_li:
+                    for i in range(self.list_level - 1):
+                        self.paragraph.add_run(' ')
                     self.paragraph.add_run('• ')
-                    self.need_dot_li = False
+                    # self.need_dot_li = False
 
             run = self.paragraph.add_run(data.strip('\n'))
             run.bold = self.bold
@@ -219,7 +226,7 @@ class MyHTMLParser(HTMLParser):
 def get_html():
     with open('./test.md') as file:
         md = file.read()
-    markdowner = Markdown(extras=["tables", "cuddled-lists", "smarty-pants"])
+    markdowner = Markdown(extras=["strike"])
     html = markdowner.convert(md)
     with open('file.html', 'w') as file:
        file.write(html)
