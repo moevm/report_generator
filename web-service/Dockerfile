@@ -20,13 +20,12 @@ RUN apt-get update && apt-get install -y \
 	vim  \
 	nano \
 	curl \
+	libreoffice \
 	&& rm -rf /var/lib/apr/lists/*
-
 RUN pip3 install --upgrade pip
 
 ADD ./ /report_generator
 WORKDIR /report_generator
-RUN ./scripts/install_libreoffice.sh
 RUN ./scripts/local_deploy.sh
 RUN ./scripts/create_ssh.sh
 RUN echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
